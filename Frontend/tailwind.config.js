@@ -9,7 +9,8 @@ export default {
     extend: {},
   },
   plugins: [
-    './node_modules/flyonui/dist/js/*.js',
+    require('flyonui'),
+    require('flyonui/plugin')
   ],
 }
 
