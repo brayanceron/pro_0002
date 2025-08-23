@@ -42,7 +42,9 @@ const AppTextArea = ({ value, name, id, options: { label = '', placeholder = '',
                         {...attributes} // rows={rows}
                         placeholder={placeholder}
                         className="textarea" aria-label="Textarea"
-                    />
+                    >
+                        {value}
+                    </textarea>
                 </div>
 
                 {
