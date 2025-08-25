@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 15-08-2025 a las 02:19:49
+-- Tiempo de generación: 25-08-2025 a las 22:43:42
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -47,6 +47,7 @@ CREATE TABLE `gender` (
   `name` varchar(200) NOT NULL,
   `description` text NOT NULL,
   `user_id` varchar(36) NOT NULL,
+  `score` decimal(4,2) NOT NULL DEFAULT -1.00,
   `image` varchar(100) NOT NULL,
   `available` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -55,17 +56,17 @@ CREATE TABLE `gender` (
 -- Volcado de datos para la tabla `gender`
 --
 
-INSERT INTO `gender` (`id`, `name`, `description`, `user_id`, `image`, `available`) VALUES
-('20514aca75bc4f22a29b9eb5f24917c7', 'Popular', 'Popular music', '8622e06b-65dd-11f0-94d0-089798b6be9f', 'gender_image_527b76f01c5d4a1d9e089fc627c5a7c5.png', 1),
-('33028177a27d4df9bec25aaa2ca65f27', 'Pop', 'Pop Music', '8622e06b-65dd-11f0-94d0-089798b6be9f', 'gender_image_89d10b0d96e34437bbbc86b5fea8ef10.jpeg', 1),
-('3b5ecd28d63b4ceba69a0ff2c8748ea0', 'cumb', 'desc', '8622e06b-65dd-11f0-94d0-089798b6be9f', '', 1),
-('45c50e4dccf8437e8c18a71a050e0128', 'test', 'test', '8622e06b-65dd-11f0-94d0-089798b6be9f', '', 1),
-('501cbbe6180347c497f31cf2258add4f', 'Salse', 'Salse music', '8622e06b-65dd-11f0-94d0-089798b6be9f', 'gender_image_34b4cd620ea6415eb9e13323170b9f7b.png', 1),
-('8a981c58f9f84b958e17c5734f03e88f', 'Jazz', 'Jazz gender', '8622e06b-65dd-11f0-94d0-089798b6be9f', 'gender_image_20bf6d4bf89f4b548bf4a187d02caa2d.jpeg', 1),
-('8ace1520fdb2447e9b6a9e194f16b261', 'Merengue', 'Merenge gender', '8622e06b-65dd-11f0-94d0-089798b6be9f', 'gender_image_ae1a426d9f2740e78e1f4380afb0cd38.jpeg', 1),
-('8b7dd5fcaa9a4530b89fd02cbe131a70', 'Bachata', 'I like', '8622e06b-65dd-11f0-94d0-089798b6be9f', 'gender_image_b18ddf3f252844fd954712d699288143.png', 1),
-('9f10b1c705fd425a9cc7c3efa764b2aa', 'Vallenato', 'Colobian\'s music', '8622e06b-65dd-11f0-94d0-089798b6be9f', 'gender_image_0e5f4fe7f9c2459682673ee51ba36037.jpeg', 1),
-('d210c7e3d15b4419936d85eb84a392c0', 'Rock', 'Rock Music', '8622e06b-65dd-11f0-94d0-089798b6be9f', 'gender_image_b6bde56d95584fe7b306098729e556bf.jpeg', 1);
+INSERT INTO `gender` (`id`, `name`, `description`, `user_id`, `score`, `image`, `available`) VALUES
+('20514aca75bc4f22a29b9eb5f24917c7', 'Popular', 'Popular music', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, 'gender_image_527b76f01c5d4a1d9e089fc627c5a7c5.png', 1),
+('33028177a27d4df9bec25aaa2ca65f27', 'Pop', 'Pop Music', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, 'gender_image_89d10b0d96e34437bbbc86b5fea8ef10.jpeg', 1),
+('3b5ecd28d63b4ceba69a0ff2c8748ea0', 'cumb', 'desc', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, '', 1),
+('45c50e4dccf8437e8c18a71a050e0128', 'test', 'test', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, '', 1),
+('501cbbe6180347c497f31cf2258add4f', 'Salse', 'Salse music', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, 'gender_image_34b4cd620ea6415eb9e13323170b9f7b.png', 1),
+('8a981c58f9f84b958e17c5734f03e88f', 'Jazz', 'Jazz gender', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, 'gender_image_20bf6d4bf89f4b548bf4a187d02caa2d.jpeg', 1),
+('8ace1520fdb2447e9b6a9e194f16b261', 'Merengue', 'Merenge gender', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, 'gender_image_ae1a426d9f2740e78e1f4380afb0cd38.jpeg', 1),
+('8b7dd5fcaa9a4530b89fd02cbe131a70', 'Bachata', 'I like', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, 'gender_image_b18ddf3f252844fd954712d699288143.png', 1),
+('9f10b1c705fd425a9cc7c3efa764b2aa', 'Vallenato', 'Colobian\'s music', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, 'gender_image_0e5f4fe7f9c2459682673ee51ba36037.jpeg', 1),
+('d210c7e3d15b4419936d85eb84a392c0', 'Rock', 'Rock Music', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, 'gender_image_b6bde56d95584fe7b306098729e556bf.jpeg', 1);
 
 -- --------------------------------------------------------
 
@@ -78,6 +79,7 @@ CREATE TABLE `language` (
   `name` varchar(200) NOT NULL,
   `description` text NOT NULL,
   `user_id` varchar(36) NOT NULL,
+  `score` decimal(4,2) NOT NULL DEFAULT -1.00,
   `image` varchar(100) NOT NULL,
   `available` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -86,9 +88,9 @@ CREATE TABLE `language` (
 -- Volcado de datos para la tabla `language`
 --
 
-INSERT INTO `language` (`id`, `name`, `description`, `user_id`, `image`, `available`) VALUES
-('4e94f143c3394a8288ebd1483dc255b6', 'Spanish', 'Spanish Language', '8622e06b-65dd-11f0-94d0-089798b6be9f', 'gender_image_b970fed68a34447eb81785a72908c5e0.png', 1),
-('613bc2fb8d064a5f9ed5870b4fd4e796', 'English', 'Nordich languages', '8622e06b-65dd-11f0-94d0-089798b6be9f', 'gender_image_0b412d6f22404738a930d2101a6860e2.jpeg', 1);
+INSERT INTO `language` (`id`, `name`, `description`, `user_id`, `score`, `image`, `available`) VALUES
+('4e94f143c3394a8288ebd1483dc255b6', 'Spanish', 'Spanish Language', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, 'gender_image_b970fed68a34447eb81785a72908c5e0.png', 1),
+('613bc2fb8d064a5f9ed5870b4fd4e796', 'English', 'Nordich languages', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, 'gender_image_0b412d6f22404738a930d2101a6860e2.jpeg', 1);
 
 -- --------------------------------------------------------
 
@@ -101,6 +103,7 @@ CREATE TABLE `playlist` (
   `name` varchar(200) NOT NULL,
   `description` text NOT NULL,
   `user_id` varchar(36) NOT NULL,
+  `score` decimal(4,2) NOT NULL DEFAULT -1.00,
   `image` varchar(100) NOT NULL,
   `available` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -109,10 +112,10 @@ CREATE TABLE `playlist` (
 -- Volcado de datos para la tabla `playlist`
 --
 
-INSERT INTO `playlist` (`id`, `name`, `description`, `user_id`, `image`, `available`) VALUES
-('4991dc6b40ca4e468781667bde881d8b', 'Test_pl', 'testpllll', '8622e06b-65dd-11f0-94d0-089798b6be9f', '', 1),
-('9e90665c17a947c1a07c4911e749db2a', 'Cumbiones', 'I love this playlist', '8622e06b-65dd-11f0-94d0-089798b6be9f', 'gender_image_ac35ca0f8f6e47fbab51e87da522cadb.jpeg', 1),
-('da9b35df1c364e58a03af882e16ed863', 'Romantic playlist', 'only romantic music', '8622e06b-65dd-11f0-94d0-089798b6be9f', 'gender_image_6bbeec56018049d7bd70163dac747179.jpeg', 1);
+INSERT INTO `playlist` (`id`, `name`, `description`, `user_id`, `score`, `image`, `available`) VALUES
+('4991dc6b40ca4e468781667bde881d8b', 'Test_pl', 'testpllll', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, '', 1),
+('9e90665c17a947c1a07c4911e749db2a', 'Cumbiones', 'I love this playlist', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, 'gender_image_ac35ca0f8f6e47fbab51e87da522cadb.jpeg', 1),
+('da9b35df1c364e58a03af882e16ed863', 'Romantic playlist', 'only romantic music', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, 'gender_image_6bbeec56018049d7bd70163dac747179.jpeg', 1);
 
 -- --------------------------------------------------------
 
@@ -125,6 +128,7 @@ CREATE TABLE `sense` (
   `name` varchar(200) NOT NULL,
   `description` text NOT NULL,
   `user_id` varchar(36) NOT NULL,
+  `score` decimal(4,2) NOT NULL DEFAULT -1.00,
   `image` varchar(100) NOT NULL,
   `available` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -133,12 +137,12 @@ CREATE TABLE `sense` (
 -- Volcado de datos para la tabla `sense`
 --
 
-INSERT INTO `sense` (`id`, `name`, `description`, `user_id`, `image`, `available`) VALUES
-('077ac547f97d4f7f877ddd08385088ea', 'Sad', 'I\'m sad 😥😓😭', '8622e06b-65dd-11f0-94d0-089798b6be9f', 'gender_image_451e45bbca114b63bbe220ba76715aa9.jpeg', 1),
-('39abe66fdd4e4eb9a41d805093024167', 'Happy', 'I\'m very happy 😀😀😀', '8622e06b-65dd-11f0-94d0-089798b6be9f', 'gender_image_c585d87022244c808b5d4c749c4925ac.png', 1),
-('7a219482f9b6469eaabeb6340528c7bf', 'Excited', 'I am very exited🤪🤪', '8622e06b-65dd-11f0-94d0-089798b6be9f', 'gender_image_93afea8c3cb546d4a2ee021e31740c28.png', 1),
-('d6edfdbf3d184e3f9afbdf77acac89de', 'Quiet', 'This Son when i wanna be quiet', '8622e06b-65dd-11f0-94d0-089798b6be9f', 'gender_image_0763c092dc5f4cc0b4ae9ac18882f70d.png', 1),
-('e8195b8db56745df9a8509bcd901819b', 'Euphoria', 'I\'m euphoria', '8622e06b-65dd-11f0-94d0-089798b6be9f', '', 1);
+INSERT INTO `sense` (`id`, `name`, `description`, `user_id`, `score`, `image`, `available`) VALUES
+('077ac547f97d4f7f877ddd08385088ea', 'Sad', 'I\'m sad 😥😓😭', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, 'gender_image_451e45bbca114b63bbe220ba76715aa9.jpeg', 1),
+('39abe66fdd4e4eb9a41d805093024167', 'Happy', 'I\'m very happy 😀😀😀', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, 'gender_image_c585d87022244c808b5d4c749c4925ac.png', 1),
+('7a219482f9b6469eaabeb6340528c7bf', 'Excited', 'I am very exited🤪🤪', '8622e06b-65dd-11f0-94d0-089798b6be9f', 4.93, 'gender_image_93afea8c3cb546d4a2ee021e31740c28.png', 1),
+('d6edfdbf3d184e3f9afbdf77acac89de', 'Quiet', 'This Son when i wanna be quiet', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, 'gender_image_0763c092dc5f4cc0b4ae9ac18882f70d.png', 1),
+('e8195b8db56745df9a8509bcd901819b', 'Euphoria', 'I\'m euphoria', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, '', 1);
 
 -- --------------------------------------------------------
 
@@ -151,6 +155,7 @@ CREATE TABLE `singer` (
   `name` varchar(200) NOT NULL,
   `description` text NOT NULL,
   `user_id` varchar(36) NOT NULL,
+  `score` decimal(4,2) NOT NULL DEFAULT -1.00,
   `image` varchar(100) NOT NULL,
   `available` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -159,12 +164,12 @@ CREATE TABLE `singer` (
 -- Volcado de datos para la tabla `singer`
 --
 
-INSERT INTO `singer` (`id`, `name`, `description`, `user_id`, `image`, `available`) VALUES
-('208ed0e092224ff2a43f31e59072d091', 'Carlo Sambrano', 'El consentido del despecho', '8622e06b-65dd-11f0-94d0-089798b6be9f', 'gender_image_cf47f7f816024dd992731f1eeacbc0e0.jpeg', 1),
-('66458c60b1a046f8ba32c002b145b346', 'Michael Jacson', 'Pop\'s king', '8622e06b-65dd-11f0-94d0-089798b6be9f', 'gender_image_8d79aabec3f54558953353f249ee81e6.jpeg', 1),
-('bce6fb4557f04736a24a1ff91e9f0bd1', 'David Ceron', 'David singer', '8622e06b-65dd-11f0-94d0-089798b6be9f', 'gender_image_e114ca46a71d4fb19f616b849e8c7905.webp', 1),
-('ce46b05ca3be4510a1a721f61c319971', 'test singer', 'singer of  test', '8622e06b-65dd-11f0-94d0-089798b6be9f', '', 1),
-('d43f2d0b44884cdab1b57fd1a7943d6a', 'Electric Dimond', 'this songs/band are my favorite artist(s)', '8622e06b-65dd-11f0-94d0-089798b6be9f', 'gender_image_90a6ee7432fc44c9b565880be6aab362.jpeg', 1);
+INSERT INTO `singer` (`id`, `name`, `description`, `user_id`, `score`, `image`, `available`) VALUES
+('208ed0e092224ff2a43f31e59072d091', 'Carlo Sambrano', 'El consentido del despecho', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, 'gender_image_cf47f7f816024dd992731f1eeacbc0e0.jpeg', 1),
+('66458c60b1a046f8ba32c002b145b346', 'Michael Jacson', 'Pop\'s king', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, 'gender_image_8d79aabec3f54558953353f249ee81e6.jpeg', 1),
+('bce6fb4557f04736a24a1ff91e9f0bd1', 'David Ceron', 'David singer', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, 'gender_image_e114ca46a71d4fb19f616b849e8c7905.webp', 1),
+('ce46b05ca3be4510a1a721f61c319971', 'test singer', 'singer of  test', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, '', 1),
+('d43f2d0b44884cdab1b57fd1a7943d6a', 'Electric Dimond', 'this songs/band are my favorite artist(s)', '8622e06b-65dd-11f0-94d0-089798b6be9f', -1.00, 'gender_image_90a6ee7432fc44c9b565880be6aab362.jpeg', 1);
 
 -- --------------------------------------------------------
 
@@ -199,7 +204,7 @@ CREATE TABLE `song` (
 --
 
 INSERT INTO `song` (`id`, `name`, `description`, `url`, `goal`, `image`, `user_id`, `available`) VALUES
-('0e832cf9973148a18674a85f273e509f', 'Daniel Deluxe', '', 'https://www.youtube.com/watch?v=QHNakk1oM7g', 4.93, '', '8622e06b-65dd-11f0-94d0-089798b6be9f', 1),
+('0e832cf9973148a18674a85f273e509f', 'Daniel Deluxe', 'Regular-normal song', 'https://www.youtube.com/watch?v=QHNakk1oM7g', 4.93, '', '8622e06b-65dd-11f0-94d0-089798b6be9f', 1),
 ('0fe0318bdd2147778491f16554eeb466', 'Xavi - La Diabla', '', 'https://www.youtube.com/watch?v=HfzbN5ky5Co', 4.98, '', '8622e06b-65dd-11f0-94d0-089798b6be9f', 1),
 ('1bbb48bd1ba94c67b8e8c5439ba9caca', 'Seemee & Soda Luv ', 'moto moto', 'https://www.youtube.com/watch?v=24EABWFG79A', 4.90, '', '8622e06b-65dd-11f0-94d0-089798b6be9f', 1),
 ('237fb66e8c5f4d188d48b5e762c6a276', 'WOS - ARRANCARMELO ', 'sad song', 'https://www.youtube.com/watch?v=RNLsc_DWDUw', 4.89, '', '8622e06b-65dd-11f0-94d0-089798b6be9f', 1),
