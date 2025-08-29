@@ -2,7 +2,7 @@ import { useRef, useEffect } from "react";
 import { defaultImages } from "../../utils/defaultImages";
 
 type MultipleSelectProps = {
-    value?: any,
+    values?: any[],
     id: string,
     name: string,
     label: string,
@@ -22,7 +22,7 @@ type option = {
 }
 
 // const MultipleSelect = ({label, options, ...attributtes }: { label: string, options: option[] }) => {
-const MultipleSelect = ({ value, id, name, label, options = [], ...attributtes }: MultipleSelectProps) => {
+const MultipleSelect = ({ values = [], id, name, label, options = [], ...attributtes }: MultipleSelectProps) => {
     const se = useRef<HTMLSelectElement>(null)
 
     useEffect(() => {
@@ -32,6 +32,14 @@ const MultipleSelect = ({ value, id, name, label, options = [], ...attributtes }
         };
         loadFlyonui();
     }, []);
+
+    const isSelected = (id : string) => {
+        for (let i = 0; i < values.length; i++) {
+            if (values[i] == id) return true
+            // console.log(values[i], " === ", id)
+        }
+        return false
+    }
 
     return (
         <div className="w-full">
@@ -65,7 +73,7 @@ const MultipleSelect = ({ value, id, name, label, options = [], ...attributtes }
                         return (
                             <option
                                 key={item.id}
-                                selected={item.selected && false}
+                                selected={ isSelected(item.id) }
                                 value={item.id}
                                 defaultValue={item.id}
                                 data-select-option={`{
