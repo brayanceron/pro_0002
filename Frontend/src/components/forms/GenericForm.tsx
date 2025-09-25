@@ -26,7 +26,6 @@ export type GenericFormFields = {
     image?: File | undefined,
     user_id: string,
 }
-// const emptyFields = { name: '', description: '', score : 0, image: undefined, user_id: '8622e06b-65dd-11f0-94d0-089798b6be9f' }
 const emptyFields = { name: '', description: '', score : 0, image: undefined, user_id: '' }
 
 const GenericForm = ({ values = emptyFields, title, url, nameFieldOptions, descriptionFieldOptions, method = Method.POST, callback }: GenericFormComponentProps) => {
@@ -34,14 +33,14 @@ const GenericForm = ({ values = emptyFields, title, url, nameFieldOptions, descr
     values.user_id = userAuth!.id; // values.user_id = userAuth.user!.id;
 
     const onSubmit = () => { sendReq(); }
-    descriptionFieldOptions!.icon = 'text-recognition'; // review possible null
+    // descriptionFieldOptions!.icon = 'text-recognition'; // review possible null
 
     const { data, formData, onChange, onChangeFile } = useFormData<GenericFormFields>(values);
     const { sendReq, isLoading } = usePost(formData, url, callback, method);
 
     return (
         <>
-            <div className="shadow-md w-1/3 min-w-[380px] m-auto border-t-[1px] border-gray-100 border-solid">
+            <div className="shadow-md w-full min-w-[380px] m-auto border-t-[1px] border-gray-100 border-solid">
                 <div className="w-full px-4 py-2">
 
                     <h1 className="text-center text-2xl font-bold mt-4 mb-2">{title}</h1>
