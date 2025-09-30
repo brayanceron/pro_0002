@@ -84,7 +84,7 @@ class GenericController :#{
 
     @validate
     def post(self, new_entity : GenericModel, image_file) :#{
-        new_entity.image = load_file(image_file, "gender_image") or ''
+        new_entity.image = load_file(image_file, prefix="gender_image", sub_folders=[new_entity.user_id]) or ''
         
         keys, dict_data = new_entity.get_data_struct()
         query = f"insert into {self.entity}({', '.join(keys)}) values({','.join([ f'%({k})s' for k in keys])})" # f"insert into {self.entity}({', '.join(list(data.keys()))}) values({f' %({')s, %('.join(list(data.keys()))})s '})" 
@@ -101,7 +101,7 @@ class GenericController :#{
         old_entity, status = self.get_id(id)
         if(status != 200) : return old_entity, status
         if (AUTH_ERROR := auth_put(old_entity['user_id'])) : return AUTH_ERROR # if (AUTH_ERR := auth_put(id)) : return AUTH_ERR
-        new_entity.image = load_file(image_file, "gender_image") or ''
+        new_entity.image = load_file(image_file, prefix="gender_image", sub_folders=[new_entity.user_id]) or ''
 
         keys, dict_data = new_entity.get_data_struct()
         if (not new_entity.image) :#{ #This for not delete image if it is not provided
