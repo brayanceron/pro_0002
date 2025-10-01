@@ -1,4 +1,3 @@
-from src.utils.load_file import load_file, load_file2
 from flask import Request,Response, abort
 from uuid import uuid4
 import json
@@ -61,5 +60,4 @@ class GenericModel :#{
     def get_data_struct(self) :#{
         return GenericModel.get_array_cols(), self.to_dict()
     #}
-
 #}
