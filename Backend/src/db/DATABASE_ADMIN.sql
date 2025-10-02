@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 02-10-2025 a las 23:19:52
+-- Tiempo de generación: 03-10-2025 a las 00:23:55
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -35,6 +35,13 @@ CREATE TABLE `band` (
   `image` varchar(100) NOT NULL,
   `available` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `band`
+--
+
+INSERT INTO `band` (`id`, `name`, `description`, `user_id`, `image`, `available`) VALUES
+('unknown', 'unknown', 'unknown', 'admin', '', 1);
 
 -- --------------------------------------------------------
 
@@ -84,7 +91,8 @@ INSERT INTO `gender` (`id`, `name`, `description`, `user_id`, `score`, `image`, 
 ('d7fa99db3bc4477b844b883b83b30917', 'Reggae', 'Reggae Music', 'admin', 4.11, '', 1),
 ('e00bdfe05e484bb6b0277b5dbdeb5b42', 'Salsa Choke', 'Salsa Choke Music', 'admin', 4.64, '', 1),
 ('ef3e46e8c0144900a1c393a8e4ef52e9', 'Electronic', 'Electronic Music', 'admin', 4.85, '', 1),
-('efc9982cde8847b88e71af25bd90c1be', 'Soul', 'Soul Music', 'admin', 3.55, '', 1);
+('efc9982cde8847b88e71af25bd90c1be', 'Soul', 'Soul Music', 'admin', 3.55, '', 1),
+('unknown', 'unknown', 'unknown', 'admin', -1.00, '', 1);
 
 -- --------------------------------------------------------
 
@@ -109,6 +117,7 @@ CREATE TABLE `language` (
 INSERT INTO `language` (`id`, `name`, `description`, `user_id`, `score`, `image`, `available`) VALUES
 ('227c1c4fc90c4290928f624da39d840c', 'Mute', 'Music without voice', 'admin', 4.90, '', 1),
 ('818e34ecaf234184929a4f25a31472c4', 'English', '', 'admin', 4.94, '', 1),
+('unknown', 'unknown', 'unknown', 'admin', -1.00, '', 1),
 ('d789aa5820fa42359e3d016877e9435d', 'Spanish', '', 'admin', 4.94, '', 1);
 
 -- --------------------------------------------------------
@@ -176,6 +185,13 @@ CREATE TABLE `singer` (
   `image` varchar(100) NOT NULL,
   `available` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `singer`
+--
+
+INSERT INTO `singer` (`id`, `name`, `description`, `user_id`, `score`, `image`, `available`) VALUES
+('unknown', 'unknown', 'unknown', 'admin', -1.00, '', 1);
 
 -- --------------------------------------------------------
 
