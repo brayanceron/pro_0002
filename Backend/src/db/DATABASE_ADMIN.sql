@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 03-10-2025 a las 00:23:55
+-- Tiempo de generación: 03-10-2025 a las 18:55:40
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -65,21 +65,27 @@ CREATE TABLE `gender` (
 
 INSERT INTO `gender` (`id`, `name`, `description`, `user_id`, `score`, `image`, `available`) VALUES
 ('0f8907fb5aef47769a8e1e617451a1ef', 'Tango', 'Tango Music', 'admin', 4.03, '', 1),
-('0fb7ecc25373410db48378fd0af44288', 'Cumbia', 'Cumbia music', 'admin', 4.71, '', 1),
+('0fb7ecc25373410db48378fd0af44288', 'Cumbia', 'Cumbia Music', 'admin', 4.71, '', 1),
 ('1add44721f274c62928ca4277485524d', 'Pop', 'Pop Music', 'admin', 0.00, '', 1),
 ('1cf82eddf6634b0fa28058d604c083ce', 'Flamenco', 'Flamenco Music', 'admin', 3.89, '', 1),
 ('237392a9554a4520b3be75297d2a9ce2', 'Ranchera', 'Ranchera Music', 'admin', 4.74, '', 1),
+('29bfac873e1742e4bac3738ac381cd0d', 'Vallenato', 'Vallenato Music', 'admin', -1.00, '', 1),
+('3059442e20d244a8a63973a393a673e8', 'Hard Rock', 'Hard Rock Music', 'admin', -1.00, '', 1),
 ('38dcb9ec0ad2481f89cd4b82ad54e9a7', 'Disco', 'Disco Music', 'admin', 4.16, '', 1),
 ('3a2eb1bed2d24f78be10cd25b1894ae2', 'House', 'House Music', 'admin', 4.03, '', 1),
 ('3a9b04543f434268a88b2db325385f91', 'Merengue', 'Merengue Music', 'admin', 4.55, '', 1),
+('3c27e64a44564430a43bd24f294b9671', 'Tropipop', 'Tropipop Music', 'admin', -1.00, '', 1),
 ('42bcd9ac91554167bdc90410d1f97ec8', 'Country', 'Country Music', 'admin', 3.17, '', 1),
+('484e102e87ec4fe99b39a7b323f62242', 'Popular Music', 'Colombian Popular Music', 'admin', -1.00, '', 1),
 ('53cf6e5b505f4a61adb08722547a8769', 'Rock', 'Rock Music', 'admin', 4.90, '', 1),
 ('5fac64e3775149019cd725270b55584b', 'Rock And Roll', 'Rock And Roll Music', 'admin', 4.33, '', 1),
+('692f0eb79aff4a358bdea053538f589b', 'Champeta', 'Champeta Music', 'admin', -1.00, '', 1),
 ('6c6b01bca13e4b6ea21f6b8189108ec1', 'Trap', 'Trap Music', 'admin', 3.90, '', 1),
 ('6ffa5940ccbb4e21acb0d0e94a1a23d5', 'Blues', 'Blues Music', 'admin', 3.55, '', 1),
 ('75378f71988f44669815706b41ea9178', 'Bolero', 'Bolero Music', 'admin', 3.93, '', 1),
 ('7d4003f8199a437b9fd225e3ef19d870', 'Ballada', 'Balada Music', 'admin', 4.21, '', 1),
 ('82e95713ca954407a5fbe7e02e3ad9ed', 'Phonk', 'Phonk Music', 'admin', 3.52, '', 1),
+('9957546f7d1f4892b4745c40f04ebd2e', 'Samba', 'Samba Music', 'admin', -1.00, '', 1),
 ('aa6a692c7f084242865f2ac6e0cb79ec', 'Reggaeton', 'Reggaeton Music', 'admin', 4.85, '', 1),
 ('b0170ac52977464f8f53e4d076572484', 'Rumba', 'Rumba Music', 'admin', 4.35, '', 1),
 ('b558d018c3ac4b879409f87d390a4738', 'Salsa', 'Salsa Music', 'admin', 4.88, '', 1),
@@ -117,8 +123,8 @@ CREATE TABLE `language` (
 INSERT INTO `language` (`id`, `name`, `description`, `user_id`, `score`, `image`, `available`) VALUES
 ('227c1c4fc90c4290928f624da39d840c', 'Mute', 'Music without voice', 'admin', 4.90, '', 1),
 ('818e34ecaf234184929a4f25a31472c4', 'English', '', 'admin', 4.94, '', 1),
-('unknown', 'unknown', 'unknown', 'admin', -1.00, '', 1),
-('d789aa5820fa42359e3d016877e9435d', 'Spanish', '', 'admin', 4.94, '', 1);
+('d789aa5820fa42359e3d016877e9435d', 'Spanish', '', 'admin', 4.94, '', 1),
+('unknown', 'unknown', 'unknown', 'admin', -1.00, '', 1);
 
 -- --------------------------------------------------------
 
