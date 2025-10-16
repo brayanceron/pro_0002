@@ -1,7 +1,6 @@
 from flask import Blueprint, request
 import src.controllers.song
 import src.controllers.auth
-# from collections import defaultdict
 
 keys : list = ['name', 'description', 'url', 'goal', 'user_id', 'available', 'duration' ]
 ext_keys : list = ['genders', 'senses', 'singers', 'languages', 'playlists']
@@ -68,7 +67,6 @@ def get_by_user(user_id) :#{
     return src.controllers.song.get_by_user(user_id, request.args.get('extended', False))
 #}
 
-
 @song_router.route('/by/gender/<gender_id>')
 def get_by_gender(gender_id) :#{
     return src.controllers.song.get_by_gender(gender_id)
@@ -101,7 +99,7 @@ def generate() :#{
     form = dict(request.get_json())
     form = {k : form.get(k, [] if k in ks else 0 ) for k in ['goal', 'user_id', *ks]} # extract necesary keys
     # print(form)
-    form['user_id'] = "0f12951ac8cf486ba7a281d64fe311f7"
+    # form['user_id'] = "0f12951ac8cf486ba7a281d64fe311f7"
     return src.controllers.song.generate(**form) 
 #}
 
