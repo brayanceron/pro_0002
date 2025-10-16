@@ -16,6 +16,7 @@ import { AppAlert } from "../../components/informational/AppAlert";
 const GET = () => {
     const { user } = useContext(AuthContext)
     const { data, isLoading, error } = useFetch(`http://localhost:5000/api/song/by/user/${user!.id}?extended=1`);
+    // const { data, isLoading, error } = useFetch(`http://localhost:5000/api/song/by/user/${user!.id}?extended=1&limit=-1`);
 
     return (
         <div className="w-1/3 h-full m-auto mt-15 ">
@@ -25,11 +26,8 @@ const GET = () => {
                     error ? <AppAlert message={error.message} color="error" icon="x" soft /> :
                         data ?
                             <>
-                                <div className="w-fit my-3 mx-auto">
-                                    <ResultPaginationComponent/>
-                                </div>
                                 {
-                                    data.map((item: any) => {
+                                    data.data.map((item: any) => {
                                         return <MusicItem
                                             id={item.id}
                                             name={item.name}
@@ -48,6 +46,10 @@ const GET = () => {
                                 {/* <PlayerComponent songs={data.map((item: any) => { return isValidYouTubeUrl(item.url) ? item.url : getUrlBySrc(item.url) })} /> */}
                                 {/* <PlayerComponent /> */}
                                 {/* </div> */}
+                                <p>Total results:  {data.count}</p>
+                                <div className="w-fit my-3 mx-auto">
+                                    <ResultPaginationComponent/>
+                                </div>
                             </>
                             : <p>Here mest be data</p>
             }
