@@ -9,7 +9,9 @@ song_router = Blueprint('song_blueprint', __name__)
 
 @song_router.route('/')
 def get() :#{
-    return src.controllers.song.get(request.args.get('extended', False))
+    page = request.args.get('page', 1)
+    limit = request.args.get('limit', 10)
+    return src.controllers.song.get(page, limit, request.args.get('extended', False))
 #}
 
 @song_router.route('/<id>')
@@ -64,7 +66,9 @@ def put(id : str) :#{
 
 @song_router.route('/by/user/<user_id>')
 def get_by_user(user_id) :#{
-    return src.controllers.song.get_by_user(user_id, request.args.get('extended', False))
+    page = request.args.get('page', 1)
+    limit = request.args.get('limit', 10)
+    return src.controllers.song.get_by_user(user_id, page, limit, request.args.get('extended', False))
 #}
 
 @song_router.route('/by/gender/<gender_id>')

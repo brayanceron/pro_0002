@@ -29,14 +29,32 @@ def validate(func) :#{
     return wrap
 #}
 
+def format_pagination_parameters(page : str, limit : str) :#{
+    try :#{
+        page = int(page)
+        limit = int(limit)
+        if limit == -1: return page, limit, None
+        if(not page >= 1 or not limit >= 1) : return None, None, "pagination parameters can't be negative"
+        return page, limit, None
+    #}
+    except :#{
+        return None, None, "invalid pagination parameters"
+    #}
+#}
 
 @validate
-def get(extended = False) :#{
+def get(page : str = '1', limit : str = '10', extended = False) :#{
     if(AUTH_ERROR := auth_get()) : return AUTH_ERROR;
+    
+    page, limit, msg = format_pagination_parameters(page, limit)
+    if (not page or not limit) : return {'message' : msg}, 400
+    offset = (page - 1) * limit
     
     with db.get_connection() as conn, conn.cursor() as cur :#{
     
-        cur.execute("select id, name, description, url, goal, image, user_id  from song")
+        # cur.execute("select id, name, description, url, goal, image, user_id  from song")
+        cur.execute(f"select id, name, description, url, goal, image, user_id  from song {"limit %s offset %s" if limit != -1 else ''}",
+                    [limit, offset][0:None if limit != -1 else 0])
         rows = cur.fetchall()
 
         if(cur.rowcount == 0) : return {'message' : 'error, data not found'} , 404
@@ -54,8 +72,11 @@ def get(extended = False) :#{
             })
         #}
 
-        if (extended and (res := extend(songs))[1] == 200) : return res;
-        return songs, 200
+        count_sng, status = count("%")
+        if status != 200 : return count_sng, status
+
+        if (extended and (res := extend(songs))[1] == 200) : return {'data' : res[0], 'count' : count_sng.get('count')}, 200;
+        return {'data' : songs, 'count' : count_sng.get('count')}, 200
     #}
 #}
     
@@ -88,7 +109,6 @@ def get_id(id, extended = False) :#{
         return song, 200
     #}
 #}
-
 
 # ====================================================================================================
 
@@ -255,18 +275,19 @@ def extend(songs : list) :#{
 #}
 
 @validate
-def get_by_user(user_id : str, extended = False) :#{
+def get_by_user(user_id : str, page : str = '1', limit : str = '10', extended = False) :#{
     if(not user_id) : return {'message' : "Invalid user id"}, 400
     if(AUTH_ERROR := auth_get_by_user(user_id)): return AUTH_ERROR
 
-    # conn = db.get_connection()
-    # cur = conn.cursor()
+    page, limit, msg = format_pagination_parameters(page, limit)
+    if (not page or not limit) : return {'message' : msg}, 400
+    offset = (page - 1) * limit
+
     with db.get_connection() as conn, conn.cursor() as cur :#{
+        cur.execute(f"""select id, name, description, url, goal, image, user_id 
+                    from song where user_id = %s {"limit %s offset %s" if limit != -1 else ''}""", 
+                    [user_id, limit, offset][0:None if limit != -1 else 1])
 
-        cur.execute("""select id, name, description, url, goal, image, user_id 
-                    from song where user_id = %s """, [user_id])
-
-        # row = cur.fetchone()
         rows = cur.fetchall()
         if cur.rowcount == 0 : return {'message' : 'data not found'}, 404
         
@@ -283,14 +304,15 @@ def get_by_user(user_id : str, extended = False) :#{
             })
         #}
         
+        count_sng, status = count(user_id)
+        if status != 200 : return count_sng, status
 
-        # if (extended and (res := extend([song]))[1] == 200) : return res;
-        # if (extended and (res := extend([songs]))[1] == 200) : return res[0][0], res[1];
-        if (extended and (res := extend(songs))[1] == 200) : return res;
-        return songs, 200
+        if (extended and (res := extend(songs))[1] == 200) : return {'data' : res[0], 'count' : count_sng.get('count')}, 200;
+        return {'data' : songs, 'count' : count_sng.get('count')}, 200
     #}
 #}
 
+#TODO paginate endpoinst "get_by"
 @validate
 def get_by_gender(gender_id : str) :#{
     if not gender_id : return {'message' : "Invalid gender id"}, 400
@@ -488,6 +510,18 @@ def generate(genders : list[str], senses : list[str], singers : list[str], langu
         return songs, 200
     #}
 #}
+
+@validate
+def count(user_id : str) :#{
+    with db.get_connection() as conn, conn.cursor() as cur :#{
+        # TODO: validat authorization
+        cur.execute("select count(*) from song where user_id = %s",[user_id]);
+        row = cur.fetchone()
+        count = row[0]
+        return {'count' : count}, 200
+    #}
+#}
+
 
 def teardown_db():#{
     db.close_global_connection()
