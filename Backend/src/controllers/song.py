@@ -122,7 +122,7 @@ def post(name : str, description : str, url : str, goal : str, user_id : str, ge
     #}
 #}
 
-@validate
+# @validate # INFO if validate is disabled this function cut all operation(POST/PUT)
 def post_song_(entity : list[str], song_id : str, entity_name : str, user_id : str) :#{
     # TODO verify if already exist repeating rows with same data
     print("------------------------")
@@ -179,9 +179,8 @@ def put(song_id : str, name : str, description : str, goal : str, user_id : str,
     if not image : del keys['image'] #keys.pop(3)
 
     kstring = [ f" {k} = %({k})s" for k in keys.keys()]
-    
     with db.get_connection() as conn, conn.cursor() as cur :#{
-        cur.execute("begin;")
+        # cur.execute("begin;")
         cur.execute(f"""update song set {" , ".join(kstring)} 
                     where id = %(id)s;""", {**keys, 'id' : song_id})
         print(cur.rowcount)
@@ -197,11 +196,6 @@ def put(song_id : str, name : str, description : str, goal : str, user_id : str,
         print("pass****")
 
         # INSERTING NEW DATA
-        # print(f"{genders=}")
-        # print(f"{playlists=}")
-        # print(f"{singers=}")
-        # print(f"{languages=}")
-        # print(f"{senses=}")
         post_song_(genders, song_id, 'gender', user_id)
         post_song_(playlists, song_id, 'playlist', user_id)
         post_song_(singers, song_id, 'singer', user_id)
@@ -209,16 +203,14 @@ def put(song_id : str, name : str, description : str, goal : str, user_id : str,
         post_song_senses(senses, song_id, user_id, goal)
         print("OKIII")
 
-        return f"put route up! ::: {song_id=} {name=} {description=} {goal=} {user_id=} {genders=}  {senses=} {singers=} {languages=} {playlists=} {available=}  {song_id=}", 200
+        return {"message" : "song update successfully"}, 200
     #}
     # TODO update {genders=}  {senses=} {singers=} {languages=} {playlists=} of a song
 #}
 
-# def delete_song_(entity : list[str], song_id : str, entity_name : str, user_id : str) :#{
 def delete_song_(song_id : str, entity_name : str, user_id : str) :#{
     with db.get_connection() as conn, conn.cursor() as cur :#{
         # TODO validate query doesn't reach exception
-        # q = f"delete from song_{entity_name} where song_id = {song_id}"
         q = f"delete from song_{entity_name} where song_id = %s"
         print(q)
         cur.execute(q, [song_id])
