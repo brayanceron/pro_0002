@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PlayListContext, type PlayListContextType, type BaseOptional } from "./PlayListContext";
 import type { SongModel } from "../models/SongModel";
 
@@ -46,8 +46,38 @@ const PlayListProvider = ({ children }: { children: any }) => {
         setPlayListState(beforeData => { return { ...beforeData, currentIndex: newIndex } });  // setPlayListState({ ...playList, currentIndex: newIndex });
     }
 
-    // const [playList, setPlayListState] = useState<PlayListContextType>({ playList: [], isLoading: false, error: null, setPlayList, currentIndex: 0, setCurrentIndex });
-    const [playList, setPlayListState] = useState<PlayListContextType>({ playList: defaultPlayList, isLoading: false, error: null, setPlayList, currentIndex: 0, setCurrentIndex });
+    const saveInLocalStorage = (data: SongModel[]) => {
+        /* if (data.length == 0) return; */
+        localStorage.setItem('playlist', JSON.stringify(data));
+    }
+    // const clearPLofLocalStorage = () =>{ localStorage.removeItem('playlist'); }
+
+    // const [playList, setPlayListState] = useState<PlayListContextType>({ playList: defaultPlayList, isLoading: false, error: null, setPlayList, currentIndex: 0, setCurrentIndex });
+    const [playList, setPlayListState] = useState<PlayListContextType>({ playList: [], isLoading: false, error: null, setPlayList, currentIndex: 0, setCurrentIndex });
+
+    useEffect(() => {
+        // INFO isLoading should start in True
+        // TODO validate playlist json has correct format
+        // reding in local storage
+        const strPL = localStorage.getItem('playlist');
+        console.log("###################");
+        if (strPL !== null) {
+            const jsonPL = JSON.parse(strPL);
+            console.log("jsonPL", jsonPL)
+            if (jsonPL.length > 0) {
+                console.log("Applaying jsonPL...")
+                setPlayListState(beforeData => { return { ...beforeData, playList: jsonPL } })
+            }
+        }
+        // BUG when user log out, must delete palylist, becouse if other user log in could see songs before user  
+    }, []);
+
+
+    // useEffect(()=>{ saveInLocalStorage(playList); },[playList]);
+    useEffect(() => {
+        if (playList.isLoading || playList.error) return
+        saveInLocalStorage(playList.playList);
+    }, [playList]);
 
     return (
         <PlayListContext.Provider value={{ ...playList }}>
