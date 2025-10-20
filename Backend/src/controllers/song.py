@@ -185,7 +185,7 @@ def put(song_id : str, name : str, description : str, goal : str, user_id : str,
 
     if (AUTH_ERROR := auth_put(user_id)) : return AUTH_ERROR
     
-    #BUG: -> image must save in user folder
+    # BUG: -> image must save in user folder
     image = load_file(image_file) or ''
     keys : dict = {
         'name': name,
@@ -468,7 +468,7 @@ def generate(genders : list[str], senses : list[str], singers : list[str], langu
     if(AUTH_ERROR := auth_get_id(user_id)): return AUTH_ERROR #Validate that the user is the same as the one who logged in. 
     
     if (not user_id): return {'message' : "Insuficient data"}, 400;
-    if (not genders and not senses and not singers and not languages): return {'message' : "Insuficient data"}, 400;
+    if (not genders and not senses and not singers and not languages and not goal): return {'message' : "Insuficient data"}, 400;
 
     # TODO validate auth user is equal to user_id
 
@@ -490,7 +490,6 @@ def generate(genders : list[str], senses : list[str], singers : list[str], langu
     song.user_id = '{user_id}'
     """
 
-    # print(q)
     with db.get_connection() as conn, conn.cursor() as cur :#{
         songs = []
         cur.execute(q)
