@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 03-10-2025 a las 18:55:40
+-- Tiempo de generación: 20-10-2025 a las 21:10:18
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -298,6 +298,18 @@ CREATE TABLE `song_singer` (
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `temp_playlist`
+--
+
+CREATE TABLE `temp_playlist` (
+  `user_id` varchar(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `json_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`json_data`)),
+  `created_at` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `user`
 --
 
@@ -424,6 +436,12 @@ ALTER TABLE `song_singer`
   ADD KEY `song_singer_songforeignkey` (`song_id`);
 
 --
+-- Indices de la tabla `temp_playlist`
+--
+ALTER TABLE `temp_playlist`
+  ADD KEY `usuarioToTemp` (`user_id`);
+
+--
 -- Indices de la tabla `user`
 --
 ALTER TABLE `user`
@@ -525,6 +543,12 @@ ALTER TABLE `song_sense`
 ALTER TABLE `song_singer`
   ADD CONSTRAINT `song_singer_singerforeignkey` FOREIGN KEY (`singer_id`) REFERENCES `singer` (`id`),
   ADD CONSTRAINT `song_singer_songforeignkey` FOREIGN KEY (`song_id`) REFERENCES `song` (`id`);
+
+--
+-- Filtros para la tabla `temp_playlist`
+--
+ALTER TABLE `temp_playlist`
+  ADD CONSTRAINT `usuarioToTemp` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
