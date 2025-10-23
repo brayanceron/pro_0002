@@ -107,6 +107,11 @@ def generate() :#{
     return src.controllers.song.generate(**form) 
 #}
 
+@song_router.route('/get_generated_playlists/<user_id>')
+def get_generated_playlists(user_id) :#{
+    return src.controllers.song.get_generated_playlists(user_id)
+#}
+
 @song_router.before_request
 def auth_middleware() :#{
     src.controllers.auth.auth_middleware()
