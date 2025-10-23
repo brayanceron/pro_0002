@@ -25,6 +25,12 @@ const Navigation = () => {
                                 </NavLink>
                             </li>
                             <li className="text-white">
+                                <NavLink to={'/home'}>
+                                    <span className="icon-[tabler--home] size-5"></span>
+                                    Home
+                                </NavLink>
+                            </li>
+                            <li className="text-white">
                                 <NavLink to={'/gender/get'}>
                                     <span className="icon-[tabler--category] size-5"></span>
                                     Genders
