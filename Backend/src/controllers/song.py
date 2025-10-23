@@ -2,8 +2,11 @@ from src.controllers.GenericController import GenericController
 from src.db.database import DatabaseConnection # ,get_connection
 from mysql.connector.errors import IntegrityError, DatabaseError
 from uuid import uuid4
+from json import dumps, loads
+from datetime import datetime
 from src.utils.load_file import load_file
 from src.controllers.GenericController import GenericController
+from flask import g
 
 from src.controllers.auth_controllers.song_auth_controller import auth_get, auth_get_id, auth_post, auth_post_song_, auth_put, auth_get_by_user
 
@@ -501,12 +504,68 @@ def generate(genders : list[str], senses : list[str], singers : list[str], langu
                 'name' : r[1],
                 'description' : r[2],
                 'url' : r[3],
-                'goal' : r[4],
+                'goal' : str(r[4]),
                 'image' : r[5],
                 'user_id' : r[6],
             })
         #}
+        generated_by = { f"{k=}".split('=')[0] : k for k in [genders, senses, singers, languages, goal] if k }
+        g.setdefault('conn', conn)  # g.setdefault(cur)
+        save_generated_playlists(songs, generated_by, user_id)
         return songs, 200
+    #}
+#}
+
+def save_generated_playlists(pl : list, generated_by : dict, user_id : str) :#{
+    if (not pl or not generated_by or not user_id) : return None;
+
+    try :#{
+        json_data = dumps({
+            'playlist' : pl,
+            'generated_by' : generated_by,
+            'user_id' : user_id,
+        })
+
+        dt = datetime.now()
+        late = 2
+        conn = g.get('conn')
+        with conn.cursor() as cur :#{
+            cur.execute("insert into temp_playlist(user_id, json_data, created_at) values (%s, %s, %s)",[user_id, json_data, dt])
+            # cur.fetchall()
+            
+            query = f"""
+            delete from `temp_playlist` as t1 
+            where user_id = %s and t1.created_at < (select * from (select created_at from `temp_playlist` as t2 
+                where t2.user_id = %s order by t2.created_at desc limit 1 {f'offset {offset}' if ((offset := late - 1) > 0) else ''}) as subquery)
+            """
+            cur.execute(query, [user_id, user_id])
+            cur.fetchall() # INFO - here is processing data for releasing buffer, otherwise it doesn't work
+
+            conn.commit()
+            return json_data
+        #}
+    #}
+    except Exception as err :#{
+        print(err)
+        import traceback
+        traceback.print_exc()
+    #}
+    return None
+#}
+
+@validate
+def get_generated_playlists(user_id : str) :#{
+    if not user_id : return {'message' : "user id not provided"}, 400
+    
+    with db.get_connection() as conn, conn.cursor() as cur :#{
+        cur.execute("select json_data, created_at from temp_playlist where user_id = %s order by created_at desc limit 1;", [user_id])
+        pls = cur.fetchone()
+        
+        if cur.rowcount == 0 : return {'message' : "data not found"}, 404
+        dict_data = loads(pls[0])
+
+        if(AUTH_ERROR := auth_get_id(dict_data['user_id'])): return AUTH_ERROR
+        return dict_data, 200
     #}
 #}
 
