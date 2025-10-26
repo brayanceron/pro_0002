@@ -467,7 +467,7 @@ def get_by_language(language_id : str):#{
 
 #TODO this way of generate is too basic, it must be moplexer
 @validate
-def generate(genders : list[str], senses : list[str], singers : list[str], languages : list[str], goal : float, user_id : str) :#{
+def generate(genders : list[str], senses : list[str], singers : list[str], languages : list[str], goal : float, user_id : str, save = True ) :#{
     if(AUTH_ERROR := auth_get_id(user_id)): return AUTH_ERROR #Validate that the user is the same as the one who logged in. 
     
     if (not user_id): return {'message' : "Insuficient data"}, 400;
@@ -518,7 +518,7 @@ def generate(genders : list[str], senses : list[str], singers : list[str], langu
         }
         generated_by = { k : generated_by[k] for k in generated_by.keys() if generated_by[k]}
         g.setdefault('conn', conn)  # g.setdefault(cur)
-        save_generated_playlists(songs, generated_by, user_id)
+        if save : save_generated_playlists(songs, generated_by, user_id)
         return songs, 200
     #}
 #}

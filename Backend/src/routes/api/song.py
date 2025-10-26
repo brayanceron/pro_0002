@@ -103,8 +103,8 @@ def generate() :#{
     form = dict(request.get_json())
     form = {k : form.get(k, [] if k in ks else 0 ) for k in ['goal', 'user_id', *ks]} # extract necesary keys
     # print(form)
-    # form['user_id'] = "0f12951ac8cf486ba7a281d64fe311f7"
-    return src.controllers.song.generate(**form) 
+    save = request.args.get('save', False) # save = save if (save := request.args.get('save', None)) else None  
+    return src.controllers.song.generate(**form, save = save)
 #}
 
 @song_router.route('/get_generated_playlists/<user_id>')
