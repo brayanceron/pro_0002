@@ -467,7 +467,7 @@ def get_by_language(language_id : str):#{
 
 #TODO this way of generate is too basic, it must be moplexer
 @validate
-def generate(genders : list[str], senses : list[str], singers : list[str], languages : list[str], goal : float, user_id : str) :#{
+def generate(genders : list[str], senses : list[str], singers : list[str], languages : list[str], goal : float, user_id : str, save = True ) :#{
     if(AUTH_ERROR := auth_get_id(user_id)): return AUTH_ERROR #Validate that the user is the same as the one who logged in. 
     
     if (not user_id): return {'message' : "Insuficient data"}, 400;
@@ -509,9 +509,16 @@ def generate(genders : list[str], senses : list[str], singers : list[str], langu
                 'user_id' : r[6],
             })
         #}
-        generated_by = { f"{k=}".split('=')[0] : k for k in [genders, senses, singers, languages, goal] if k }
+        generated_by : dict = { # generated_by = { f"{k=}".split('=')[0] : k for k in [genders, senses, singers, languages, goal] if k }
+            'genders' : genders,
+            'senses' : senses,
+            'singers' : singers,
+            'languages' : languages,
+            'goal' : str(goal) if float(goal) > 0 else -1 # 'goal' : goal,
+        }
+        generated_by = { k : generated_by[k] for k in generated_by.keys() if generated_by[k]}
         g.setdefault('conn', conn)  # g.setdefault(cur)
-        save_generated_playlists(songs, generated_by, user_id)
+        if save : save_generated_playlists(songs, generated_by, user_id)
         return songs, 200
     #}
 #}
@@ -527,7 +534,7 @@ def save_generated_playlists(pl : list, generated_by : dict, user_id : str) :#{
         })
 
         dt = datetime.now()
-        late = 2
+        late = 5
         conn = g.get('conn')
         with conn.cursor() as cur :#{
             cur.execute("insert into temp_playlist(user_id, json_data, created_at) values (%s, %s, %s)",[user_id, json_data, dt])
@@ -558,14 +565,21 @@ def get_generated_playlists(user_id : str) :#{
     if not user_id : return {'message' : "user id not provided"}, 400
     
     with db.get_connection() as conn, conn.cursor() as cur :#{
-        cur.execute("select json_data, created_at from temp_playlist where user_id = %s order by created_at desc limit 1;", [user_id])
-        pls = cur.fetchone()
+        # cur.execute("select json_data, created_at from temp_playlist where user_id = %s order by created_at desc limit 1;", [user_id])
+        cur.execute("select json_data, created_at from temp_playlist where user_id = %s order by created_at desc", [user_id])
+        pls = cur.fetchall()
         
         if cur.rowcount == 0 : return {'message' : "data not found"}, 404
-        dict_data = loads(pls[0])
+        history = []
+        for p in pls:#{
+            history.append({
+                "json_data" : loads(p[0]),
+                "created_at" : p[1],  # "created_at" : str(p[1]),
+            })
+        #}
 
-        if(AUTH_ERROR := auth_get_id(dict_data['user_id'])): return AUTH_ERROR
-        return dict_data, 200
+        if(AUTH_ERROR := auth_get_id(history[0].get('json_data').get('user_id'))): return AUTH_ERROR
+        return history, 200
     #}
 #}
 
