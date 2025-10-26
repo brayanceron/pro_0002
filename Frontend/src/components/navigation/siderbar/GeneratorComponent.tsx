@@ -2,10 +2,12 @@ import { useContext, useEffect } from "react";
 import { type reqProps } from "../../../hooks/usePost";
 import { PlayListContext } from "../../../context/PlayListContext";
 import { GenerationForm } from "../../forms/GenerationForm";
+import { useNavigate } from "react-router";
 
 
 function GeneratorComponent() {
-    const { setPlayList } = useContext(PlayListContext)
+    const { setPlayList } = useContext(PlayListContext);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const loadFlyonui = async () => {
@@ -15,14 +17,15 @@ function GeneratorComponent() {
         loadFlyonui();
     }, [location.pathname]);
 
-    const cb = (res: reqProps) => {
-        if (!res.res?.ok) return alert("Error al generar las canciones")
+    const cb = ({ isLoading, result, error }: reqProps) => {
+        if (error) return alert(error.message);
         setPlayList({
-            isLoading: res.isLoading,
-            error: res.error,
-            playList: res.result,
+            isLoading: isLoading,
+            error: error,
+            playList: result,
             currentIndex: 0,
-        })
+        });
+        navigate('/playing');
     }
 
     return (
