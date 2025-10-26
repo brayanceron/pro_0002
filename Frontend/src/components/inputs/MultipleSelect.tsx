@@ -1,8 +1,9 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useContext, /* useState */ } from "react";
 import { defaultImages } from "../../utils/defaultImages";
+import { AuthContext } from "../../context/AuthContext";
 
 type MultipleSelectProps = {
-    values?: any[],
+    values?: string[],
     id: string,
     name: string,
     label: string,
@@ -16,6 +17,7 @@ type option = {
     selected: boolean,
     name: string,
     description: string,
+    user_id: string,
     // url : string,
     image: string,
     alt: string,
@@ -23,8 +25,9 @@ type option = {
 
 // const MultipleSelect = ({label, options, ...attributtes }: { label: string, options: option[] }) => {
 const MultipleSelect = ({ values = [], id, name, label, options = [], ...attributtes }: MultipleSelectProps) => {
-    const se = useRef<HTMLSelectElement>(null)
-
+    const {user} = useContext(AuthContext)
+    const se = useRef<HTMLSelectElement>(null);
+    
     useEffect(() => {
         const loadFlyonui = async () => {
             await import('flyonui/flyonui');
@@ -33,18 +36,18 @@ const MultipleSelect = ({ values = [], id, name, label, options = [], ...attribu
         loadFlyonui();
     }, []);
 
-    const isSelected = (id : string) => {
-        for (let i = 0; i < values.length; i++) {
-            if (values[i] == id) return true
-            // console.log(values[i], " === ", id)
-        }
-        return false
-    }
+    /* const [selectedValues, setSelectedValues] = useState(values);
+    useEffect(() => {
+        console.log("reset values...")
+        setSelectedValues(values);
+    }, [values]) */
 
     return (
         <div className="w-full">
             <h1>{label}</h1>
             <select
+                value={values}   // value={[...values]}
+                // value={selectedValues}
                 ref={se}
                 id={id}
                 name={name}
@@ -73,11 +76,13 @@ const MultipleSelect = ({ values = [], id, name, label, options = [], ...attribu
                         return (
                             <option
                                 key={item.id}
-                                selected={ isSelected(item.id) }
                                 value={item.id}
                                 defaultValue={item.id}
                                 data-select-option={`{
-                                    "description": "${item.description}",
+                                    "description": "${
+                                    item.user_id == user!.id? "By: "+user?.name+" ☝️"
+                                    : "By: Admin ✅" }",
+                                    
                                     "icon": "<img class=\\"rounded-full\\" src=\\"${image}\\" alt=\\"${item.alt && ''}\\" />"}
                                 `}
                             >
