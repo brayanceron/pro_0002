@@ -2,11 +2,28 @@ import { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import useFetch from "../hooks/useFetch";
 import { GenerationForm } from "../components/forms/GenerationForm";
+import { PlayListContext } from "../context/PlayListContext";
+import type { reqProps } from "../hooks/usePost";
+import { useNavigate } from "react-router";
 
 const Home = () => {
     const { user } = useContext(AuthContext);
+    const { setPlayList } = useContext(PlayListContext);
+    const navigate = useNavigate();
+
     const { data, isLoading, error } = useFetch(`http://localhost:5000/api/song/get_generated_playlists/${user?.id}`);
     const [indexg, setIndexg] = useState(0);
+
+    const cb = ({ isLoading, result, error }: reqProps) => {
+        if (error) return alert(error.message);
+        setPlayList({
+            isLoading: isLoading,
+            error: error,
+            playList: result,
+            currentIndex: 0,
+        });
+        navigate('/playing');
+    }
 
     return (
         <>
@@ -34,11 +51,15 @@ const Home = () => {
                                 // <GenerationForm values={data[indexg]['json_data']['generated_by']} callback={() => { }} /> 
 
                                 //HACK it works but is not correct
-                                data.map((_: any, ii: number) => {
-                                    if (ii !== indexg) return;
+                                data.map((_: any, j: number) => {
+                                    if (j !== indexg) return;
                                     return (
                                         <div className="w-1/3 mx-auto shadow-md p-5">
-                                            <GenerationForm values={data[ii]['json_data']['generated_by']} callback={() => { }} />
+                                            <GenerationForm
+                                                values={data[j]['json_data']['generated_by']}
+                                                callback={cb}
+                                                // saveArg={j === 0 ? false : true} // this for not save the first and don't show repeated generated playlists
+                                            />
                                         </div>
                                     );
                                 })
