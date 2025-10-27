@@ -67,28 +67,11 @@ const Navigation = () => {
                                 </NavLink>
                             </li>
 
-                            {/* ------|| SONG ||------ */}
-                            <li className="space-y-0.5 text-white">
-                                {/* <a className="collapse-toggle collapse-open:bg-base-content/10 " id="menu-app" data-collapse="#menu-app-collapse"> */}
-                                <a className="collapse-toggle collapse-open:bg-base-content/10 open" id="menu-app" data-collapse="#menu-app-collapse">
-                                    <span className="icon-[tabler--music] size-5"></span>
+                            <li className="text-white">
+                                <NavLink to={'/song/get'}>
+                                    <span className="icon-[tabler--user] size-5"></span>
                                     Songs
-                                    <span className="icon-[tabler--chevron-down] collapse-open:rotate-180 size-4 transition-all duration-300"></span>
-                                </a>
-
-                                {/* <ul id="menu-app-collapse" className="w-auto overflow-hidden transition-[height] duration-300" aria-labelledby="menu-app"> */}
-                                <ul id="menu-app-collapse" className="open collapse w-auto overflow-hidden transition-[height] duration-300" aria-labelledby="menu-app">
-                                    <li>
-                                        <NavLink to={'/song/post'}>
-                                            <span className="icon-[tabler--plus] size-5"></span> Add
-                                        </NavLink>
-                                    </li>
-                                    <li>
-                                        <NavLink to={'/song/get'}>
-                                            <span className="icon-[tabler--eye] size-5"></span> See
-                                        </NavLink>
-                                    </li>
-                                </ul>
+                                </NavLink>
                             </li>
 
                             <li className="text-white">
