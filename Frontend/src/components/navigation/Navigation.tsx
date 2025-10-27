@@ -25,9 +25,9 @@ const Navigation = () => {
                                 </NavLink>
                             </li>
                             <li className="text-white">
-                                <NavLink to={'/home'}>
-                                    <span className="icon-[tabler--home] size-5"></span>
-                                    Home
+                                <NavLink to={'/generate'}>
+                                    <span className="icon-[tabler--bolt] size-5"></span> {/* <span className="icon-[tabler--music-star] size-5"></span> */}
+                                    Generate
                                 </NavLink>
                             </li>
                             <li className="text-white">
