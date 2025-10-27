@@ -1,5 +1,5 @@
 // import songDefault from "../../assets/songDefault.jpeg"
-import { useContext, useEffect, useRef } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 
 // import { GoalInput } from "../../components/inputs/GoalInput";
 // import { PlayerComponent } from "../../components/player/PlayerComponent";
@@ -9,51 +9,74 @@ import { getImageUrlByYTVideo, getUrlBySrc, isValidYouTubeUrl } from "../../util
 import songDefault from "../../assets/default/song.png";
 import singerDefault from "../../assets/default/singer.jpg";
 import genderDefault from "../../assets/default/gender.png";
-import { useNavigate } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 import { AuthContext } from "../../context/AuthContext";
 import { AppAlert } from "../../components/informational/AppAlert";
+import { PaginationComponent } from "../../components/navigation/PaginationComponent";
 
 const GET = () => {
     const { user } = useContext(AuthContext)
-    const { data, isLoading, error } = useFetch(`http://localhost:5000/api/song/by/user/${user!.id}?extended=1`);
-    // const { data, isLoading, error } = useFetch(`http://localhost:5000/api/song/by/user/${user!.id}?extended=1&limit=-1`);
+    const [currentPage, setCurrentPage_] = useState(1);
+    const setCurrentPage = (newValue: number) => {
+        if (newValue < 1) return;
+        if (newValue > data.count) return; // BUG: it's bad
+        setCurrentPage_(newValue)
+    }
+    const { data, isLoading, error } = useFetch(`http://localhost:5000/api/song/by/user/${user!.id}?extended=1&page=${currentPage}`);
 
     return (
-        <div className="w-1/3 h-full m-auto mt-15 ">
-            <h1 className="text-center text-2xl font-bold my-2">List of Songs</h1>
+        <>
+            <div className="w-1/3 h-full m-auto mt-15">
+                {/* <div className=" h-full m-auto mt-15"> */}
+                {
+                    isLoading ? <p>cargando...</p> :
+                        error ? <AppAlert message={error.message} color="error" icon="x" soft /> :
+                            data ?
+                                <>
+                                    <h1 className="text-center text-2xl font-bold mb-3">List of Songs</h1>
+
+                                    <Options />
+
+                                    {
+                                        data.data.map((item: any) => {
+                                            return <MusicItem
+                                                id={item.id}
+                                                name={item.name}
+                                                description={item.description}
+                                                image={item.image}
+                                                url={item.url}
+                                                genders={item.genders}
+                                                singers={item.singers}
+                                                languages={[]}
+                                                goal={item.goal}
+                                            />
+                                        })
+                                    }
+
+                                    {/* <div className="w-1/3 m-auto bg-black my-4"> */}
+                                    {/* <PlayerComponent songs={data.map((item: any) => item.url)} /> */}
+                                    {/* <PlayerComponent songs={data.map((item: any) => { return isValidYouTubeUrl(item.url) ? item.url : getUrlBySrc(item.url) })} /> */}
+                                    {/* <PlayerComponent /> */}
+                                    {/* </div> */}
+                                    <p>Total results:  {data.count}</p>
+
+                                </>
+                                : <p>Here mest be data</p>
+                }
+            </div>
+
+            <Options />
+
             {
-                isLoading ? <p>cargando...</p> :
-                    error ? <AppAlert message={error.message} color="error" icon="x" soft /> :
-                        data ?
-                            <>
-                                {
-                                    data.data.map((item: any) => {
-                                        return <MusicItem
-                                            id={item.id}
-                                            name={item.name}
-                                            description={item.description}
-                                            image={item.image}
-                                            url={item.url}
-                                            genders={item.genders}
-                                            singers={item.singers}
-                                            languages={[]}
-                                            goal={item.goal}
-                                        />
-                                    })
-                                }
-                                {/* <div className="w-1/3 m-auto bg-black my-4"> */}
-                                {/* <PlayerComponent songs={data.map((item: any) => item.url)} /> */}
-                                {/* <PlayerComponent songs={data.map((item: any) => { return isValidYouTubeUrl(item.url) ? item.url : getUrlBySrc(item.url) })} /> */}
-                                {/* <PlayerComponent /> */}
-                                {/* </div> */}
-                                <p>Total results:  {data.count}</p>
-                                <div className="w-fit my-3 mx-auto">
-                                    <ResultPaginationComponent/>
-                                </div>
-                            </>
-                            : <p>Here mest be data</p>
+                data && !error && !isLoading &&
+                <div className="w-full my-8">
+                    <div className="mx-auto w-fit">
+                        <PaginationComponent limit={10} page={currentPage}
+                            totalResults={data.count} setPage={setCurrentPage} numbersOfOptions={5} />
+                    </div>
+                </div>
             }
-        </div>
+        </>
     )
 }
 
@@ -161,36 +184,21 @@ function BadgeInfo({ text, image, defaultImg }: { text: string, image: string, d
     )
 }
 
-function ResultPaginationComponent(){
-    return(
-        <nav className="flex items-center gap-x-1">
-            <button type="button" className="btn btn-soft max-sm:btn-square">
-                <span className="icon-[tabler--chevron-left] size-5 rtl:rotate-180 sm:hidden"></span>
-                <span className="hidden sm:inline">Previous</span>
-            </button>
-            <div className="flex items-center gap-x-1">
-                <button type="button" className="btn btn-soft btn-square aria-[current='page']:text-bg-soft-primary">1</button>
-                <button type="button" className="btn btn-soft btn-square aria-[current='page']:text-bg-soft-primary" aria-current="page">2</button>
-                <button type="button" className="btn btn-soft btn-square aria-[current='page']:text-bg-soft-primary">3</button>
-                {/* <!-- tooltip --> */}
-                <div className="tooltip inline-block">
-                <button type="button" className="tooltip-toggle tooltip-toggle btn btn-soft btn-square group" aria-label="More Pages">
-                    <span className="icon-[tabler--dots] size-5 group-hover:hidden"></span>
-                    <span className="icon-[tabler--chevrons-right] hidden size-5 flex-shrink-0 group-hover:block"></span>
-                    <span className="tooltip-content tooltip-shown:opacity-100 tooltip-shown:visible" role="tooltip">
-                    <span className="tooltip-body">Next 7 pages</span>
-                    </span>
+const Options = () => {
+    return (
+        <div className=" m-auto py-2 flex gap-1 justify-center items-end content-end">
+            <NavLink to={`/song/get`} className="">
+                <button className="btn btn-xs btn-square border-[#2b3137] bg-[#2b3137] text-white shadow-[#2b3137]/30 hover:border-[#2b3137] hover:bg-[#2b3137]/90" aria-label="Github Icon Button" >
+                    <span className="icon-[tabler--reload]"></span>
                 </button>
-                </div>
-                {/* <!-- tooltip end --> */}
-                <button type="button" className="btn btn-soft btn-square aria-[current='page']:text-bg-soft-primary">10</button>
-            </div>
-            <button type="button" className="btn btn-soft max-sm:btn-square">
-                <span className="hidden sm:inline">Next</span>
-                <span className="icon-[tabler--chevron-right] size-5 rtl:rotate-180 sm:hidden"></span>
-            </button>
-            </nav>
+            </NavLink>
+
+            <NavLink to={`/song/post`} className="">
+                <button className="btn btn-xs btn-square border-[#2b3137] bg-[#2b3137] text-white shadow-[#2b3137]/30 hover:border-[#2b3137] hover:bg-[#2b3137]/90" aria-label="Github Icon Button" >
+                    <span className="icon-[tabler--plus]"></span>
+                </button>
+            </NavLink>
+        </div>
     );
 }
-
 export default GET
