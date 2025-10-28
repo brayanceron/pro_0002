@@ -1,8 +1,5 @@
 // import songDefault from "../../assets/songDefault.jpeg"
 import { useContext, useEffect, useRef, useState } from "react";
-
-// import { GoalInput } from "../../components/inputs/GoalInput";
-// import { PlayerComponent } from "../../components/player/PlayerComponent";
 import useFetch from "../../hooks/useFetch";
 import { getImageUrlByYTVideo, getUrlBySrc, isValidYouTubeUrl } from "../../utils/urls";
 
@@ -22,21 +19,20 @@ const GET = () => {
         if (newValue > data.count) return; // BUG: it's bad
         setCurrentPage_(newValue)
     }
-    const { data, isLoading, error } = useFetch(`http://localhost:5000/api/song/by/user/${user!.id}?extended=1&page=${currentPage}`);
+    const { data, isLoading, error } = useFetch(`http://localhost:5000/api/song/by/user/${user!.id}?extended=1&page=${currentPage}&limit=30`);
 
     return (
         <>
-            <div className="w-1/3 h-full m-auto mt-15">
-                {/* <div className=" h-full m-auto mt-15"> */}
+            <div className="w-auto h-full m-auto mt-15">
                 {
                     isLoading ? <p>cargando...</p> :
-                        error ? <AppAlert message={error.message} color="error" icon="x" soft /> :
+                        error ? <div className="w-1/3 m-auto mt-15"> <AppAlert message={error.message} color="error" icon="x" soft /> </div> :
                             data ?
                                 <>
                                     <h1 className="text-center text-2xl font-bold mb-3">List of Songs</h1>
 
                                     <Options />
-
+                                    <div className="flex flex-wrap gap-1 w-full justify-center">
                                     {
                                         data.data.map((item: any) => {
                                             return <MusicItem
@@ -47,17 +43,12 @@ const GET = () => {
                                                 url={item.url}
                                                 genders={item.genders}
                                                 singers={item.singers}
-                                                languages={[]}
+                                                languages={item.languages}
                                                 goal={item.goal}
                                             />
                                         })
                                     }
-
-                                    {/* <div className="w-1/3 m-auto bg-black my-4"> */}
-                                    {/* <PlayerComponent songs={data.map((item: any) => item.url)} /> */}
-                                    {/* <PlayerComponent songs={data.map((item: any) => { return isValidYouTubeUrl(item.url) ? item.url : getUrlBySrc(item.url) })} /> */}
-                                    {/* <PlayerComponent /> */}
-                                    {/* </div> */}
+                                    </div>
                                     <p>Total results:  {data.count}</p>
 
                                 </>
@@ -80,7 +71,7 @@ const GET = () => {
     )
 }
 
-const MusicItem = ({ id, name, genders, singers, goal, image, url }: { id: string, name: string, description: string, image: string, url: string, goal: number, genders: [], singers: [], languages: [] }) => {
+const MusicItem = ({ id, name, genders, singers, languages, goal, image, url }: { id: string, name: string, description: string, image: string, url: string, goal: number, genders: [], singers: [], languages: [] }) => {
     const navigate = useNavigate()
     const songImg = useRef<HTMLImageElement>(null);
 
@@ -95,8 +86,7 @@ const MusicItem = ({ id, name, genders, singers, goal, image, url }: { id: strin
     });
 
     return (
-        // <div className="shadow-md w-1/3 m-auto border-t-[1px] border-gray-100 border-solid">
-        <div className="shadow-md m-auto border-t-[1px] border-gray-100 border-solid">
+        <div className="shadow-md m-auto border-t-[1px] border-gray-100 border-solid w-[420px]">
             <div className="w-full px-4 py-2 flex">
 
                 <div className="h-full flex flex-col items-center justify-center justify-items-center content-center">
@@ -109,43 +99,34 @@ const MusicItem = ({ id, name, genders, singers, goal, image, url }: { id: strin
 
                 <div className="w-full flex flex-col py-1 pl-2">
 
-                    <h1 className="text-xl font-bold">{name}</h1>
+                    {/* TODO implement a tooltip to show full name */}
+                    <h1 className="text-xl font-bold">{name.length > 40 ? `${name.slice(0, 40)}...` : name}</h1>
 
-                    {/* <GoalInput id="" name="" defaultGoal={goal} label={`(${goal})`} size="xl" /> */}
-                    <p className="text-xs">Goal : <span className="text-lg">★★★★★</span>  <span className="text-sm">{goal}</span></p>
+                    <ScoreSong goal={goal} key={id} />
 
                     {/* SINGERS SECTION */}
                     <p className="text-xs link link-animated w-fit">Author Singers/Band : </p>
                     <div className="w-full flex gap-1">
                         {
-                            singers.map(({ name, image }: any) => <BadgeInfo image={image} text={name} defaultImg={singerDefault} />)
+                            singers.map(({ name, image }: any) => <BadgeInfo image={image} text={name} defaultImg={singerDefault} /* color="badge-warning" */ />)
                         }
                     </div>
 
                     {/* GENDERS SECTION */}
                     <div className="w-full flex gap-1 mt-1">
-                        <p className="text-xs link link-animated w-fit">Gender(s) : </p>
+                        <p className=" text-base-content text-xs font-medium link link-animated w-fit">Gender(s) : </p>
                         {
-                            genders.map(({ name, image }: any) => <BadgeInfo image={image} text={name} defaultImg={genderDefault} />)
+                            genders.map(({ name, image }: any) => <BadgeInfo image={image} text={name} defaultImg={genderDefault} color="badge-primary" />)
                         }
                     </div>
 
                     {/* LANGUAGE SECTION */}
                     <div className="w-full flex gap-1 mt-1">
-                        <p className="text-xs link link-animated w-fit">Language(s) : </p>
-
-                        <div className="avatar">
-                            <div className="size-4  mask mask-hexagon">
-                                <img src="https://cdn-icons-png.flaticon.com/256/6070/6070316.png" alt="avatar" />
-                            </div>
-                        </div>
-
+                        <p className="text-base-content text-xs font-medium link link-animated w-fit">Language(s) : </p>
+                        {
+                            languages.map(({ name/* , image */ }: any) => <p className="text-xs">{name}</p>)
+                        }
                     </div>
-
-
-                    {/* <p className="text-[8px] link link-animated w-fit">{id}</p> */}
-                    {/* <p className="text-sm">{description}</p> */}
-
 
                 </div>
 
@@ -167,7 +148,8 @@ const MusicItem = ({ id, name, genders, singers, goal, image, url }: { id: strin
 
 }
 
-function BadgeInfo({ text, image, defaultImg }: { text: string, image: string, defaultImg: string }) {
+function BadgeInfo({ text, image, defaultImg, color = "badge-neutral" }: { text: string, image: string, defaultImg: string, color?: string }) {
+    const [colorBg, _] = useState(color);
     const imgBadfe = useRef<HTMLImageElement>(null)
     useEffect(() => {
         if (image) { imgBadfe.current!.src = getUrlBySrc(image); }
@@ -176,11 +158,60 @@ function BadgeInfo({ text, image, defaultImg }: { text: string, image: string, d
     })
 
     return (
-        <span className="badge badge-neutral badge-sm removing:translate-x-5 removing:opacity-0 transition duration-300 ease-in-out" id="badge-4" >
+        // <span className="badge badge-neutral badge-sm removing:translate-x-5 removing:opacity-0 transition duration-300 ease-in-out" id="badge-4" >
+        <span className={`badge ${colorBg} badge-sm removing:translate-x-5 removing:opacity-0 transition duration-300 ease-in-out`} id="badge-4" >
             <img ref={imgBadfe} alt="John" className="size-4.5 rounded-full" />
             {text}
             {/* <button className="icon-[tabler--circle-check] size-5 min-h-0 px-0" data-remove-element="#badge-4" aria-label="Dismiss Button" ></button> */}
         </span>
+    )
+}
+
+const ScoreSong = ({ goal }: { goal: number,  }) => {
+    const [goalPercent, _] = useState(Math.round(goal / 5 * 100));
+    const progressBarRef = useRef<HTMLDivElement>(null);
+    
+    useEffect(() => {
+        if (goal < 0) { return; }
+        if (progressBarRef.current)  progressBarRef.current.style.width = `${goalPercent}%`;
+        setColorProgressBar(getColorProgressBar());
+    }, []);
+
+
+    const getColorProgressBar = () => {
+        if (goal >= 4.9) return `bg-green-600`;
+        if (goal >= 4.85 && goal < 4.9) return `bg-green-500`;
+        if (goal >= 4.8 && goal < 4.85) return `bg-green-400`;
+        if (goal >= 4.7 && goal < 4.8) return `bg-lime-500`;
+        if (goal >= 4.5 && goal < 4.7) return `bg-teal-500`;
+        if (goal >= 4 && goal < 4.5) return `bg-cyan-500`;
+        if (goal >= 3 && goal < 4) return `bg-yellow-500`;
+        if (goal >= 2 && goal < 3) return `bg-orange-500`;
+        if (goal >= 1 && goal < 2) return `bg-red-500-500`;
+        
+        return 'progress-neutral';
+    }
+    const [colorProgressBar, setColorProgressBar] = useState<string>('bg-neutral-500');
+
+    return (
+        <>
+            {
+                goal >= 0 ?
+                    <div className="w-52">
+                        <div className="mb-1 flex items-end justify-between">
+                            <p className="text-base-content text-xs font-medium">Score 
+                                <span className="text-base-content text-xs font-light"> ({goalPercent}%)</span>
+                            </p>
+                            <span className="text-base-content text-xs font-light">{goal}★</span>
+                        </div>
+                        <div className="progress" role="progressbar" aria-label={`30% Progressbar`}
+                            aria-valuenow={goalPercent} aria-valuemin={0} aria-valuemax={100}>
+                            <div ref={progressBarRef} className={`progress-bar ${colorProgressBar} w-[${goalPercent}%] progress-striped`}></div>
+                        </div>
+                    </div>
+                    : <p className="text-xs font-light">No rating</p>
+            }
+        </>
     )
 }
 
