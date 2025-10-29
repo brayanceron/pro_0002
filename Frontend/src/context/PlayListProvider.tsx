@@ -22,7 +22,8 @@ const PlayListProvider = ({ children }: { children: any }) => {
         // INFO isLoading should start in True
         // TODO validate playlist json has correct format
         if(isLoading || error || !res || !res.ok) return;
-        if(data && data['playlist']) setPlayListState(beforeData => { return { ...beforeData, playList: data['playlist'] } });
+        const newPlayList = data[0]['json_data']['playlist']
+        if(data && newPlayList) setPlayListState(beforeData => { return { ...beforeData, playList: newPlayList } });
     }, [data]);
 
     return (
