@@ -19,20 +19,21 @@ const GET = () => {
         if (newValue > data.count) return; // BUG: it's bad
         setCurrentPage_(newValue)
     }
-    const { data, isLoading, error } = useFetch(`http://localhost:5000/api/song/by/user/${user!.id}?extended=1&page=${currentPage}&limit=30`);
+    const { data, isLoading, error } = useFetch(`http://localhost:5000/api/song/by/user/${user!.id}?extended=1&page=${currentPage}&limit=20`);
 
     return (
         <>
-            <div className="w-auto h-full m-auto mt-15">
+            {/* <div className="w-2/3 mx-auto h-full"> */}
+            <div className="w-auto h-full">
                 {
                     isLoading ? <p>cargando...</p> :
                         error ? <div className="w-1/3 m-auto mt-15"> <AppAlert message={error.message} color="error" icon="x" soft /> </div> :
                             data ?
                                 <>
-                                    <h1 className="text-center text-2xl font-bold mb-3">List of Songs</h1>
+                                    <h1 className="text-center text-2xl font-bold mt-8 mb-3">List of Songs</h1>
 
                                     <Options />
-                                    <div className="flex flex-wrap gap-1 w-full justify-center">
+                                    <div className="flex flex-wrap gap-0 w-full justify-center mt-5 mb-3">
                                     {
                                         data.data.map((item: any) => {
                                             return <MusicItem
@@ -86,6 +87,7 @@ const MusicItem = ({ id, name, genders, singers, languages, goal, image, url }: 
     });
 
     return (
+        // <div className="shadow-md m-auto border-t-[1px] border-gray-100 border-solid w-[360px]">
         <div className="shadow-md m-auto border-t-[1px] border-gray-100 border-solid w-[420px]">
             <div className="w-full px-4 py-2 flex">
 
