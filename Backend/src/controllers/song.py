@@ -177,14 +177,16 @@ def post_song_senses(senses : list, song_id : str, user_id, goal : int = 0):#{
 #}
 
 @validate
-# name : str, description : str, url : str, goal : str, user_id : str, genders, senses, singers, languages, playlists, music_file, image_file, available : bool = 1,
 def put(song_id : str, name : str, description : str, goal : str, user_id : str, genders, senses, singers, languages, playlists, image_file,  available : bool = 1) :#{
-    singers = singers if len(singers) > 0  else ['unknown']
-    languages = languages if len(singers) > 0  else ['unknown']
-    # if (not name or not user_id or not singers or not languages):#{
-    if (not name or not user_id):#{
-        return {'message' : "Insuficient data"}, 400
-    #}
+    # TODO receive arguments way optional to not update all values if not necessary and doing update less demanding (List = [] o None)
+    # TODO get song data to verify what is going to be updated and what not and verify if is convenient to update or not with optional arguments
+    singers = singers if singers and len(singers) > 0  else ['unknown']
+    languages = languages if languages and len(languages) > 0  else ['unknown']
+    # if (not name or not user_id):#{
+    #     return {'message' : "Insuficient data"}, 400
+    # #}
+    
+    if not song_id : return {'message' : "song id not provided"}, 400
 
     if (AUTH_ERROR := auth_put(user_id)) : return AUTH_ERROR
     
@@ -198,8 +200,7 @@ def put(song_id : str, name : str, description : str, goal : str, user_id : str,
         'available': available,
         # 'id' : song_id,
     }
-    
-    if not image : del keys['image'] #keys.pop(3)
+    keys : dict = { k : v for k, v in keys.items() if v} # if not image : del keys['image'] #keys.pop(3)
 
     kstring = [ f" {k} = %({k})s" for k in keys.keys()]
     with db.get_connection() as conn, conn.cursor() as cur :#{
@@ -210,13 +211,8 @@ def put(song_id : str, name : str, description : str, goal : str, user_id : str,
         conn.commit()
 
         # DELETING BEFORE DATA
-        delete_song_(song_id, 'gender', user_id)
-        delete_song_(song_id, 'playlist', user_id)
-        delete_song_(song_id, 'singer', user_id)
-        delete_song_(song_id, 'language', user_id)
-        delete_song_(song_id, 'sense', user_id)
-
-        print("pass****")
+        for i in ['gender', 'playlist', 'singer', 'language', 'sense']:
+            delete_song_(song_id, i, user_id)
 
         # INSERTING NEW DATA
         post_song_(genders, song_id, 'gender', user_id)
