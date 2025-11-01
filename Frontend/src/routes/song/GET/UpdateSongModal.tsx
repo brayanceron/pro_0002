@@ -7,6 +7,14 @@ export const UpdateSongModal = ({ modalId, defaultValues, isChanging }: { modalI
 
     useEffect(() => { setFData(defaultValues); }, [defaultValues])
     
+    /* useEffect(() => {
+        const loadFlyonui = async () => {
+        await import('flyonui/flyonui');
+        window.HSStaticMethods.autoInit();
+        };
+        loadFlyonui();
+    }, [defaultValues]); */
+
     return (
         <>
             <div id={modalId} className="overlay modal overlay-open:opacity-100 hidden" role="dialog" tabIndex={-1}>
@@ -21,7 +29,7 @@ export const UpdateSongModal = ({ modalId, defaultValues, isChanging }: { modalI
                         <div className="modal-body">
 
                             {
-                                isChanging ? <p>Loading song data...</p>
+                                isChanging || !fData ? <p>Loading song data...</p>
                                     : <SongForm values={fData} url={`http://localhost:5000/api/song/${(fData as any).id}`} callback={() => { }} method={Method.PUT} />
                             }
                             {/* <p>{JSON.stringify(defaultValues)}</p> */}
