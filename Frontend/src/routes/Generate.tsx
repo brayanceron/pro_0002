@@ -13,6 +13,7 @@ const Generate = () => {
 
     const { data, isLoading, error } = useFetch(`http://localhost:5000/api/song/get_generated_playlists/${user?.id}`);
     const [indexg, setIndexg] = useState(0);
+    const url ="http://localhost:5000/api/song/generate?save=true"
 
     const cb = ({ isLoading, result, error }: reqProps) => {
         if (error) return alert(error.message);
@@ -31,7 +32,7 @@ const Generate = () => {
                 isLoading ? <p>Loading</p> :
                     error ? <p>Error to load information</p> :
                         <>
-                            <div className="flex justify-center w-full gap-3 mt-10">
+                            <div className="flex justify-center w-full gap-3 mt-12">
                                 {
                                     data.map((item: any, i: number) => {
                                         return (
@@ -46,10 +47,10 @@ const Generate = () => {
                                 }
                             </div>
 
-                            <div className="w-1/3 mx-auto shadow-md p-5">
+                            <div className="w-1/4 mx-auto shadow-md m-8 p-5">
                                 <h1 className="text-center text-2xl font-bold mt-6 mb-4">{ indexg === -1 ? 'Generate' : `Re-Generate` }</h1>
                                 {
-                                    indexg === -1 ? <GenerationForm callback={cb} /> :
+                                    indexg === -1 ? <GenerationForm callback={cb} url={url} /> :
                                         //FIXME fix re-rendering of GenerationForm when changing indexg
                                         // <GenerationForm values={data[indexg]['json_data']['generated_by']} callback={() => { }} /> 
 
@@ -61,6 +62,7 @@ const Generate = () => {
 
                                                     <GenerationForm
                                                         values={data[j]['json_data']['generated_by']}
+                                                        url={url}
                                                         callback={cb}
                                                     // saveArg={j === 0 ? false : true} // this for not save the first and don't show repeated generated playlists
                                                     />

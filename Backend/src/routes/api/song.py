@@ -47,6 +47,9 @@ def put(id : str) :#{
 
     form = dict(request.form)
     form = {k : form.get(k) for k in keys} # extract necesary keys
+    
+    #TODO  validate if keys are empty("[]") or if was not provided(None), 
+    #BUG it is a problem becouse it don't allow to leave empty lists("[]")
     form = {**form, **{k : values.getlist(k) for k in ext_keys}} # extract list keys
     form = {**form, **{k :  [v for v in (form.get(k) or []) if v] for k in ext_keys}} # format(delete empty values) list keys
 

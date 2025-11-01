@@ -3,10 +3,11 @@ import { GoalInput } from '../inputs/GoalInput';
 import AppButton from '../buttons/AppButton';
 import { useFormData } from '../../hooks/useFormData';
 import { usePost, type reqProps } from '../../hooks/usePost';
-import { useContext, /* useEffect, useState */ } from 'react';
+import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
+import { Method } from "../../utils/Methods"
 
-type GenerationFormsFields = { // interface GenerationFormsFields  {
+export type GenerationFormsFields = { // interface GenerationFormsFields  {
     genders?: string[],
     senses?: string[],
     singers?: string[],
@@ -16,6 +17,8 @@ type GenerationFormsFields = { // interface GenerationFormsFields  {
 }
 type ComponentProps = {
     values?: GenerationFormsFields,
+    url : string,
+    method? : Method,
     callback: (params: reqProps) => void,
     saveArg?: boolean,
 }
@@ -24,14 +27,16 @@ const emptyFields = { genders: [], senses: [], singers: [], languages: [], goal:
 const keyThatAreArrays = ['gender', 'sense', 'singer', 'language'];
 
 
-export const GenerationForm = ({ values = emptyFields, callback, saveArg = true }: ComponentProps) => {
+export const GenerationForm = ({ values = emptyFields, url, callback, method = Method.POST, /* saveArg = true */ }: ComponentProps) => {
     const { user } = useContext(AuthContext)
     values.user_id = user?.id || ''
 
     let { data, onChangeMultipleSelect, onChange } = useFormData<GenerationFormsFields>(values, keyThatAreArrays.map(i => i + 's'));
-    const { sendReq, isLoading } = usePost(data, `http://localhost:5000/api/song/generate?save=true'}`, callback);
+    const { sendReq, isLoading } = usePost(data, url, callback, method);
 
-    const onSubmit = () => { sendReq(); }
+    const onSubmit = () => { 
+        sendReq(); 
+    }
 
     /* //TODO (this for later) : this save playlist data only if the form data changes, it for avoid save repeated generated playlists
     const [save, setSave] = useState(false); // it starts in false because in beginning both values and data are equal
