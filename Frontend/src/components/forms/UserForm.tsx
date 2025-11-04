@@ -1,5 +1,5 @@
 import { useFormData } from "../../hooks/useFormData"
-import { usePost } from "../../hooks/usePost"
+import { usePost, type reqProps } from "../../hooks/usePost"
 import { Method } from "../../utils/Methods"
 import AppButton from "../buttons/AppButton"
 import AppInput from "../inputs/AppInput"
@@ -17,15 +17,12 @@ type UserFormFields = {
 }
 const emptyFields = { name: '', gender: 'M', email: '', birthdate: '', password: '', password2: '', image: '', description: '' };
 
-const UserForm = ({ values = emptyFields, method = Method.POST }: { values?: UserFormFields, method?: Method }) => {
+const UserForm = ({ values = emptyFields, url, method = Method.POST, callback }: { values?: UserFormFields, url : string, method?: Method, callback : (params: reqProps) => void }) => {
+    values = values || emptyFields; //
     const { data, formData, onChange, onChangeFile } = useFormData<UserFormFields>(values);
-    const cb = () => { }
 
-    const { sendReq } = usePost(formData, 'http://localhost:5000/api/user', cb)
-    const onSubmit = () => {
-        // console.log(data);
-        sendReq()
-    }
+    const { sendReq, isLoading } = usePost(formData, url, callback, method)
+    const onSubmit = () => { sendReq(); }
 
     return (
         <div className="shadow-md  min-w-[350px]  m-auto border-t-[1px] border-gray-100 border-solid">
@@ -72,7 +69,7 @@ const UserForm = ({ values = emptyFields, method = Method.POST }: { values?: Use
 
                 <AppTextArea value={data.description} id="description" name="description" onChange={onChange} options={{ label: 'Description', icon: 'text-scan-2' }} />
 
-                <AppButton text={method == Method.POST ? "Register" : "Update"} onClick={onSubmit} icon="send" addStyles="my-2" />
+                <AppButton text={method == Method.POST ? "Register" : "Update"} onClick={onSubmit} icon="send" addStyles="my-2" isLoading={isLoading} />
 
             </div>
         </div>
