@@ -12,6 +12,8 @@ import type { reqProps } from "../../hooks/usePost";
 import { Method } from "../../utils/Methods";
 import { useState } from "react";
 import { AppAlert } from "../../components/informational/AppAlert";
+import { Notyf } from "notyf"
+import "../../../node_modules/notyf/notyf.min.css"
 
 const defaultImgs = {
     sense: senseDefault,
@@ -31,13 +33,13 @@ const GETID = ({ entity }: { entity: EntityType }) => {
     const [url, setUrl] = useState(`http://localhost:5000/api/${entity}/${id}`)
     const { data, isLoading, error } = useFetch(url);
 
-    function cb({ res, result, error }: reqProps) {
-        if (error) { return alert(error.message) }
-        if (res?.status == 200) {
+    const notyf = new Notyf();
+    function cb({ res, result, error : errorCb }: reqProps) {
+        if (errorCb) { return notyf.error("Error updating the song!  "+ errorCb.message); }
+        if (res && res.ok){ 
             setUrl(befUrl => befUrl + ' ');
-            return alert(result.message);
+            return notyf.success(result.message); 
         }
-        alert("Operation not completed")
     }
 
     function onClickGetSongs() { navigate(`/song/get/by/${entity}/${id}`); }
