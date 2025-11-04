@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react"
 import SongForm from "../../../components/forms/SongForm"
 import { Method } from "../../../utils/Methods"
+import type { reqProps } from "../../../hooks/usePost"
+import { Notyf } from "notyf"
+import "../../../../node_modules/notyf/notyf.min.css"
 
 export const UpdateSongModal = ({ modalId, defaultValues, isChanging }: { modalId: string, defaultValues: {}, isChanging: boolean }) => {
     const [fData, setFData] = useState(defaultValues);
@@ -15,10 +18,15 @@ export const UpdateSongModal = ({ modalId, defaultValues, isChanging }: { modalI
         loadFlyonui();
     }, [defaultValues]); */
 
+    const notyf = new Notyf();
+    function cb({ result, error, res }: reqProps) { 
+        if (error) { return notyf.error("Error updating the song!  "+ error.message); }
+        if (res && res.ok){ return notyf.success(result.message); }
+    }
     return (
         <>
             <div id={modalId} className="overlay modal overlay-open:opacity-100 hidden" role="dialog" tabIndex={-1}>
-                <div className="modal-dialog overlay-open:opacity-100">
+                <div className="modal-dialog overlay-open:opacity-100 modal-dialog-lg">
                     <div className="modal-content">
                         <div className="modal-header">
                             <h3 className="modal-title">Quick update</h3>
@@ -30,7 +38,7 @@ export const UpdateSongModal = ({ modalId, defaultValues, isChanging }: { modalI
 
                             {
                                 isChanging || !fData ? <p>Loading song data...</p>
-                                    : <SongForm values={fData} url={`http://localhost:5000/api/song/${(fData as any).id}`} callback={() => { }} method={Method.PUT} />
+                                    : <SongForm values={fData} url={`http://localhost:5000/api/song/${(fData as any).id}`} callback={cb} method={Method.PUT} />
                             }
                             {/* <p>{JSON.stringify(defaultValues)}</p> */}
                         </div>
