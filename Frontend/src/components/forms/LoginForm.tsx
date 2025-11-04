@@ -1,21 +1,28 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { useForm } from "../../hooks/useForm"
 // import { usePost } from "../../hooks/usePost";
 import AppButton from "../buttons/AppButton"
 import AppInput from "../inputs/AppInput"
 import { AuthContext } from "../../context/AuthContext";
 
-const LoginForm = () => {
+type LoginFormType ={
+    email : string,
+    password : string,
+}
 
-    const { data, onChange } = useForm({ email: '', password: '' });
+const LoginForm = ({values}:{values? : LoginFormType | null}) => {
+
+    const { data, onChange } = useForm<LoginFormType>(values || { email: '', password: '' });
     const {login} = useContext(AuthContext)!;
     
     // const cb = ()=>{ console.log(result)}
     // const {sendReq, result} = usePost(data, "http://localhost:5000/api/auth/login", cb);
 
-    const onSubmit = () => {
-        login(data.email, data.password);
-        // sendReq();
+    const [isLoading, setIsLoading] = useState(false);
+    const onSubmit = async () => {
+        setIsLoading(true)
+        await login(data.email, data.password);
+        setIsLoading(false)
     }
     return (
         <div className="shadow-md  min-w-[370px] w-[370px] m-auto border-t-[1px] border-gray-100 border-solid">
@@ -30,7 +37,7 @@ const LoginForm = () => {
                     <AppInput value={data.password} id="password" name="password" type="password" onChange={onChange} options={{ label: 'Password', icon: 'lock-password' }} />
                 </div>
 
-                <AppButton text="Login" onClick={onSubmit} icon="send" addStyles="my-8" />
+                <AppButton text="Login" onClick={onSubmit} icon="send" addStyles="my-8" isLoading = {isLoading} />
 
             </div>
         </div>
