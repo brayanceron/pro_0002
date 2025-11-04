@@ -4,6 +4,7 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
     './node_modules/flyonui/dist/js/*.js',
+    "./node_modules/notyf/**/*.js", // '../path/to/notyf/**/*.js',
   ],
   theme: {
     extend: {},
@@ -12,5 +13,8 @@ export default {
     require('flyonui'),
     require('flyonui/plugin'),
   ],
+  flyonui: {
+    vendors: true // Enable vendor-specific CSS generation
+  }
 }
 
