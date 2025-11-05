@@ -7,16 +7,20 @@ import { PaginationComponent } from "../../../components/navigation/PaginationCo
 import { UpdateSongModal } from "./UpdateSongModal";
 import { SongItem } from "./SongItem";
 import type { GenerationFormsFields } from "../../../components/forms/GenerationForm";
+import { useSearchParams } from "react-router";
 
 const emptyFields: GenerationFormsFields = { genders: [], senses: [], singers: [], languages: [], goal: 0, user_id: '' };
 
 const GET = () => {
+    const [searchParams, setSearchParams] = useSearchParams();
     const { user } = useContext(AuthContext)
-    const [currentPage, setCurrentPage_] = useState(1);
+    
+    const [currentPage, setCurrentPage_] = useState(parseInt(searchParams.get('page') || '1')); //  TODO validate page arg are a number const [currentPage, setCurrentPage_] = useState(1);
     const setCurrentPage = (newValue: number) => {
         if (newValue < 1) return;
         if (newValue > data.count) return; // BUG: it's wrong
         setCurrentPage_(newValue)
+        setSearchParams({page : newValue.toString()})
     }
     const { data, isLoading, error } = useFetch(`http://localhost:5000/api/song/by/user/${user!.id}?extended=1&page=${currentPage}&limit=20`);
     const modalId = "basic-modal";
