@@ -8,7 +8,7 @@ from src.utils.load_file import load_file
 from src.controllers.GenericController import GenericController
 from flask import g
 
-from src.controllers.auth_controllers.song_auth_controller import auth_get, auth_get_id, auth_post, auth_post_song_, auth_put, auth_get_by_user
+from src.controllers.auth_controllers.song_auth_controller import auth_get, auth_get_id, auth_post, auth_post_song_, auth_put, auth_delete, auth_get_by_user
 
 db = DatabaseConnection()
 
@@ -18,6 +18,12 @@ def validate(func) :#{
             result, state = func(*args, **kwargs)
             return result, state
         #}
+        except IntegrityError as err :#{
+            print(err)
+            print(type(err))
+            msg = "This item is associated with other records; delete those records first to continue."
+            return {'message' : msg}, 400 
+        #}
         except DatabaseError as err :#{
             print(err)
             print(type(err))
@@ -26,6 +32,8 @@ def validate(func) :#{
         except Exception as err:#{
             print(err)
             print(type(err))
+            import traceback
+            traceback.print_exc()
             return {"message" : "Some went bad :("}, 500
         #}
     #}
@@ -93,7 +101,9 @@ def get_id(id, extended = False) :#{
         """, [id])
 
         row = cur.fetchone()
-        if cur.rowcount == 0 : return {'message' : 'data not found'}, 404
+        # TODO verify in all controllers if <row> is None, 
+        # TODO review what happend when <>cur.fetchone()</> is before that <>cur.rowcount</> or the opposite
+        if not row or cur.rowcount == 0 : return {'message' : 'data not found'}, 404
         
         song = {
             'id': row[0],
@@ -227,6 +237,7 @@ def put(song_id : str, name : str, description : str, goal : str, user_id : str,
     # TODO update {genders=}  {senses=} {singers=} {languages=} {playlists=} of a song
 #}
 
+#NOTE this function doesn't validate user permmission, it must validate before
 def delete_song_(song_id : str, entity_name : str, user_id : str) :#{
     with db.get_connection() as conn, conn.cursor() as cur :#{
         # TODO validate query doesn't reach exception
@@ -234,6 +245,32 @@ def delete_song_(song_id : str, entity_name : str, user_id : str) :#{
         print(q)
         cur.execute(q, [song_id])
         conn.commit()
+    #}
+#}
+
+@validate
+def delete(song_id : str) :#{
+    print("Deleting...")
+    if not song_id : return {'message' : "song id not provided"}, 400
+    song_data, status = get_id(song_id)
+    
+    if status != 200 : return song_data, status # if (song_data := get_id(song_id))[1] != 200 : return song_data
+    if (AUTH_ERROR := auth_delete(song_data.get('user_id'))) : return AUTH_ERROR
+    
+    with db.get_connection() as conn, conn.cursor() as cur :#{
+        for i in ['gender', 'playlist', 'singer', 'language', 'sense']:
+            delete_song_(song_id, i, song_data.get('user_id'))
+            # delete_song_(song_id, i, user_id)
+            
+        cur.execute(f"delete from song where id = %s", [song_id])
+        print(f"{cur.rowcount=}")
+        if(cur.rowcount == 0) : return {'message' : 'error, data not found'} , 404
+        r1 = cur.fetchone()
+        # r = 
+        print(f"{r1=}")
+        conn.commit()
+        
+        return {'message' : "song deleted successesfully"}, 200;
     #}
 #}
 
