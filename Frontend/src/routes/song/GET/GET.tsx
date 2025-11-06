@@ -6,6 +6,7 @@ import { AppAlert } from "../../../components/informational/AppAlert";
 import { PaginationComponent } from "../../../components/navigation/PaginationComponent";
 import { UpdateSongModal } from "./UpdateSongModal";
 import { SongItem } from "./SongItem";
+import { DeleteSongModal } from "./DeleteSongModal";
 import type { GenerationFormsFields } from "../../../components/forms/GenerationForm";
 import { useSearchParams } from "react-router";
 
@@ -22,8 +23,11 @@ const GET = () => {
         setCurrentPage_(newValue)
         setSearchParams({page : newValue.toString()})
     }
-    const { data, isLoading, error } = useFetch(`http://localhost:5000/api/song/by/user/${user!.id}?extended=1&page=${currentPage}&limit=20`);
-    const modalId = "basic-modal";
+    const [url, setUrl] = useState(`http://localhost:5000/api/song/by/user/${user!.id}?extended=1&page=${currentPage}&limit=20`);
+    const { data, isLoading, error } = useFetch(url);
+
+    const editModalId = "basic-modal";
+    const deleteModalId = "deleteModal";
     const [currentSong, setCurrentSong] = useState<any>(emptyFields);
     const [isChanging, setIsChanging] = useState(false);
     
@@ -45,6 +49,7 @@ const GET = () => {
         
     }
     useEffect(() => { if (!currentSong) return; setIsChanging(false); }, [currentSong]);
+    const reloadPage = () => { setUrl(baseUrl => baseUrl + ' '); }
 
     return (
         <>
@@ -56,7 +61,8 @@ const GET = () => {
                             data ?
                                 <>
                                     <h1 className="text-center text-2xl font-bold mt-8 mb-3">List of Songs</h1>
-                                    <UpdateSongModal modalId={modalId} defaultValues={currentSong} isChanging={isChanging}/>
+                                    <UpdateSongModal modalId={editModalId} defaultValues={currentSong} isChanging={isChanging} reload={reloadPage}/>
+                                    <DeleteSongModal modalId="deleteModal" songId={currentSong.id} songName={currentSong.name}  /* isChanging={isChanging} */ reload={reloadPage}/>
 
                                     <Options />
                                     <div className="flex flex-wrap gap-0 w-full justify-center mt-5 mb-3">
@@ -75,7 +81,8 @@ const GET = () => {
                                                 key={index} // key={item.id}
                                                 index={index}
                                                 setNewCurrentSongIndex={setNewCurrentSongIndex}
-                                                modalId={modalId}
+                                                editModalId={editModalId}
+                                                deleteModalId={deleteModalId}
                                             />
                                         })
                                     }
