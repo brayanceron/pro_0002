@@ -5,7 +5,7 @@ import type { reqProps } from "../../../hooks/usePost"
 import { Notyf } from "notyf"
 import "../../../../node_modules/notyf/notyf.min.css"
 
-export const UpdateSongModal = ({ modalId, defaultValues, isChanging }: { modalId: string, defaultValues: {}, isChanging: boolean }) => {
+export const UpdateSongModal = ({ modalId, defaultValues, isChanging, reload }: { modalId: string, defaultValues: {}, isChanging: boolean, reload : () => void }) => {
     const [fData, setFData] = useState(defaultValues);
 
     useEffect(() => { setFData(defaultValues); }, [defaultValues])
@@ -21,7 +21,10 @@ export const UpdateSongModal = ({ modalId, defaultValues, isChanging }: { modalI
     const notyf = new Notyf();
     function cb({ result, error, res }: reqProps) { 
         if (error) { return notyf.error("Error updating the song!  "+ error.message); }
-        if (res && res.ok){ return notyf.success(result.message); }
+        if (res && res.ok){ 
+            reload()
+            return notyf.success(result.message);
+        }
     }
     return (
         <>
