@@ -66,6 +66,11 @@ def put(id : str) :#{
     # return src.controllers.song.put(id, **form, image_file = image_file)
 #}
 
+@song_router.route('/<id>', methods = ['DELETE'])
+def delete(id : str) :#{
+    print("HEre")
+    return src.controllers.song.delete(id)
+#}
 
 @song_router.route('/by/user/<user_id>')
 def get_by_user(user_id) :#{
