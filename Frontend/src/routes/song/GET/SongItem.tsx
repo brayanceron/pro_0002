@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { getImageUrlByYTVideo, getUrlBySrc, isValidYouTubeUrl } from "../../../utils/urls";
+import { OpenModal } from "./DeleteSongModal";
 import songDefault from "../../../assets/default/song.png";
 import singerDefault from "../../../assets/default/singer.jpg";
 import genderDefault from "../../../assets/default/gender.png";
@@ -19,11 +20,11 @@ type SongItemProps = {
     
     index: number,
     setNewCurrentSongIndex: (newIndex: number) => void,
-    modalId: string,
-    
+    editModalId: string,
+    deleteModalId: string,
 };
 
-const SongItem = ({ id, name,  genders, singers, languages, goal, image, url,  index, setNewCurrentSongIndex, modalId }: SongItemProps) => {
+const SongItem = ({ id, name,  genders, singers, languages, goal, image, url,  index, setNewCurrentSongIndex, editModalId, deleteModalId }: SongItemProps) => {
     const songImg = useRef<HTMLImageElement>(null);
     const navigate = useNavigate()
     const onClickGetId = () => { navigate(`/song/get/${id}`); }
@@ -35,6 +36,10 @@ const SongItem = ({ id, name,  genders, singers, languages, goal, image, url,  i
     });
 
     const onClickBtnEdit = () => { setNewCurrentSongIndex(index);};
+    const onClickBtnDelete = () => { 
+        setNewCurrentSongIndex(index);
+        OpenModal(deleteModalId);
+    };
 
     return (
         // <div className="shadow-md m-auto border-t-[1px] border-gray-100 border-solid w-[360px]">
@@ -89,12 +94,11 @@ const SongItem = ({ id, name,  genders, singers, languages, goal, image, url,  i
                         <span className="icon-[tabler--external-link]"></span>
                     </span>
         
-                    <span className="badge badge-neutral size-6 rounded-full p-0 mr-1">
+                    <span onClick={onClickBtnDelete} className="badge badge-neutral size-6 rounded-full p-0 mr-1">
                         <span className="icon-[tabler--trash]"></span>
                     </span>
         
-                    {/* <span onClick={onClickBtnEdit} className="badge badge-neutral size-6 rounded-full p-0" data-overlay="#basic-modal"> */}
-                    <span onClick={onClickBtnEdit} className="badge badge-neutral size-6 rounded-full p-0" data-overlay={`#${modalId}`}>
+                    <span onClick={onClickBtnEdit} className="badge badge-neutral size-6 rounded-full p-0" data-overlay={`#${editModalId}`}>
                         <span className="icon-[tabler--edit]"></span>
                     </span>
                 </div>
