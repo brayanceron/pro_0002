@@ -16,11 +16,10 @@ type ComponentProps ={
     modalId: string,
     songName: string,
     songId : string,
-    // isChanging? : boolean,
-    reload : () => void
+    callback : () => void
 }
 
-export const DeleteSongModal = ({ modalId, songId, songName, /* isChanging, */reload }: ComponentProps) => {
+export const DeleteSongModal = ({ modalId, songId, songName, callback }: ComponentProps) => {
 
     const closeModalHandler = () => { CloseModal(modalId,/* songId */); }
     const [isLoading, setIsLoading] = useState(false)
@@ -37,7 +36,7 @@ export const DeleteSongModal = ({ modalId, songId, songName, /* isChanging, */re
         const data = await res.json();
         if (res.ok){ 
             notyf.success(data.message); 
-            reload()
+            callback()
         }
         else { notyf.error(data.message);}
         CloseModal(modalId, /* songId */)
