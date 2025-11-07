@@ -1,4 +1,4 @@
-import { useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import useFetch from '../../hooks/useFetch';
 import SongForm from '../../components/forms/SongForm';
 import type { reqProps } from '../../hooks/usePost';
@@ -9,6 +9,7 @@ import defaultImgs from '../../assets/default/song.png';
 import { AppAlert } from '../../components/informational/AppAlert';
 import { Notyf } from "notyf"
 import "../../../node_modules/notyf/notyf.min.css"
+import { DeleteSongModal, OpenModal } from './GET/DeleteSongModal';
 
 
 const GETID = () => {
@@ -47,7 +48,14 @@ const GETID = () => {
         console.log(fData)
     }, [data, isLoading, error])
 
-
+    const deleteModalId = "deleteModalId2";
+    const navigate = useNavigate();
+    const onClickBtnDelete = () => { OpenModal(deleteModalId); };
+    const deleteCb = () => { 
+        navigate('/song/get');
+        //TODO this becouse there is error with modal. Modal doesn´t close well, so it reload page
+        navigate(0);// navigate(-1) //FIXME fix it later
+    }
     return (
         <div className='mt-15'>
             {
@@ -61,12 +69,17 @@ const GETID = () => {
                                     <h1 className="text-4xl text-center mt-2">{fData.name}</h1>
                                     <p className="text-xs text-center">{fData.id}</p>
                                     <p className="text-xs text-center text-gray-400">(Song)</p>
+                                    <div className='w-fit mx-auto mt-3'>
+                                        <span onClick={onClickBtnDelete} className="badge badge-neutral size-6 rounded-full p-0">
+                                            <span className="icon-[tabler--trash]"></span>
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <div className='w-1/4 mt-5 mx-auto'>
                                     <SongForm values={fData} url={`http://localhost:5000/api/song/${song_id}`} callback={cb} method={Method.PUT} />
                                 </div>
-
+                                <DeleteSongModal modalId={deleteModalId} songId={fData.id} songName={fData.name} callback={ deleteCb }/>
                             </>
                             : <p>Formating...</p>
             }
