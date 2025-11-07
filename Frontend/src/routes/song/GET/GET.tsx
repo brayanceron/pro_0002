@@ -26,7 +26,7 @@ const GET = () => {
     const [url, setUrl] = useState(`http://localhost:5000/api/song/by/user/${user!.id}?extended=1&page=${currentPage}&limit=20`);
     const { data, isLoading, error } = useFetch(url);
 
-    const editModalId = "basic-modal";
+    const editModalId = "editModal";
     const deleteModalId = "deleteModal";
     const [currentSong, setCurrentSong] = useState<any>(emptyFields);
     const [isChanging, setIsChanging] = useState(false);
@@ -49,6 +49,7 @@ const GET = () => {
         
     }
     useEffect(() => { if (!currentSong) return; setIsChanging(false); }, [currentSong]);
+    useEffect(()=>{ setUrl(`http://localhost:5000/api/song/by/user/${user!.id}?extended=1&page=${currentPage}&limit=20`); },[currentPage])
     const reloadPage = () => { setUrl(baseUrl => baseUrl + ' '); }
 
     return (
@@ -62,7 +63,7 @@ const GET = () => {
                                 <>
                                     <h1 className="text-center text-2xl font-bold mt-8 mb-3">List of Songs</h1>
                                     <UpdateSongModal modalId={editModalId} defaultValues={currentSong} isChanging={isChanging} reload={reloadPage}/>
-                                    <DeleteSongModal modalId="deleteModal" songId={currentSong.id} songName={currentSong.name}  /* isChanging={isChanging} */ reload={reloadPage}/>
+                                    <DeleteSongModal modalId={deleteModalId} songId={currentSong.id} songName={currentSong.name} callback={reloadPage}/>
 
                                     <Options />
                                     <div className="flex flex-wrap gap-0 w-full justify-center mt-5 mb-3">
