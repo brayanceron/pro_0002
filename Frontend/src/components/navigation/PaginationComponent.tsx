@@ -1,8 +1,7 @@
 
 function PaginationComponent({ limit, page, totalResults, numbersOfOptions = 5, setPage }: { limit: number, page: number, totalResults: number, numbersOfOptions: number, setPage: (newValue: number) => void }) {
     //TODO validate numberOfOptions must be greater than 2
-    
-    const tabs = totalResults / limit; //TODO validate when tabs is small, 1,2 or 3 tabs
+    const tabs = Math.ceil(totalResults / limit); //TODO validate when tabs is small, 1,2 or 3 tabs
     const listTabs = [];
     for (let i = -(numbersOfOptions - 1); i <= numbersOfOptions; i++) {
         const tabToCreate = page + i;
@@ -12,6 +11,7 @@ function PaginationComponent({ limit, page, totalResults, numbersOfOptions = 5, 
     }
     listTabs.sort((a, b) => a - b) // it sort tabs
 
+    if (totalResults < limit) return <></>
     return (
         <nav className="flex items-center gap-x-1">
             <button type="button" onClick={_ => setPage(page - 1)} className="btn btn-soft max-sm:btn-square">
@@ -65,7 +65,6 @@ const SidaPage = ({ page, setPage }: { page: number, setPage: (newValue: number)
                     <span className="icon-[tabler--dots] size-5 group-hover:hidden"></span>
                     <span className="icon-[tabler--chevrons-left] hidden size-5 flex-shrink-0 group-hover:block"></span>
                     <span className="tooltip-content tooltip-shown:opacity-100 tooltip-shown:visible" role="tooltip">
-                        {/* <span className="tooltip-body">Firsts pages</span> */}
                         <span className="tooltip-body">{page} pages</span>
                     </span>
                 </button>
