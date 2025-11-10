@@ -276,6 +276,62 @@ def delete(song_id : str) :#{
 
 # ====================================================================================================
 
+@validate
+def search(pattern : str, page : str = '1', limit : str = '10', extended = 0) :#{
+    if not pattern : return {'message' : "pattern not provided"}, 400;
+    user_id = ''
+    
+    page, limit, msg = format_pagination_parameters(page, limit)
+    if (not page or not limit) : return {'message' : msg}, 400;
+    offset = (page - 1) * limit
+
+    from src.controllers.auth import whoami
+    data, st = whoami()
+    if (st != 200) : return {'message' : "forbidden"}, 403;
+    user_id = data['id']
+    
+    with db.get_connection() as conn, conn.cursor() as cur :#{
+        cur.execute(f"""
+                    select id, name, description, url, goal, image, user_id from song 
+                    where user_id = %s and name like(%s) {"limit %s offset %s" if limit != -1 else ''}
+                    """, [user_id, f"%{pattern}%", limit, offset][0:None if limit != -1 else 2])
+        rows = cur.fetchall()
+        if not rows or cur.rowcount == 0 : return {'message' : "data not found"}, 404
+        songs = []
+        for row in rows :#{
+            songs.append({
+                'id' : row[0],
+                'name' : row[1],
+                'description' : row[2],
+                'url' : row[3],
+                'goal' : float( row[4]),
+                'image' : row[5],
+                'user_id' : row[6],
+            })
+        #}
+        
+        if(AUTH_ERROR := auth_get_id(songs[0]['user_id'])): return AUTH_ERROR
+
+        count_srch, st = count_search(pattern, user_id)
+        if st != 200 : return count_srch, st
+        
+        if (extended and (res := extend(songs))[1] == 200) : return {'data' : res[0], 'count' : count_srch.get('count')}, res[1];
+        
+        return {'data' : songs, 'count' : count_srch.get('count')}, 200;
+    #}
+#}
+
+@validate
+def count_search(pattern : str, user_id : str) :#{
+    with db.get_connection() as conn, conn.cursor() as cur:#{
+        cur.execute("select count(*) from song where user_id = %s and name like(%s)", [user_id, f"%{pattern}%"])
+        row = cur.fetchone()
+        count = row[0]
+        return {'count' : count}, 200
+    #}
+#}
+
+
 def extend(songs : list) :#{
 
     with db.get_connection() as conn, conn.cursor() as cur :#{
@@ -617,7 +673,7 @@ def get_generated_playlists(user_id : str) :#{
 #}
 
 @validate
-def count(user_id : str) :#{
+def count(user_id : str) :#{ #TODO change name to count_songs
     with db.get_connection() as conn, conn.cursor() as cur :#{
         # TODO: validat authorization
         cur.execute("select count(*) from song where user_id = %s",[user_id]);

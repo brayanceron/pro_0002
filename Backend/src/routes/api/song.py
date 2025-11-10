@@ -72,6 +72,14 @@ def delete(id : str) :#{
     return src.controllers.song.delete(id)
 #}
 
+@song_router.route('/search/<pattern>')
+def search(pattern : str) :#{
+    extended = request.args.get('extended')
+    page = request.args.get('page', 1)
+    limit = request.args.get('limit', 10)
+    return src.controllers.song.search(pattern, page, limit, extended)
+#}
+
 @song_router.route('/by/user/<user_id>')
 def get_by_user(user_id) :#{
     page = request.args.get('page', 1)
