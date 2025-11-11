@@ -27,7 +27,7 @@ def auth_post(user_id_of_item : str) :#{
 
 def auth_put(user_id_of_item : str) :#{
     user_data, _ = whoami() # data token is validated in auth middleware
-
+    print(f"AUTH PUT { user_data['id']=} = {user_id_of_item=}")
     if user_data['id'] == 'admin' : return None
     if (user_id_of_item != user_data['id']) : return {"message" : "Forbiden"}, 403
 #}
@@ -59,7 +59,7 @@ def auth_get_by_user(user_id_of_item : str) :#{
 
 def auth_post_song_(user_id : str, entity_id : str, entity_name) :#{
     conn = db.get_connection() # conn = get_connection()
-    
+    #TODO use context manager for db connection
     try :#{
         cur = conn.cursor();
         cur.execute("""select user_id from %s  where id = %s;""", [entity_name, entity_id]);
