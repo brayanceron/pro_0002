@@ -1,10 +1,12 @@
 from flask import Blueprint, request
+from src.db.database import DatabaseConnection
 import src.controllers.song
 import src.controllers.auth
 
 keys : list = ['name', 'description', 'url', 'goal', 'user_id', 'available', 'duration' ]
 ext_keys : list = ['genders', 'senses', 'singers', 'languages', 'playlists']
 
+db = DatabaseConnection()
 song_router = Blueprint('song_blueprint', __name__)
 
 @song_router.route('/')
@@ -16,7 +18,10 @@ def get() :#{
 
 @song_router.route('/<id>')
 def get_id(id) :#{
-    return src.controllers.song.get_id(id, request.args.get('extended', False))
+    #INFO it becouse this endpoint is used for others routes, so it exhausted pool
+    with db.get_connection() as conn :#{
+        return src.controllers.song.get_id(id, conn, request.args.get('extended', False))
+    #}
 #}
 
 @song_router.route('/', methods = ['POST'])
@@ -59,16 +64,11 @@ def put(id : str) :#{
 
     image_file = request.files.get('image')
 
-    # print(form)
-    result = src.controllers.song.put(id, **form, image_file = image_file)
-    print(f"{result=}")
-    return result
-    # return src.controllers.song.put(id, **form, image_file = image_file)
+    return src.controllers.song.put(id, **form, image_file = image_file)
 #}
 
 @song_router.route('/<id>', methods = ['DELETE'])
 def delete(id : str) :#{
-    print("HEre")
     return src.controllers.song.delete(id)
 #}
 
@@ -118,7 +118,7 @@ def generate() :#{
     ks = ['genders', 'senses', 'singers', 'languages']
     form = dict(request.get_json())
     form = {k : form.get(k, [] if k in ks else 0 ) for k in ['goal', 'user_id', *ks]} # extract necesary keys
-    # print(form)
+    
     save = request.args.get('save', False) # save = save if (save := request.args.get('save', None)) else None  
     return src.controllers.song.generate(**form, save = save)
 #}
@@ -136,4 +136,16 @@ def auth_middleware() :#{
 # @song_router.teardown_app_request
 # def teardown_db(err) :#{
 #     src.controllers.song.teardown_db()
+# #}
+
+# def conection(func) :#{
+#         def wrap(*args, **kargs) :#{
+#             conn = "IT IS CONNECTION"
+#             return func(conn, *args, **kargs)
+#             # func(*args, **kargs, conn)
+#             # func(*[*args, conn], **kargs)
+#             # return func(*[*args, conn], **{**kargs, 'conn' : conn})
+#         #}
+#         return wrap
+#     #}
 # #}
