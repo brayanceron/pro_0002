@@ -1,10 +1,8 @@
 from mysql.connector.errors import IntegrityError, DatabaseError
-# from Backend.src.controllers.auth import extract_token
 from src.utils.load_file import load_file
-from src.db.database import DatabaseConnection # ,get_connection
+from src.db.database import DatabaseConnection
 from src.models.GenericModel import GenericModel
 from src.controllers.auth_controllers.generic_auth_controller import auth_get, auth_get_id, auth_put, auth_delete, auth_get_by_user
-# import werkzeug.exceptions
 
 class GenericController :#{
     def __init__(self, entity : str):#{
@@ -68,9 +66,20 @@ class GenericController :#{
 
     @validate
     def get_id(self, id : str) :#{
-        query =f"select {self.cols} from {self.entity} where id = %s"
+        with self.db.get_connection() as conn :#{
+            return self.get_id_impl(id, conn)
+        #}
+    #}
+    
+    # @validate #TODO verify if activate decorator
+    def get_id_with_conn(self, id : str, conn) :#{
+        return self.get_id_impl(id, conn)
+    #}
+    
+    def get_id_impl(self, id : str, conn) :#{
+        query = f"select {self.cols} from {self.entity} where id = %s"
 
-        with self.db.get_connection() as conn, conn.cursor() as cursor :#{
+        with conn.cursor() as cursor :#{
             cursor.execute(query, [id])
 
             row = cursor.fetchone()
@@ -101,7 +110,7 @@ class GenericController :#{
         old_entity, status = self.get_id(id)
         if(status != 200) : return old_entity, status
         if (AUTH_ERROR := auth_put(old_entity['user_id'])) : return AUTH_ERROR # if (AUTH_ERR := auth_put(id)) : return AUTH_ERR
-        new_entity.image = load_file(image_file, prefix="gender_image", sub_folders=[new_entity.user_id]) or ''
+        new_entity.image = load_file(image_file, prefix="entity_image", sub_folders=[new_entity.user_id]) or ''
 
         keys, dict_data = new_entity.get_data_struct()
         if (not new_entity.image) :#{ #This for not delete image if it is not provided
