@@ -5,8 +5,6 @@ from uuid import uuid4
 from json import dumps, loads
 from datetime import datetime
 from src.utils.load_file import load_file
-from src.controllers.GenericController import GenericController
-from flask import g
 
 from src.controllers.auth_controllers.song_auth_controller import auth_get, auth_get_id, auth_post, auth_post_song_, auth_put, auth_delete, auth_get_by_user
 
@@ -83,19 +81,19 @@ def get(page : str = '1', limit : str = '10', extended = False) :#{
             })
         #}
 
-        count_sng, status = count("%")
+        count_sng, status = count("%", conn = conn)
         if status != 200 : return count_sng, status
 
-        if (extended and (res := extend(songs))[1] == 200) : return {'data' : res[0], 'count' : count_sng.get('count')}, 200;
+        if (extended and (res := extend(songs, conn))[1] == 200) : return {'data' : res[0], 'count' : count_sng.get('count')}, 200;
         return {'data' : songs, 'count' : count_sng.get('count')}, 200
     #}
 #}
     
 @validate
-def get_id(id, extended = False) :#{
+def get_id(id, conn, extended = False,) :#{
     if not id : return {'message' : "song id not provided"}, 400
 
-    with db.get_connection() as conn, conn.cursor() as cur :#{
+    with conn.cursor() as cur :#{
         cur.execute("""
             select id, name, description, url, goal, image, user_id from song where id = %s
         """, [id])
@@ -117,8 +115,7 @@ def get_id(id, extended = False) :#{
 
         if(AUTH_ERROR := auth_get_id(song['user_id'])): return AUTH_ERROR
 
-        # if (extended and (res := extend([song]))[1] == 200) : return res;
-        if (extended and (res := extend([song]))[1] == 200) : return res[0][0], res[1];
+        if (extended and (res := extend([song], conn))[1] == 200) : return res[0][0], res[1];
         return song, 200
     #}
 #}
@@ -129,7 +126,6 @@ def get_id(id, extended = False) :#{
 def post(name : str, description : str, url : str, goal : str, user_id : str, genders, senses, singers, languages, playlists, music_file, image_file, available : bool = 1, ) :#{
     url = url if url else load_file(music_file) if music_file else None
 
-    print(f"(not {name} or not {url} or not {user_id} or not {singers} or not {languages})")
     singers = singers or ['unknown']
     languages = languages or ['unknown']
     if (not name or not url or not user_id):#{
@@ -143,46 +139,35 @@ def post(name : str, description : str, url : str, goal : str, user_id : str, ge
         id = uuid4().hex
         cur.execute("""insert into song(id, name, description, url, goal, image, user_id, available) 
                     values( %s, %s, %s, %s, %s, %s, %s, %s )""", (id, name, description, url, goal, image, user_id, available,));
+
+        post_song_(genders, id, 'gender', user_id, conn)
+        post_song_(playlists, id, 'playlist', user_id, conn)
+        post_song_(singers, id, 'singer', user_id, conn)
+        post_song_(languages, id, 'language', user_id, conn)
+        post_song_senses(senses, id, user_id, goal, conn=conn)
+
         conn.commit()
-
-        post_song_(genders, id, 'gender', user_id)
-        post_song_(playlists, id, 'playlist', user_id)
-        post_song_(singers, id, 'singer', user_id)
-        post_song_(languages, id, 'language', user_id)
-        post_song_senses(senses, id, user_id, goal)
-
         return {'message' : "song registered", 'id' : id}, 200
     #}
 #}
 
 # @validate # INFO if validate is disabled this function cut all operation(POST/PUT)
-def post_song_(entity : list[str], song_id : str, entity_name : str, user_id : str) :#{
+def post_song_(entity : list[str], song_id : str, entity_name : str, user_id : str, conn) :#{
     # TODO verify if already exist repeating rows with same data
-    print("------------------------")
-    print(f"{entity_name=}")
-    print(f"{entity=}")
-    with db.get_connection() as conn, conn.cursor() as cur :#{
+    with conn.cursor() as cur :#{
         for item in entity :#{
-            auth_post_song_(user_id = user_id, entity_id = item, entity_name = entity_name) #FIXME this doesn't anything
-            # TODO validate query doesn't reach exception
-            query = f" insert into song_{entity_name}(song_id, {entity_name}_id) values('{song_id}', '{item}'); ";
-            print(f"{query=}")
-            cur.execute(query);
-            print("oki")
+            auth_post_song_(user_id = user_id, entity_id = item, entity_name = entity_name, conn = conn)
+            cur.execute(f"insert into song_{entity_name}(song_id, {entity_name}_id) values('{song_id}', '{item}')"); # TODO validate query doesn't reach exception
         #}
-        conn.commit()
-        print("doki")
     #}
 #}
 
-@validate
-def post_song_senses(senses : list, song_id : str, user_id, goal : int = 0):#{
-    with db.get_connection() as conn, conn.cursor() as cur :#{
+def post_song_senses(senses : list, song_id : str, user_id, goal : int = 0, conn = None):#{
+    with conn.cursor() as cur :#{
         for sense in senses:#{
             query = f"insert into song_sense(song_id, sense_id, goal, user_id) values('{song_id}','{sense}','{goal}','{user_id}')"
             cur.execute(query)
         #}
-        conn.commit()
     #}
 #}
 
@@ -217,32 +202,29 @@ def put(song_id : str, name : str, description : str, goal : str, user_id : str,
         # cur.execute("begin;")
         cur.execute(f"""update song set {" , ".join(kstring)} 
                     where id = %(id)s;""", {**keys, 'id' : song_id})
-        print(cur.rowcount)
-        conn.commit()
 
         # DELETING BEFORE DATA
         for i in ['gender', 'playlist', 'singer', 'language', 'sense']:
-            delete_song_(song_id, i, user_id)
+            delete_song_(song_id, i, user_id, conn)
 
         # INSERTING NEW DATA
-        post_song_(genders, song_id, 'gender', user_id)
-        post_song_(playlists, song_id, 'playlist', user_id)
-        post_song_(singers, song_id, 'singer', user_id)
-        post_song_(languages, song_id, 'language', user_id)
-        post_song_senses(senses, song_id, user_id, goal)
-        print("OKIII")
+        post_song_(genders, song_id, 'gender', user_id, conn)
+        post_song_(playlists, song_id, 'playlist', user_id, conn)
+        post_song_(singers, song_id, 'singer', user_id, conn)
+        post_song_(languages, song_id, 'language', user_id, conn)
+        post_song_senses(senses, song_id, user_id, goal, conn=conn)
 
+        conn.commit()
         return {"message" : "song update successfully"}, 200
     #}
     # TODO update {genders=}  {senses=} {singers=} {languages=} {playlists=} of a song
 #}
 
 #NOTE this function doesn't validate user permmission, it must validate before
-def delete_song_(song_id : str, entity_name : str, user_id : str) :#{
-    with db.get_connection() as conn, conn.cursor() as cur :#{
+def delete_song_(song_id : str, entity_name : str, user_id : str, conn) :#{
+    with conn.cursor() as cur :#{
         # TODO validate query doesn't reach exception
         q = f"delete from song_{entity_name} where song_id = %s"
-        print(q)
         cur.execute(q, [song_id])
         conn.commit()
     #}
@@ -250,23 +232,20 @@ def delete_song_(song_id : str, entity_name : str, user_id : str) :#{
 
 @validate
 def delete(song_id : str) :#{
-    print("Deleting...")
     if not song_id : return {'message' : "song id not provided"}, 400
-    song_data, status = get_id(song_id)
-    
-    if status != 200 : return song_data, status # if (song_data := get_id(song_id))[1] != 200 : return song_data
-    if (AUTH_ERROR := auth_delete(song_data.get('user_id'))) : return AUTH_ERROR
     
     with db.get_connection() as conn, conn.cursor() as cur :#{
+        song_data, status = get_id(song_id, conn)
+    
+        if status != 200 : return song_data, status
+        if (AUTH_ERROR := auth_delete(song_data.get('user_id'))) : return AUTH_ERROR
+        
         for i in ['gender', 'playlist', 'singer', 'language', 'sense']:
-            delete_song_(song_id, i, song_data.get('user_id'))
-            # delete_song_(song_id, i, user_id)
+            delete_song_(song_id, i, song_data.get('user_id'), conn)
             
         cur.execute(f"delete from song where id = %s", [song_id])
-        print(f"{cur.rowcount=}")
         if(cur.rowcount == 0) : return {'message' : 'error, data not found'} , 404
         r1 = cur.fetchone()
-        # r = 
         print(f"{r1=}")
         conn.commit()
         
@@ -312,18 +291,17 @@ def search(pattern : str, page : str = '1', limit : str = '10', extended = 0) :#
         
         if(AUTH_ERROR := auth_get_id(songs[0]['user_id'])): return AUTH_ERROR
 
-        count_srch, st = count_search(pattern, user_id)
+        count_srch, st = count_search(pattern, user_id, conn)
         if st != 200 : return count_srch, st
         
-        if (extended and (res := extend(songs))[1] == 200) : return {'data' : res[0], 'count' : count_srch.get('count')}, res[1];
+        if (extended and (res := extend(songs, conn))[1] == 200) : return {'data' : res[0], 'count' : count_srch.get('count')}, res[1];
         
         return {'data' : songs, 'count' : count_srch.get('count')}, 200;
     #}
 #}
 
-@validate
-def count_search(pattern : str, user_id : str) :#{
-    with db.get_connection() as conn, conn.cursor() as cur:#{
+def count_search(pattern : str, user_id : str, conn) :#{
+    with conn.cursor() as cur :#{
         cur.execute("select count(*) from song where user_id = %s and name like(%s)", [user_id, f"%{pattern}%"])
         row = cur.fetchone()
         count = row[0]
@@ -332,9 +310,9 @@ def count_search(pattern : str, user_id : str) :#{
 #}
 
 
-def extend(songs : list) :#{
+def extend(songs : list, conn) :#{
 
-    with db.get_connection() as conn, conn.cursor() as cur :#{
+    with conn.cursor() as cur :#{
         for song in songs :#{
             keys = ['gender','language','sense','singer', 'playlist']
             dic_list : dict = { k : [] for k in keys }
@@ -345,15 +323,7 @@ def extend(songs : list) :#{
                 for result_id in results_ids :#{
                     res, status = [], 500
                     ctrl = GenericController(k)
-                    res, status = ctrl.get_id(result_id)
-                    """ match (k) :#{
-                        case 'gender' : res, status = src.routes.api.gender.get_id(result_id)
-                        case 'language' : res, status = src.routes.api.language.get_id(result_id)
-                        case 'sense' : res, status = src.routes.api.sense.get_id(result_id)
-                        case 'singer' : res, status = src.routes.api.singer.get_id(result_id)
-                        case 'playlist' : res, status = src.routes.api.playlist.get_id(result_id)
-                    #}
-                    if status == 200 : dic_list[k].append(res) """
+                    res, status = ctrl.get_id_with_conn(result_id, conn)
                     if status == 200 : dic_list[k].append(res)
                 #}
             #}
@@ -396,15 +366,15 @@ def get_by_user(user_id : str, page : str = '1', limit : str = '10', extended = 
             })
         #}
         
-        count_sng, status = count(user_id)
+        count_sng, status = count(user_id, conn = conn)
         if status != 200 : return count_sng, status
 
-        if (extended and (res := extend(songs))[1] == 200) : return {'data' : res[0], 'count' : count_sng.get('count')}, 200;
+        if (extended and (res := extend(songs, conn))[1] == 200) : return {'data' : res[0], 'count' : count_sng.get('count')}, 200;
         return {'data' : songs, 'count' : count_sng.get('count')}, 200
     #}
 #}
 
-#TODO paginate endpoinst "get_by"
+#TODO paginate endpoinst "get_by" and validate permmisions
 @validate
 def get_by_gender(gender_id : str) :#{
     if not gender_id : return {'message' : "Invalid gender id"}, 400
@@ -497,7 +467,6 @@ def get_by_sense(sense_id : str) :#{
 #}
 
 @validate
-# @require_conecction
 def get_by_singer(singer_id : str) :#{
     if not singer_id : return {'message' : "Invalid sense id"}, 400
 
@@ -606,13 +575,12 @@ def generate(genders : list[str], senses : list[str], singers : list[str], langu
             'goal' : str(goal) if float(goal) > 0 else -1 # 'goal' : goal,
         }
         generated_by = { k : generated_by[k] for k in generated_by.keys() if generated_by[k]}
-        g.setdefault('conn', conn)  # g.setdefault(cur)
-        if save : save_generated_playlists(songs, generated_by, user_id)
+        if save : save_generated_playlists(songs, generated_by, user_id, conn = conn)
         return songs, 200
     #}
 #}
 
-def save_generated_playlists(pl : list, generated_by : dict, user_id : str) :#{
+def save_generated_playlists(pl : list, generated_by : dict, user_id : str, conn) :#{
     if (not pl or not generated_by or not user_id) : return None;
 
     try :#{
@@ -624,7 +592,6 @@ def save_generated_playlists(pl : list, generated_by : dict, user_id : str) :#{
 
         dt = datetime.now()
         late = 5
-        conn = g.get('conn')
         with conn.cursor() as cur :#{
             cur.execute("insert into temp_playlist(user_id, json_data, created_at) values (%s, %s, %s)",[user_id, json_data, dt])
             # cur.fetchall()
@@ -672,9 +639,8 @@ def get_generated_playlists(user_id : str) :#{
     #}
 #}
 
-@validate
-def count(user_id : str) :#{ #TODO change name to count_songs
-    with db.get_connection() as conn, conn.cursor() as cur :#{
+def count(user_id : str, conn) :#{ #TODO change name to count_songs
+    with conn.cursor() as cur :#{
         # TODO: validat authorization
         cur.execute("select count(*) from song where user_id = %s",[user_id]);
         row = cur.fetchone()
