@@ -2,7 +2,7 @@ from src.controllers.auth import get_auth_user, whoami
 from src.db.database import DatabaseConnection #,get_connection
 
 # conn = get_connection()
-db = DatabaseConnection()
+# db = DatabaseConnection()
 
 
 def auth_get() :#{
@@ -44,31 +44,17 @@ def auth_get_by_user(user_id_of_item : str) :#{
     return auth_get_id(user_id_of_item)
 #}
 
-# def auth_post_song_1(user_id : str, entity_id : str, entity_name) :#{
-#     # conn = get_connection()
-#     try :#{
-#         cur = conn.cursor();
-#         cur.execute("""select * from %s  where id = %s and and user_id = %s""", [entity_name, entity_id, user_id]);
-#         rows = cur.fetchall()
-#         if(cur.rowcount == 0) : return {'message' : f"{entity_name} with id{entity_id} Forbiden" }, 403
-#     #}
-#     except :#{
-#         return {'message' : "Some went bad verifying authorization :("}, 500
-#     #}
-# #}
-
-def auth_post_song_(user_id : str, entity_id : str, entity_name) :#{
-    conn = db.get_connection() # conn = get_connection()
-    #TODO use context manager for db connection
+def auth_post_song_(user_id : str, entity_id : str, entity_name, conn) :#{
     try :#{
-        cur = conn.cursor();
-        cur.execute("""select user_id from %s  where id = %s;""", [entity_name, entity_id]);
-        row = cur.fetchone()
-        # if(cur.rowcount == 0) : return {'message' : f"{entity_name} with id{entity_id} Forbiden" }, 403
-        if(cur.rowcount == 0) : return {'message' : f"{entity_name} not found" }, 404
-        gotten_user_id = row[0]
-        if(gotten_user_id == 'admin') : return
-        if(gotten_user_id != user_id) : return {'message' : f"{entity_name} whit id {entity_id} Forbiden" }, 403
+        with conn.cursor() as cur :#{
+            cur.execute("""select user_id from %s  where id = %s;""", [entity_name, entity_id]);
+            row = cur.fetchone()
+            if(cur.rowcount == 0) : return {'message' : f"{entity_name} not found" }, 404
+            gotten_user_id = row[0]
+            if(gotten_user_id == 'admin') : return None
+            if(gotten_user_id != user_id) : return {'message' : f"{entity_name} whit id {entity_id} Forbiden" }, 403
+            return None
+        #}
     #}
     except :#{
         return {'message' : "Some went bad verifying authorization :("}, 500
