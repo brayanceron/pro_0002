@@ -9,9 +9,9 @@ def auth_get() -> tuple | None :#{
 #}
 
 def auth_get_id(user_id_of_item : str) ->  tuple | None :#{
-    user_data, _ = whoami() # data token is validated in auth middleware
+    user_data, _ = whoami() # INFO data token is validated in auth middleware // BUG generate error if the route doesn't has auth muiddleware 
     if (user_data['id'] == 'admin' or user_id_of_item == 'admin') : return None
-    print(f"{user_data['id']=} -> {user_id_of_item}" )
+    # print(f"{user_data['id']=} -> {user_id_of_item}" )
     if (user_id_of_item != user_data['id']) : return {"message" : "Forbiden"}, 403  # if (user_data['id'] != user_id_of_item) : return {"message" : "Forbiden"}, 403
 #}
 
