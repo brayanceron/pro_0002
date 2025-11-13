@@ -45,18 +45,14 @@ def auth_get_by_user(user_id_of_item : str) :#{
 #}
 
 def auth_post_song_(user_id : str, entity_id : str, entity_name, conn) :#{
-    try :#{
-        with conn.cursor() as cur :#{
-            cur.execute("""select user_id from %s  where id = %s;""", [entity_name, entity_id]);
-            row = cur.fetchone()
-            if(cur.rowcount == 0) : return {'message' : f"{entity_name} not found" }, 404
-            gotten_user_id = row[0]
-            if(gotten_user_id == 'admin') : return None
-            if(gotten_user_id != user_id) : return {'message' : f"{entity_name} whit id {entity_id} Forbiden" }, 403
-            return None
-        #}
-    #}
-    except :#{
-        return {'message' : "Some went bad verifying authorization :("}, 500
+    #TODO it doesnt return status error, it must manage better
+    with conn.cursor() as cur :#{
+        cur.execute(f"""select user_id from {entity_name}  where id = %s;""", [entity_id]);
+        row = cur.fetchone()
+        if(cur.rowcount == 0) : raise Exception(f"{entity_name} not found")
+        gotten_user_id = row[0]
+        if(gotten_user_id == 'admin') : return None
+        if(gotten_user_id != user_id) : raise Exception(f"{entity_name} whit id {entity_id} Forbiden")
+        return None
     #}
 #}
