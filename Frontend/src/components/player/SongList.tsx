@@ -29,10 +29,10 @@ const SongItem = ({ id, name, singer, url, index, /* currentIndex */ }: { id: st
     const { /* playList, isLoading, error, */ currentIndex, setCurrentIndex } = useContext(PlayListContext);
 
 
-    const bg = index === currentIndex ? "bg-gray-300" : "bg-gray-200";
+    const bg = index === currentIndex ? "bg-purple-200" : "bg-gray-100";
     const onClick = () => { if (index == currentIndex) return; setCurrentIndex(index); }
     return (
-        <div className={`w-[99%] shadow-md ${bg} py-2 px-1 m-1 flex hover:bg-gray-300`}>
+        <div className={`w-[99%] shadow-md ${bg} py-2 px-1 m-1 flex hover:bg-gray-200`}>
             <div className="mx-2">
                 <div className="avatar">
                     <div className="size-14 rounded-md hover:cursor-pointer" onClick={_ => onClick()}>
