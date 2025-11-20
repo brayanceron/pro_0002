@@ -1,10 +1,10 @@
-import { useRef, useContext, useState } from "react"
+import { useContext, useState } from "react"
 
 import songDefault from "../../assets/songDefault.jpeg"
 import { YouTubePlayer } from "./Yt"; //TODO change name to YouTubePlayer
-import { SrcPlayer, type HandleSrc } from "./SrcPlayer"
+import { SrcPlayer } from "./SrcPlayer"
 import { PlayListContext } from "../../context/PlayListContext"
-import { getUrlBySong, isValidYouTubeUrl } from "../../utils/urls"
+import { getUrlBySong } from "../../utils/urls"
 import './style.css'
 
 
@@ -15,40 +15,19 @@ const PlayerComponent = () => {
     
     const nameSong = "¡Hola, este es un texto en movimiento que se repite! ";
 
-    const back = () => {
+    const move = (step: number) => {
         pause();
-        const newIndex = currentIndex - 1;
-        if (newIndex < 0) { 
-            console.log("newIndex less than 0"); 
-            return setCurrentIndex(0); }
-        else { setCurrentIndex(newIndex); }
-        play()
+        validateAndSetIndex(currentIndex + step);
+        play();
     }
-    const next = () => {
-        pause();
-        const newIndex = currentIndex + 1;
-        console.log("/////>", currentIndex,'->',newIndex)
-        if (newIndex < 0) { 
-            console.log("newIndex less than 0"); 
-            return setCurrentIndex(0); }
-        else { setCurrentIndex(newIndex); }
-        play()
-    }
-    const play = () => {
-        // if (isValidYouTubeUrl(songs[currentIndex])) {/*  YtPlayerRef.current?.play(); */  }  // if (isExternal()) { YtPlayerRef.current?.play(); }
-        // else { SrcPlayerRef.current?.play(); }
-        // console.log(YtPlayerRef.current?.getVideoData())
-        setPlaying(true);
-    }
-    const pause = () => {
-        // if (isValidYouTubeUrl(songs[currentIndex])) {/*  YtPlayerRef.current?.pause() */  } // if (isExternal()) { YtPlayerRef.current?.pause() }
-        // else { SrcPlayerRef.current?.pause(); }
-        // console.log(songs, currentIndex)
-        setPlaying(false);
+    const validateAndSetIndex = (index: number) => {
+        if (index < 0) { return setCurrentIndex(0); }
+        if (index >= playList.length) { return setCurrentIndex(playList.length -1); }
+        setCurrentIndex(index);
     }
 
-    // const YtPlayerRef = useRef<YouTubePlayerHandle>(null);
-    const SrcPlayerRef = useRef<HandleSrc>(null);
+    const play = () => { setPlaying(true); }
+    const pause = () => { setPlaying(false); }
 
     return (
         <div className="w-full overflow-hidden px-3 box-border">
@@ -80,23 +59,31 @@ const PlayerComponent = () => {
                 {
                     songs.length > 0 ?
                         <>
-                            <SrcPlayer url={songs[currentIndex]} index={currentIndex} ref={SrcPlayerRef} />
-                            <YouTubePlayer url={songs[currentIndex]} onFinishSong={next} playing={playing} setPlaying={setPlaying} />
+                            <SrcPlayer url={songs[currentIndex]} onFinishSong={() => move(1)} playing={playing} setPlaying={setPlaying} />
+                            <YouTubePlayer url={songs[currentIndex]} onFinishSong={() => move(1)} playing={playing} setPlaying={setPlaying} />
                         </>
-                        : <p>Empty reproduction playlist</p>
+                        : <p>Empty playlist</p>
                 }
             </div>
 
 
             {/* CONTROLS SECTION */}
+            <PlayerControls play={play} pause={pause} move={move} />
 
-            <div className="flex justify-center my-4">
+        </div>
+    )
+}
+
+
+const PlayerControls = ({play, pause, move}:{play : () => void, pause : () => void, move : (step: number) => void}) => {
+    return (
+        <div className="flex justify-center my-4">
 
                 <button className="btn btn-circle btn-soft btn-default glass text-white" aria-label="Circle Soft Icon Button">
                     <span className="icon-[tabler--repeat]"></span>
                 </button>
 
-                <button onClick={back} className="btn btn-circle btn-soft btn-default glass text-white" aria-label="Circle Soft Icon Button">
+                <button onClick={_ => move(-1)} className="btn btn-circle btn-soft btn-default glass text-white" aria-label="Circle Soft Icon Button">
                     <span className="icon-[tabler--track-prev]"></span>
                 </button>
 
@@ -108,19 +95,15 @@ const PlayerComponent = () => {
                     <span className="icon-[tabler--play]"></span>
                 </button>
 
-                <button onClick={next} className="btn btn-circle btn-soft btn-default glass text-white" aria-label="Circle Soft Icon Button">
+                <button onClick={_ => move(1)} className="btn btn-circle btn-soft btn-default glass text-white" aria-label="Circle Soft Icon Button">
                     <span className="icon-[tabler--track-next]"></span>
                 </button>
 
             </div>
-
-        </div>
     )
 }
 
 export { PlayerComponent }
-
-
 
 /* 
  function isExternal(): boolean {
