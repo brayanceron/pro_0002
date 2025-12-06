@@ -1,4 +1,3 @@
-# from flask import File
 from werkzeug.datastructures.file_storage import FileStorage
 from mysql.connector.errors import IntegrityError, DatabaseError
 
@@ -7,14 +6,13 @@ from src.db.database import DatabaseConnection # ,get_connection
 from datetime import datetime
 from hashlib import sha256
 from uuid import uuid4
-
+from src.utils.generate_backup import generate_json_backup, load_json_backup, read_backup_file
 from src.controllers.auth_controllers.generic_auth_controller import auth_get, auth_get_id, auth_put, auth_delete, auth_get_by_user
-# import src.controllers.auth_controllers.generic_auth_controller
+import src.controllers.auth
 
-# conn = get_connection()
 db = DatabaseConnection()
-# conn = db.get_connection()
 
+# TODO -> active get user endpoint
 # def get() :#{
 #     return {'message' : "Not available"}, 200
 # #}
@@ -22,8 +20,7 @@ db = DatabaseConnection()
 def validate(func) :#{
     def wrap(*args, **kwargs) :#{
         try :#{
-            result, state = func(*args, **kwargs)
-            return result, state
+            return func(*args, **kwargs)
         #}
         except DatabaseError as err :#{
             print(err)
@@ -40,7 +37,7 @@ def validate(func) :#{
 #}
 
 @validate
-def get_id(id) :#{
+def get_id(id, return_password : bool = False,) :#{ # INFO : review who use return_password, this for security, the pass must'n send to front/client
     if (AUTH_ERROR := auth_get_id(id)) : return AUTH_ERROR
     if not id : return {'message' : "user id not provided"}, 400
 
@@ -57,12 +54,13 @@ def get_id(id) :#{
             'gender':row[2],
             'description':row[3],
             'email':row[4],
-            'birthdate':row[5],
+            'birthdate':str(row[5]),
             'image':row[6],
             'available':row[7],
             'password':row[8],
         }
 
+        if not return_password : del user['password']
         return user, 200
     #}
 #}
@@ -84,7 +82,7 @@ def get_by_email(email : str, return_password : bool = False, is_for_login = Fal
             'gender':row[2],
             'description':row[3],
             'email':row[4],
-            'birthdate':row[5],
+            'birthdate':str(row[5]),
             'image':row[6],
             'available':row[7],
             'password':row[8],
@@ -99,17 +97,24 @@ def get_by_email(email : str, return_password : bool = False, is_for_login = Fal
     #}
 #}
 
-
 @validate
-def post(name : str, gender : str, description : str, email : str, birthdate : str,  password : str, password2 : str, image_file : FileStorage, available = 1) :#{
+def post(name : str, gender : str, description : str, email : str, birthdate : str, password : str, password2 : str, 
+        image_file : FileStorage, available = 1, req_auth : bool = True ,to_login = False) :#{
+
     if (not name or not gender or not email or not birthdate or not password or not password2):#{
         return {'message' : "Insuficient data"}, 400
     #}
-    image = load_file(image_file, 'user_image') or ''
+
+    #TODO: verify if already exist user with that same email
+
+    id : str = uuid4().hex
+    if(req_auth) :#{
+        if (AUTH_ERROR := auth_get_id(id)) : return AUTH_ERROR; # INFO this always is false if there isn't session
+    #}
+    image = load_file(image_file, sub_folders = [id], prefix = 'user_image') or ''
     if(password != password2) : return {'message' : "Passwords are diferents"}, 400
 
     password = sha256(password.encode()).hexdigest()
-    id = uuid4().hex
     birthdate = format_date(birthdate)
     if (not birthdate): return {'message' : "Invalid birthdate" }, 400
 
@@ -118,18 +123,75 @@ def post(name : str, gender : str, description : str, email : str, birthdate : s
                     values (%s, %s, %s, %s, %s, %s, %s, %s, %s)""", [id, name, gender, description, email, birthdate, image, available, password])
         conn.commit()
     
+        if to_login : return src.controllers.auth.login(email, password2)
         return {'message' : "user registered", 'id' : id }, 200
     #}
 #}
 
+@validate
+def put(id : str, name : str, gender : str, description : str, email : str, birthdate : str, password : str, password2 : str, image_file : FileStorage, available = 1,) :#{
+    if not id : return {'message' : "user id not provided"}, 400;
+    if (AUTH_ERROR := auth_get_id(id)) : return AUTH_ERROR;
+
+    if password :#{
+        if (password != password2) : return {'message' : "passwords are diferents"}, 400;
+        password = sha256(password.encode()).hexdigest()
+    #}
+    
+    image = load_file(image_file, [id], prefix = 'user_image')
+    keys : dict = {
+        'name' : name,
+        'gender' : gender,
+        'description' : description,
+        'birthdate' : birthdate,
+        'password' : password or None,
+        'image' : image or '',
+    }
+    print(f"{id=}")
+
+    keys = {k : keys[k] for k in keys.keys() if keys[k]}
+    if len(keys.keys()) == 0 : return {'message' : "insuficient data"}, 500;
+
+    kstring : list = [f" {k} = %({k})s " for k in keys.keys()]
+    with (db.get_connection() as conn, conn.cursor() as cur) :#{
+        cur.execute(f"""update user set {','.join(kstring)} where id = %(id)s;""", {**keys, 'id' : id});
+
+        if cur.rowcount == 0: return {'message' : 'Error, data not found' }, 404
+        conn.commit()
+
+        return {'message' : f"user updated"}, 200
+    #}
+#}
+
+@validate
+def generate_backup(id : str) :#{
+    if not id : return {'message' : "user id not provided"}, 400
+    if (AUTH_ERROR := auth_get_id(id)) : return AUTH_ERROR
+
+    return generate_json_backup(id)
+#}
+
+@validate
+def load_backup(id : str, json_file : FileStorage) :#{
+    if not id : return {'message' : "id mot provided or it's invalid"}, 400;
+    if not json_file : return {"message" : "backup file not provided"}, 400;
+
+    if (AUTH_ERROR := auth_get_id(id)) : return AUTH_ERROR
+
+    json_bk = read_backup_file(json_file)
+    if json_bk is None : return {"message" : "File is invalid"}, 400;
+
+    return load_json_backup(json_bk, id);
+#}
 
 def format_date(date_str : str) :#{
     if not date_str : return None
     if '-' in date_str : date_str = date_str.replace('-', '/')
     try :#{
-        return datetime.strptime(date_str, "%Y/%m/%d").date()
+        # return datetime.strptime(date_str, "%Y/%m/%d").date()
+        return str(datetime.strptime(date_str, "%Y/%m/%d").date())
     #}
-    except Exception as err:#{ # except ValueError :#{
+    except Exception as err :#{
         print(err)
         return None
     #}
