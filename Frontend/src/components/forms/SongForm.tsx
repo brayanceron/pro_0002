@@ -10,6 +10,7 @@ import { PlayerComponent } from "../player/PlayerComponent"
 import { Method } from "../../utils/Methods"
 import { AuthContext } from "../../context/AuthContext"
 import { WrapMultipleSelect } from "./SongForm/WrapMultipleSelect"
+import { AppSelectOptionInput } from "../inputs/AppSelectOptionInput/AppSelectOptionInput"
 
 // TODO pass this to SongForm folder
 
@@ -24,7 +25,7 @@ const emptyFields = { url: '', image: '', name: '', languages: '', duration: '',
 
 const SongForm = ({ values = emptyFields, url, method = Method.POST, callback }: { values?: any, url: string, method?: Method, callback: (params: reqProps) => void }) => {
     const { user: userAuth } = useContext(AuthContext); // const userAuth = useContext(AuthContext!);
-    const [videoUrl, setVideoUrl] = useState<string | null>(null);
+    const [videoUrl, setVideoUrl] = useState<string | null>(values.url || null); // const [videoUrl, setVideoUrl] = useState<string | null>(null);
     values.user_id = userAuth?.id;
 
     useEffect(() => {
@@ -68,7 +69,7 @@ const SongForm = ({ values = emptyFields, url, method = Method.POST, callback }:
                                 videoUrl === null ? <p className="text-sm text-gray-300">...</p> :
                                     validarLinkYoutube(videoUrl) ?
                                         <div className="bg-black"><PlayerComponent /></div>
-                                        : <p className="text-sm text-gray-300 ">Onvalid Youtube Link!</p>
+                                        : <p className="text-sm text-gray-300 ">Invalid Youtube Link!</p>
                             }
                         </div>
 
@@ -82,6 +83,8 @@ const SongForm = ({ values = emptyFields, url, method = Method.POST, callback }:
                 <AppInput id="name" name="name" value={data.name} onChange={onChange} options={{ label: "Name", icon: "text-recognition" }} />
                 <AppInput id="duration" name="duration" value={data.duration} onChange={onChange} options={{ label: "duration", icon: "clock" }} />
 
+                <AppSelectOptionInput />
+                
                 {
                     ['gender', 'sense', 'singer', 'language', 'playlist'].map((item: string) => {
                         return (
