@@ -11,6 +11,7 @@ const SongList = ({ playList, isLoading, error, currentIndex }: { playList: any,
                 isLoading ? <p>Loading...</p> :
                     error ? <p>Error : {error.message}</p> :
                         <div>
+                            <p className="text-[10px] text-gray-400">Total songs: {playList.length}</p>
                             {
                                 playList.map((item: any, index: number) => {
                                     return <SongItem id={item.id} name={item.name} url={item.image || item.url} singer={"Test Singer"} index={index} currentIndex={currentIndex} />
