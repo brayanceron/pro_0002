@@ -5,13 +5,24 @@ import { PlayListContext } from "../../context/PlayListContext";
 import gifPlaying from '../../assets/playing.gif';
 
 const SongList = ({ playList, isLoading, error, currentIndex }: { playList: any, isLoading: boolean, error: Error | null, currentIndex: number }) => { // const SongList = ({ urlGet }: { urlGet?: string }) => {
+    const { setPlayList } = useContext(PlayListContext);
+    const random = () => {
+        const shuffled : any = shuffleArray(playList);
+        setPlayList({ playList: shuffled });
+    }
+
     return (
         <div className="bg-white">
             {
                 isLoading ? <p>Loading...</p> :
                     error ? <p>Error : {error.message}</p> :
                         <div>
-                            <p className="text-[10px] text-gray-400">Total songs: {playList.length}</p>
+                            <div className="p-0 flex content-center items-center">
+                                <span onClick={random} className="badge badge-neutral size-6 rounded-full p-0 mt-1 hover:cursor-pointer transition-transform hover:scale-105 hover:bg-neutral-600">
+                                    <span className="icon-[tabler--arrows-shuffle]"></span>
+                                </span>
+                                <p className="text-[10px] text-gray-400 mx-2">Total songs: {playList.length}</p>
+                            </div>
                             {
                                 playList.map((item: any, index: number) => {
                                     return <SongItem id={item.id} name={item.name} url={item.image || item.url} singer={"Test Singer"} index={index} currentIndex={currentIndex} />
@@ -31,9 +42,10 @@ const SongItem = ({ id, name, singer, url, index, /* currentIndex */ }: { id: st
 
 
     const bg = index === currentIndex ? "bg-purple-200" : "bg-gray-100";
+    const hbg = index === currentIndex ? "bg-purple-300" : "bg-gray-200";
     const onClick = () => { if (index == currentIndex) return; setCurrentIndex(index); }
     return (
-        <div className={`w-[99%] shadow-md ${bg} py-2 px-1 m-1 flex hover:bg-gray-200`}>
+        <div className={`w-[99%] shadow-md ${bg} py-2 px-1 m-1 flex hover:${hbg}`}>
             <div className="mx-2">
                 <div className="avatar">
                     <div className="size-14 rounded-md hover:cursor-pointer" onClick={_ => onClick()}>
@@ -50,9 +62,9 @@ const SongItem = ({ id, name, singer, url, index, /* currentIndex */ }: { id: st
             <div className="flex w-auto justify-end">
                 {
                     index === currentIndex &&
-                        <div className="w-[25px]">
-                            <img src={gifPlaying} alt="" />
-                        </div>
+                    <div className="w-[25px]">
+                        <img src={gifPlaying} alt="" />
+                    </div>
                 }
                 <span onClick={onClickGetEntity} className="badge badge-neutral size-6 rounded-full p-0 mr-1">
                     <span className="icon-[tabler--external-link]"></span>
@@ -60,6 +72,15 @@ const SongItem = ({ id, name, singer, url, index, /* currentIndex */ }: { id: st
             </div>
         </div>
     );
+}
+
+function shuffleArray<T>(array: T[]): T[] {
+    const shuffledArray = [...array];
+    for (let i = shuffledArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]]; // Intercambiamos el elemento actual (en i) con el elemento aleatorio (en j)
+    }
+    return shuffledArray;
 }
 
 export default SongList
