@@ -1,6 +1,5 @@
-import {  useContext, useEffect, useRef, useState} from "react";
-import { ProgressBarPlayer } from "./ProgressBarPlayer";
-import { isValidSrcUrl } from '../../utils/urls';
+import {  forwardRef, useContext, useEffect, useImperativeHandle, useRef, useState} from "react";
+import { /* isValidSrcUrl, */ isValidYouTubeUrl } from '../../utils/urls';
 import { PlayListContext } from "../../context/PlayListContext";
 
 interface Props {
@@ -8,52 +7,59 @@ interface Props {
     playing: boolean,
     setPlaying: (val: boolean) => void,
     onFinishSong : () => void,
+    onChangeStates: (error: boolean, duration: number, currentTime: number) => void,
 }
 
-
 //TODO verify if url is a url supported by audio element or is url of backend
-export const SrcPlayer = ({ url, playing, onFinishSong } : Props) => {
+export const SrcPlayer = forwardRef ( ({ url, playing, onFinishSong, onChangeStates } : Props, ref) => {
     const { currentIndex } = useContext(PlayListContext);
-    const [error, setError] = useState(!isValidSrcUrl(url));
+    const [error, setError] = useState(isValidYouTubeUrl(url)); // const [error, setError] = useState(!isValidSrcUrl(url));
     const rep = useRef<HTMLAudioElement>(null);
     const [duration, setDuration] = useState<number>(0);
     
 
-    useEffect(() => { setError(!isValidSrcUrl(url)); }, [url]);
     useEffect(() => { exec(); }, [playing]);
-    useEffect(() => { exec(); }, [duration]);
-    useEffect(() => { rep.current!.src = url; }, [currentIndex]);  // useEffect(() => { rep.current!.src = url; }, [url]);
+    useEffect(() => { 
+        // setError(!isValidSrcUrl(url));
+        setError(isValidYouTubeUrl(url));
+        rep.current!.src = url; 
+        exec();
+    }, [currentIndex, url]);  // useEffect(() => { rep.current!.src = url; }, [url]);
     useEffect(() => {
         if(!error) return;
         setDuration(0);
+        if(rep.current) rep.current.pause();
     }, [error]);
 
+    useEffect(() => {
+        if(error && isValidYouTubeUrl(url)) return; 
+        onChangeStates(error, duration, rep.current && rep.current.currentTime ? rep.current.currentTime  : 0);
+    }, [error, duration, playing]);
+
     const exec = () => {
-        if(error) return;
-        if (duration <= 0) return;
+        // if(isValidYouTubeUrl(url)==true) return; //HACK
+        if(!rep.current) return; // if (duration <= 0) return;
+        if(error) rep.current?.pause(); // if(error) return;
+        
         if (playing) { rep.current!.play(); }
         else { rep.current!.pause(); }
     }
 
     const onError = () => { setError(true); }
-    const onCanPlay =  () => { if (rep.current) { setDuration(rep.current.duration); } }
+    const onCanPlay =  () => { if (rep.current) { setDuration(rep.current.duration); exec(); } }
 
-    const onChangeProgress = (newVal : number) => {
-        console.log("New val : ", newVal)
-        if(!rep.current) return;
-        rep.current.currentTime = newVal;
-    }
+    useImperativeHandle(ref, () => ({
+        onChangeProgress(newVal: number) {
+            if(rep.current) rep.current.currentTime = newVal;
+        },
+        getCurrentTime : () => { return rep.current ? rep.current.currentTime : 0; }, // get currentTime() {
+    }));
+
     return (
         <>
             <div>
                 {
-                    error ? <p>Error loading src video</p> :
-                        <ProgressBarPlayer
-                            key={url}
-                            duration={duration} // duration={rep.current?.duration || 0}
-                            playing={playing}
-                            onChangeTime={onChangeProgress}
-                        />
+                    error && <p>Error loading src video</p> 
                 }
 
                 <audio
@@ -61,13 +67,14 @@ export const SrcPlayer = ({ url, playing, onFinishSong } : Props) => {
                     src={url}
                     controls className="hidden w-full"
                     onError={onError}
-                    onEnded={ _ => onFinishSong()}
+                    onEnded={ _ => {if(error) return; onFinishSong()}}
                     onCanPlay={ _ => onCanPlay()} // onCanPlayThrough={onLoaded}
                 />
             </div>
 
         </>
     )
+})
 
-}
+// }
 
