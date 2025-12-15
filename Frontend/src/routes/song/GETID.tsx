@@ -76,7 +76,7 @@ const GETID = () => {
                                     </div>
                                 </div>
 
-                                <div className='w-1/4 mt-5 mx-auto'>
+                                <div className='w-1/3 mt-5 mx-auto'>
                                     <SongForm values={fData} url={`http://localhost:5000/api/song/${song_id}`} callback={cb} method={Method.PUT} />
                                 </div>
                                 <DeleteSongModal modalId={deleteModalId} songId={fData.id} songName={fData.name} callback={ deleteCb }/>
