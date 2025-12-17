@@ -1,5 +1,5 @@
-import {  forwardRef, useContext, useEffect, useImperativeHandle, useRef, useState} from "react";
-import { /* isValidSrcUrl, */ isValidYouTubeUrl } from '../../utils/urls';
+import {  forwardRef, useContext, useEffect, useImperativeHandle, useReducer, useRef, /* useState */} from "react";
+import { isValidSrcUrl, isValidYouTubeUrl } from '../../utils/urls';
 import { PlayListContext } from "../../context/PlayListContext";
 
 interface Props {
@@ -10,65 +10,89 @@ interface Props {
     onChangeStates: (error: boolean, duration: number, currentTime: number) => void,
 }
 
+interface PlayerStates {
+    error : boolean | null,
+    duration : number | null,
+    // playerState : number | null,
+}
+type ReduxAction = {
+    type : string,
+    payload : PlayerStates,
+}
+const reducer = (prevState : PlayerStates, action : ReduxAction ) : PlayerStates => {
+    const {duration, error } = action.payload;
+    switch(action.type){
+        case 'ERROR' : { return { error, duration : -1 }; }
+        case 'PLAYERSTATE' : { return {error, duration };}
+        case 'ONCHANGEURL' : { return { error , duration } }
+        default : { return prevState; }
+    }
+}
+
 //TODO verify if url is a url supported by audio element or is url of backend
 export const SrcPlayer = forwardRef ( ({ url, playing, onFinishSong, onChangeStates } : Props, ref) => {
     const { currentIndex } = useContext(PlayListContext);
-    const [error, setError] = useState(isValidYouTubeUrl(url)); // const [error, setError] = useState(!isValidSrcUrl(url));
     const rep = useRef<HTMLAudioElement>(null);
-    const [duration, setDuration] = useState<number>(0);
+    const initialState : PlayerStates = {error : !isValidSrcUrl(url), duration : 0,};
+    const [plState, dispatch] = useReducer(reducer, initialState);
     
 
     useEffect(() => { exec(); }, [playing]);
-    useEffect(() => { 
-        // setError(!isValidSrcUrl(url));
-        setError(isValidYouTubeUrl(url));
-        rep.current!.src = url; 
-        exec();
-    }, [currentIndex, url]);  // useEffect(() => { rep.current!.src = url; }, [url]);
     useEffect(() => {
-        if(!error) return;
-        setDuration(0);
-        if(rep.current) rep.current.pause();
-    }, [error]);
-
+        if(plState.error && /* isValidSrcUrl(url) == false && */ isValidYouTubeUrl(url)) return;
+        if(plState.duration == null || plState.duration <= 0) return;
+        console.log("CALL FROM :: SrcPlayer")
+        onChangeStates(plState.error != null ? plState.error : false, plState.duration ? plState.duration : 0, rep.current && rep.current.currentTime ? rep.current.currentTime : 0);
+    }, [ plState.error, plState.duration]);
+    
     useEffect(() => {
-        if(error && isValidYouTubeUrl(url)) return; 
-        onChangeStates(error, duration, rep.current && rep.current.currentTime ? rep.current.currentTime  : 0);
-    }, [error, duration, playing]);
+        dispatch({type : 'ONCHANGEURL', payload : {error : !isValidSrcUrl(url), duration : getDuration(), /* playerState : null, */ /* url */}}) // dispatch payload without side-effect functions; run side-effects after dispatch
+        changeUrl();
+    }, [currentIndex, url]);
 
+    const changeUrl = () =>{
+        if (!rep.current) return;
+        rep.current!.src = url;
+        exec()
+    }
+    const getDuration = () => {
+        if(isValidSrcUrl(url) == false) return -1;
+        if(rep.current && rep.current.duration) { return rep.current.duration; }
+        return -1;
+    }
+    
     const exec = () => {
-        // if(isValidYouTubeUrl(url)==true) return; //HACK
-        if(!rep.current) return; // if (duration <= 0) return;
-        if(error) rep.current?.pause(); // if(error) return;
-        
+        if(!rep.current) return;
+        if(plState.error) rep.current.pause();
         if (playing) { rep.current!.play(); }
         else { rep.current!.pause(); }
     }
 
-    const onError = () => { setError(true); }
-    const onCanPlay =  () => { if (rep.current) { setDuration(rep.current.duration); exec(); } }
+    const onError = () => { dispatch({type : 'ERROR', payload : {error : true, duration : -1}}) }
+    const onCanPlay =  () => { if (rep.current) { dispatch({type : 'PLAYERSTATE', payload : {error : false, duration : getDuration(),}}) } }
 
     useImperativeHandle(ref, () => ({
         onChangeProgress(newVal: number) {
             if(rep.current) rep.current.currentTime = newVal;
         },
-        getCurrentTime : () => { return rep.current ? rep.current.currentTime : 0; }, // get currentTime() {
+        getCurrentTime : () => { return rep.current ? rep.current.currentTime : 0; },
     }));
 
     return (
         <>
             <div>
-                {
-                    error && <p>Error loading src video</p> 
-                }
+                { plState.error && <p>Error loading src video</p> }
 
                 <audio
                     ref={rep}
                     src={url}
                     controls className="hidden w-full"
                     onError={onError}
-                    onEnded={ _ => {if(error) return; onFinishSong()}}
-                    onCanPlay={ _ => onCanPlay()} // onCanPlayThrough={onLoaded}
+                    onEnded={ () => {
+                        if(plState.error) return;
+                        onFinishSong();
+                    }}
+                    onCanPlay={ () => onCanPlay()} // onCanPlayThrough={onLoaded}
                 />
             </div>
 
