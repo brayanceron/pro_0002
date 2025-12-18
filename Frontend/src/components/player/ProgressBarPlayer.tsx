@@ -3,31 +3,35 @@ import { useEffect, useState, useRef } from "react";
 type Props = {
     duration: number,
     playing: boolean,
+    url: string,
+    currentIndex: number,
+    currentTime?: number,
     onChangeTime : (nreVal : number) => void,   // callback: cuando usuario mueve la barra
 }
 
-const ProgressBarPlayer = ({ duration, playing, onChangeTime }: Props) => {
+const ProgressBarPlayer = ({ duration, url, playing, currentIndex, onChangeTime, currentTime}: Props) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const progressRef = useRef(0);   // progress, time in seconds
     const lastFrameRef = useRef(0);
     const animRef = useRef(0); // const animRef = useRef(null);
 
+    useEffect(() => { resetValues(); }, [currentIndex]);
+    const resetValues = () => {
+        if (progressRef.current && progressRef.current > 0) { progressRef.current = 0; } // progressRef.current = 0;
+        if (inputRef.current) { inputRef.current.value = "0"; }
+        setDisplayTime(0);
+    };
+    url;
+
     // start / stop animation
     useEffect(() => {
-        if (!duration || duration <= 0) { // it reset when duration is 0, it means song changed, it fix whe change song and duration not updated yet
-            if (progressRef.current && progressRef.current > 0) { progressRef.current = 0; }
-            if (inputRef.current) { inputRef.current.value = "0"; }
-            setDisplayTime(0);
-        }
-
-        if (!playing) {
-            cancelAnimationFrame(animRef.current);
-            return;
-        }
-
+        console.log("playing = ", playing, " duration = ", duration, " progressRef = ", progressRef)
+        if (!duration || duration <= 0) { resetValues(); return; } // it reset when duration is 0, it means song changed, it fix whe change song and duration not updated yet
+        if (!playing) { cancelAnimationFrame(animRef.current); return; }
         
         const tick = (now: any) => {
-            const delta = (now - lastFrameRef.current) / 1000; // ms->segundos
+            // console.log("progressRef : ", progressRef) //TODO - it was active
+            const delta = (now - lastFrameRef.current) / 1000; // tiempo del último frame// ms->segundos
             lastFrameRef.current = now;
             progressRef.current += delta;
 
@@ -54,10 +58,12 @@ const ProgressBarPlayer = ({ duration, playing, onChangeTime }: Props) => {
     const [displayTime, setDisplayTime] = useState(0);
 
     useEffect(() => {
-        const id = setInterval(() => {
-            setDisplayTime(progressRef.current);
-        }, 250);
-
+        if(currentTime !== undefined && currentTime !== null) {
+            progressRef.current = currentTime;
+            if(inputRef.current) inputRef.current.value = currentTime.toString();
+            setDisplayTime(currentTime);
+        }
+        const id = setInterval(() => { setDisplayTime(progressRef.current); }, 250);
         return () => clearInterval(id);
     }, []);
 
