@@ -172,7 +172,7 @@ def post_song_senses(senses : list, song_id : str, user_id, goal : int = 0, conn
 #}
 
 @validate
-def put(song_id : str, name : str, description : str, goal : str, user_id : str, genders, senses, singers, languages, playlists, image_file,  available : bool = 1) :#{
+def put(song_id : str, name : str, description : str, url : str, goal : str, user_id : str, genders, senses, singers, languages, playlists, image_file,  available : bool = 1) :#{
     # TODO receive arguments way optional to not update all values if not necessary and doing update less demanding (List = [] o None)
     # TODO get song data to verify what is going to be updated and what not and verify if is convenient to update or not with optional arguments
     singers = singers if singers and len(singers) > 0  else ['unknown']
@@ -190,6 +190,7 @@ def put(song_id : str, name : str, description : str, goal : str, user_id : str,
     keys : dict = {
         'name': name,
         'description': description,
+        'url': url,
         'goal': goal,
         'image': image,
         'available': available,

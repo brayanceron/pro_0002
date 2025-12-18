@@ -1,10 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { getImageUrlByYTVideo, getUrlBySrc, isValidYouTubeUrl } from "../../../utils/urls";
 import { OpenModal } from "./DeleteSongModal";
 import songDefault from "../../../assets/default/song.png";
 import singerDefault from "../../../assets/default/singer.jpg";
 import genderDefault from "../../../assets/default/gender.png";
+import useFetch from "../../../hooks/useFetch";
+import { PlayListContext } from "../../../context/PlayListContext";
 
 type SongItemProps = { 
     id: string, 
@@ -25,6 +27,7 @@ type SongItemProps = {
 };
 
 const SongItem = ({ id, name,  genders, singers, languages, goal, image, url,  index, setNewCurrentSongIndex, editModalId, deleteModalId }: SongItemProps) => {
+    const {setCurrentIndex, setPlayList} = useContext(PlayListContext);
     const songImg = useRef<HTMLImageElement>(null);
     const navigate = useNavigate()
     const onClickGetId = () => { navigate(`/song/get/${id}`); }
@@ -41,6 +44,19 @@ const SongItem = ({ id, name,  genders, singers, languages, goal, image, url,  i
         OpenModal(deleteModalId);
     };
 
+    const {data, isLoading, error} = useFetch(`http://localhost:5000/api/song/${id}`);
+    const onPlaySong = () => {
+        if (error) return alert(error.message);
+        if (isLoading) return;
+        setPlayList({
+            isLoading: false,
+            error: null,
+            playList: [data],
+            currentIndex: 0,
+        });
+        setCurrentIndex(0);
+        navigate('/playing');
+    }
     return (
         // <div className="shadow-md m-auto border-t-[1px] border-gray-100 border-solid w-[360px]">
         <div className="shadow-md m-auto border-t-[1px] border-gray-100 border-solid w-[420px]">
@@ -52,6 +68,9 @@ const SongItem = ({ id, name,  genders, singers, languages, goal, image, url,  i
                             <img ref={songImg} alt="Music Icon" /> {/* <img ref={songImg} src={imgUrl || songDefault} alt="Music Icon" /> */}
                         </div>
                     </div>
+                    <span onClick={onPlaySong} className="badge badge-neutral size-6 rounded-full p-0 mr-1 mt-2">
+                        <span className="icon-[tabler--play]"></span>
+                    </span>
                 </div>
 
                 <div className="w-full flex flex-col py-1 pl-2">

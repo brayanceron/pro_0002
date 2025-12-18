@@ -58,7 +58,6 @@ def put(id : str) :#{
     form = {**form, **{k : values.getlist(k) for k in ext_keys}} # extract list keys
     form = {**form, **{k :  [v for v in (form.get(k) or []) if v] for k in ext_keys}} # format(delete empty values) list keys
 
-    del form['url']
     del form['duration']
     if form['available'] == None : del form['available']
 
