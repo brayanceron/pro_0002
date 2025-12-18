@@ -6,11 +6,11 @@ import AppTextArea from "../inputs/AppTextArea"
 import { GoalInput } from "../inputs/GoalInput"
 import { useFormData } from "../../hooks/useFormData"
 import { usePost, type reqProps } from "../../hooks/usePost"
-import { PlayerComponent } from "../player/PlayerComponent"
 import { Method } from "../../utils/Methods"
 import { AuthContext } from "../../context/AuthContext"
 import { WrapMultipleSelect } from "./SongForm/WrapMultipleSelect"
 import { AppSelectOptionInput } from "../inputs/AppSelectOptionInput/AppSelectOptionInput"
+import { YouTubePlayer } from "../player/Yt"
 
 // TODO pass this to SongForm folder
 
@@ -20,12 +20,11 @@ function validarLinkYoutube(url: string) {
 }
 
 const emptyFields = { url: '', image: '', name: '', languages: '', duration: '', genders: [], senses: [], singers: [], playlists: [], description: '', goal: 0 }
-// const emptyFields = { id : '', url: '', image: '', name: '', languages: '', duration: '', genders: [], senses: [], singers: [], playlists: [], description: '', goal : 0 }
-
 
 const SongForm = ({ values = emptyFields, url, method = Method.POST, callback }: { values?: any, url: string, method?: Method, callback: (params: reqProps) => void }) => {
     const { user: userAuth } = useContext(AuthContext); // const userAuth = useContext(AuthContext!);
     const [videoUrl, setVideoUrl] = useState<string | null>(values.url || null); // const [videoUrl, setVideoUrl] = useState<string | null>(null);
+    const [validateYTUrl, setValidateYTUrl] = useState<boolean>(false);
     values.user_id = userAuth?.id;
 
     useEffect(() => {
@@ -41,7 +40,7 @@ const SongForm = ({ values = emptyFields, url, method = Method.POST, callback }:
     
     function onSub() { sendReq(); }
 
-
+    const onChangePlayerStatus = (error : boolean) => { setValidateYTUrl(error); }
     return (
         <div className="shadow-md  w-full m-auto border-t-[1px] border-gray-100 border-solid">
             <div className="w-full px-4 py-2">
@@ -65,11 +64,18 @@ const SongForm = ({ values = emptyFields, url, method = Method.POST, callback }:
                                 onChange={(event: BaseSyntheticEvent) => { setVideoUrl(event.target.value); onChange(event) }}
                             />
                             <AppButton text="Extract info" addStyles="btn-xs w-[130px] my-1" icon="stack-push" />
+                            
+                            <div className="hidden">
+                                <YouTubePlayer url={videoUrl || ''} playing={true} setPlaying={() => {}}
+                                    onFinishSong={() => {}} 
+                                    onChangeStates={ onChangePlayerStatus }
+                                />
+                            </div>
                             {
                                 videoUrl === null ? <p className="text-sm text-gray-300">...</p> :
-                                    validarLinkYoutube(videoUrl) ?
-                                        <div className="bg-black"><PlayerComponent /></div>
-                                        : <p className="text-sm text-gray-300 ">Invalid Youtube Link!</p>
+                                    !validarLinkYoutube(videoUrl) ?<p className="text-sm text-red-500 ">This link is not a YouTube video!</p>
+                                        : validateYTUrl ? <p className="text-sm text-red-500 ">Video not supported!</p>
+                                            : <p className="text-sm text-green-500 ">Video compatible!</p>
                             }
                         </div>
 
@@ -88,7 +94,6 @@ const SongForm = ({ values = emptyFields, url, method = Method.POST, callback }:
                 {
                     ['gender', 'sense', 'singer', 'language', 'playlist'].map((item: string) => {
                         return (
-                            // <WrapMultipleSelect entity={item} values={values[`${item}s`]} onChangeMultipleSelect={onChangeMultipleSelect}
                             <WrapMultipleSelect entity={item} values={data[`${item}s`]} onChangeMultipleSelect={onChangeMultipleSelect}
                                 addAdmin={item == 'playlist' ? false : true} /* key={item} */ />
                         );
