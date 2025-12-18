@@ -31,8 +31,11 @@ const reducer = (prevState: PlayerStates, action: ReduxAction): PlayerStates => 
     let { duration, error, playerState } = action.payload;
     switch (action.type) {
         case 'ERROR': { return { playerState: null, error, duration: -1 } }
-        case 'PLAYERSTATE': { return { error: playerState == 1 ? false : error, playerState, duration }; }
-        case 'ONCHANGEURL': { return { error, duration, playerState: null } }
+        case 'PLAYERSTATE': { 
+            if(prevState.error) { return prevState; } // it solves a bug where error was overwritten, becuase onError event was called before that this event
+            return { error: playerState == 1 ? false : error, playerState, duration }; 
+        }
+        case 'ONCHANGEURL': { return { error : null, duration, playerState: null } } // case 'ONCHANGEURL': { return { error, duration, playerState: null } }
         default: { return prevState; }
     }
 }
@@ -62,16 +65,15 @@ export const YouTubePlayer = forwardRef(({ url, playing, setPlaying, onFinishSon
 
     useEffect(() => {
         if (plState.error && isValidYouTubeUrl(url) == false /* && isValidSrcUrl(url) */) return;
-
-        // FIXME - DURATION BUG
-        /* NOTE : pltState.duration was giving wrong duration, so it is necessary to get duration again with getDuration(). 
-        for solving this, it is necessary add a useEffect that updates duration when video is loaded(plState.state is good) */
         const newDuration = getDuration();
-        if (newDuration == null || newDuration <= 0) return; // if(plState.duration == null || plState.duration <= 0) return;
+        if (newDuration == null || newDuration <= 0 && !plState.error) return; // if (newDuration == null || newDuration <= 0) return;
         console.log("CALL FROM :: YtPlayer")
 
         onChangeStates(plState.error != null ? plState.error : false, newDuration, playerInstance.current && playerInstance.current.getCurrentTime ? playerInstance.current.getCurrentTime() : 0);
         if (plState.playerState === 0 && !plState.error) { onFinishSong(); }
+        // FIXME - DURATION BUG
+        /* NOTE : pltState.duration was giving wrong duration, so it is necessary to get duration again with getDuration(). 
+        for solving this, it is necessary add a useEffect that updates duration when video is loaded(plState.state is good) */
     }, [plState.playerState, plState.error, plState.duration]);
 
     useEffect(() => {
