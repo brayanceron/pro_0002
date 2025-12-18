@@ -40,7 +40,7 @@ export const SrcPlayer = forwardRef ( ({ url, playing, onFinishSong, onChangeSta
     useEffect(() => { exec(); }, [playing]);
     useEffect(() => {
         if(plState.error && /* isValidSrcUrl(url) == false && */ isValidYouTubeUrl(url)) return;
-        if(plState.duration == null || plState.duration <= 0) return;
+        if(plState.duration == null || plState.duration <= 0 && !plState.error) return;
         console.log("CALL FROM :: SrcPlayer")
         onChangeStates(plState.error != null ? plState.error : false, plState.duration ? plState.duration : 0, rep.current && rep.current.currentTime ? rep.current.currentTime : 0);
     }, [ plState.error, plState.duration]);
