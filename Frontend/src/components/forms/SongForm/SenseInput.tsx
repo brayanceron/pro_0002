@@ -1,37 +1,41 @@
 import { useEffect, useState, type BaseSyntheticEvent } from "react";
 import { WrapMultipleSelect } from "./WrapMultipleSelect";
 
-type OptionsType = {
+export type SenseOptionsType = {
     id: string,
     name: string,
     score: number,
 }
 
-const SenseInput = ({ options, onChange }: { options: any, onChange: (selection: OptionsType[]) => void }) => {
-    const [selection, setSelection] = useState<OptionsType[]>([]);
+const SenseInput = ({ defaultValues, onChange }: { defaultValues: SenseOptionsType[], onChange: (selection: SenseOptionsType[]) => void }) => {
+    const [selection, setSelection] = useState<SenseOptionsType[]>(defaultValues ? defaultValues : []);
 
-    const onChangeRange = ({ name, score/* ,id */ }: OptionsType) => {
-        const updatedSelection = selection.map((item: OptionsType) => { return item.name === name ? { ...item, score: score } : item; });
+    const onChangeRange = ({ /* name, */ score, id }: SenseOptionsType) => {
+        const updatedSelection = selection.map((item: SenseOptionsType) => { return item.id === id ? { ...item, score: score } : item; });
         if (updatedSelection) setSelection(updatedSelection);
     }
 
     useEffect(() => { onChange(selection); }, [selection]);
 
+    const ids : string[] = [];
+    defaultValues.forEach((item) => {ids.push(item.id);});
+
+    //TODO validate what happens when id of defaultVales is not valid id of options available in MultipleSelect/backend
+
     return (
         <>
             <WrapMultipleSelect
                 entity="sense"
-                values={options}
+                values={ids} // values={options}
                 onChangeMultipleSelect={(event: BaseSyntheticEvent) => { // onChangeMultipleSelect={onChangeMultipleSelect}
-                    const newSelection: OptionsType[] = [];
+                    const newSelection: SenseOptionsType[] = [];
                     const options = Array.from(event.target.selectedOptions);
 
                     options.forEach((option: any) => {
-                        const f: OptionsType | undefined = selection.find((s) => s.name === option.text);
+                        const f: SenseOptionsType | undefined = selection.find((s) => s.id === option.value);
                         if (f) { newSelection.push({'id': f.id, 'name': f.name, 'score': f.score });}
                         else{newSelection.push({'id': option.value, 'name': option.text, 'score': 0.00});} // default score
                         // const { name, id, score } = f ? f : { name: option.text, id: option.value, score: 0.00 };
-                        // newSelection.push({ name, id, score }); // default score
                     });
                     setSelection(newSelection);
                 }}
@@ -42,11 +46,11 @@ const SenseInput = ({ options, onChange }: { options: any, onChange: (selection:
     );
 }
 
-const SensesRanges = ({ selectedSenses, onChangeRange }: { selectedSenses: OptionsType[], onChangeRange: (values: OptionsType) => void }) => {
+const SensesRanges = ({ selectedSenses, onChangeRange }: { selectedSenses: SenseOptionsType[], onChangeRange: (values: SenseOptionsType) => void }) => {
     return (
         <>
             {
-                selectedSenses.map(({ name, score }: OptionsType) => {
+                selectedSenses.map(({ name, score, id }: SenseOptionsType) => {
                     return (
                         <>
                             <div className="flex align-middle justify-center items-center">
@@ -56,7 +60,7 @@ const SensesRanges = ({ selectedSenses, onChangeRange }: { selectedSenses: Optio
                                     className="range w-4/5"
                                     aria-label="range"
                                     defaultValue={score} // value={rangeValue}
-                                    onChange={(e) => onChangeRange({ name: name, score: parseFloat(e.target.value), id: '' })}
+                                    onChange={(e) => onChangeRange({ name, id, score: parseFloat(e.target.value) })}
                                     min={0}
                                     max={5}
                                     step={0.01}
