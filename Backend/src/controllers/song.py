@@ -5,6 +5,7 @@ from uuid import uuid4
 from json import dumps, loads
 from datetime import datetime
 from src.utils.load_file import load_file
+from flask import jsonify
 
 from src.controllers.auth_controllers.song_auth_controller import auth_get, auth_get_id, auth_post, auth_post_song_, auth_put, auth_delete, auth_get_by_user
 
@@ -115,7 +116,7 @@ def get_id(id, conn, extended = False,) :#{
 
         if(AUTH_ERROR := auth_get_id(song['user_id'])): return AUTH_ERROR
 
-        if (extended and (res := extend([song], conn))[1] == 200) : return res[0][0], res[1];
+        if (extended and (res := extend([song], conn))[1] == 200) : return  jsonify(res[0][0]), res[1];
         return song, 200
     #}
 #}
@@ -311,26 +312,31 @@ def count_search(pattern : str, user_id : str, conn) :#{
 #}
 
 
-def extend(songs : list, conn) :#{
+def extend(songs : list, conn) -> list :#{
 
     with conn.cursor() as cur :#{
         for song in songs :#{
-            keys = ['gender','language','sense','singer', 'playlist']
-            dic_list : dict = { k : [] for k in keys }
+            keys_cols : dict = { k : [f"{k}_id"] for k in ['gender','language','sense','singer', 'playlist'] }
+            keys_cols['sense'] = ['sense_id', 'goal', 'user_id']
+            
+            dic_list : dict = { k : [] for k in keys_cols.keys() }
 
-            for k in keys :#{
-                cur.execute(f"select {k}_id from song_{k} where song_id = " + "%s", [ song['id']])
-                results_ids = cur.fetchall(); results_ids = [i[0] for i in results_ids if i];
-                for result_id in results_ids :#{
+            for k in keys_cols.keys() :#{
+                cur.execute(f"select {','.join(keys_cols[k])} from song_{k} where song_id = " + "%s", [ song['id']]) # cur.execute(f"select {k}_id from song_{k} where song_id = " + "%s", [ song['id']])
+                rows = cur.fetchall()
+                if(cur.rowcount == 0) : continue
+                for row in rows :#{
+                    cols = keys_cols[k]
                     res, status = [], 500
                     ctrl = GenericController(k)
-                    res, status = ctrl.get_id_with_conn(result_id, conn)
-                    if status == 200 : dic_list[k].append(res)
+                    res, status = ctrl.get_id_with_conn(row[0], conn)
+                    zip_dict = dict(zip(cols, row))
+                    if status == 200 : dic_list[k].append({**res, **zip_dict})
                 #}
             #}
 
             # song |= dic_list 
-            song.update({f"{k2}s": dic_list[k2]  for k2 in keys})
+            song.update({f"{k2}s": dic_list[k2]  for k2 in keys_cols.keys()})
         #}
         
         return songs, 200
