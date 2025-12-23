@@ -312,7 +312,7 @@ def count_search(pattern : str, user_id : str, conn) :#{
 #}
 
 
-def extend(songs : list, conn) -> list :#{
+def extend(songs : list, conn) -> list :#{ # it returns same songs list with extended data
 
     with conn.cursor() as cur :#{
         for song in songs :#{
