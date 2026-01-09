@@ -398,7 +398,7 @@ CREATE TABLE `song_playlist` (
 CREATE TABLE `song_sense` (
   `song_id` varchar(36) NOT NULL,
   `sense_id` varchar(36) NOT NULL,
-  `goal` decimal(10,0) NOT NULL DEFAULT 0,
+  `goal` decimal(4,2) NOT NULL DEFAULT 0.00,
   `user_id` varchar(36) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
