@@ -145,7 +145,7 @@ def post(name : str, description : str, url : str, goal : str, user_id : str, ge
         post_song_(playlists, id, 'playlist', user_id, conn)
         post_song_(singers, id, 'singer', user_id, conn)
         post_song_(languages, id, 'language', user_id, conn)
-        post_song_senses(senses, id, user_id, goal, conn=conn)
+        post_song_senses(senses, id, user_id, conn = conn)
 
         conn.commit()
         return {'message' : "song registered", 'id' : id}, 200
@@ -163,11 +163,11 @@ def post_song_(entity : list[str], song_id : str, entity_name : str, user_id : s
     #}
 #}
 
-def post_song_senses(senses : list, song_id : str, user_id, goal : int = 0, conn = None):#{
+def post_song_senses(senses : list, song_id : str, user_id, conn = None) :#{
     with conn.cursor() as cur :#{
-        for sense in senses:#{
-            query = f"insert into song_sense(song_id, sense_id, goal, user_id) values('{song_id}','{sense}','{goal}','{user_id}')"
-            cur.execute(query)
+        for sense in senses :#{
+            query = f"insert into song_sense(song_id, sense_id, goal, user_id) values(%s, %s, %s, %s)"
+            cur.execute(query, (song_id, sense.get('id', ''), float(sense.get('score', 0)), user_id))
         #}
     #}
 #}
@@ -214,7 +214,7 @@ def put(song_id : str, name : str, description : str, url : str, goal : str, use
         post_song_(playlists, song_id, 'playlist', user_id, conn)
         post_song_(singers, song_id, 'singer', user_id, conn)
         post_song_(languages, song_id, 'language', user_id, conn)
-        post_song_senses(senses, song_id, user_id, goal, conn=conn)
+        post_song_senses(senses, song_id, user_id, conn = conn)
 
         conn.commit()
         return {"message" : "song update successfully"}, 200
