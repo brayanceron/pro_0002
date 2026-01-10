@@ -7,6 +7,7 @@ export type SenseOptionsType = {
     score: number,
 }
 
+//TODO change this file to inputs folder
 const SenseInput = ({ defaultValues, onChange }: { defaultValues: SenseOptionsType[], onChange: (selection: SenseOptionsType[]) => void }) => {
     const [selection, setSelection] = useState<SenseOptionsType[]>(defaultValues ? defaultValues : []);
 
@@ -15,18 +16,16 @@ const SenseInput = ({ defaultValues, onChange }: { defaultValues: SenseOptionsTy
         if (updatedSelection) setSelection(updatedSelection);
     }
 
+    const [ids, setIds] = useState<string[]>(); //TODO validate what happens when id of defaultVales is not valid id of options available in MultipleSelect/backend
     useEffect(() => { onChange(selection); }, [selection]);
-
-    const ids : string[] = [];
-    defaultValues.forEach((item) => {ids.push(item.id);});
-
-    //TODO validate what happens when id of defaultVales is not valid id of options available in MultipleSelect/backend
+    useEffect(() => { setIds(defaultValues.map((item) => item.id)); },[]);
+    
 
     return (
         <>
             <WrapMultipleSelect
                 entity="sense"
-                values={ids} // values={options}
+                values={ids!} // values={options}
                 onChangeMultipleSelect={(event: BaseSyntheticEvent) => { // onChangeMultipleSelect={onChangeMultipleSelect}
                     const newSelection: SenseOptionsType[] = [];
                     const options = Array.from(event.target.selectedOptions);
