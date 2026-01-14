@@ -166,8 +166,12 @@ def post_song_(entity : list[str], song_id : str, entity_name : str, user_id : s
 def post_song_senses(senses : list, song_id : str, user_id, conn = None) :#{
     with conn.cursor() as cur :#{
         for sense in senses :#{
+            score = {
+                'min' : sense.get('score', {}).get('min', 0),
+                'max' : sense.get('score', {}).get('max', 0),
+            }
             query = f"insert into song_sense(song_id, sense_id, goal, user_id) values(%s, %s, %s, %s)"
-            cur.execute(query, (song_id, sense.get('id', ''), float(sense.get('score', 0)), user_id))
+            cur.execute(query, (song_id, sense.get('id', ''), float(score['max']), user_id))
         #}
     #}
 #}
@@ -533,13 +537,22 @@ def get_by_language(language_id : str):#{
 #TODO this way of generate is too basic, it must be moplexer
 @validate
 def generate(genders : list[str], senses : list[str], singers : list[str], languages : list[str], goal : float, user_id : str, save = True ) :#{
+    # TODO validate auth user is equal to user_id
     if(AUTH_ERROR := auth_get_id(user_id)): return AUTH_ERROR #Validate that the user is the same as the one who logged in. 
     
     if (not user_id): return {'message' : "Insuficient data"}, 400;
     if (not genders and not senses and not singers and not languages and not goal): return {'message' : "Insuficient data"}, 400;
 
-    # TODO validate auth user is equal to user_id
-
+    #BUG - it isn't protected of sql injection
+    sense_str = ""
+    for s in senses :#{
+        sense_str += f"""
+                (song_sense.sense_id = '{s.get('id', '')}' 
+                and song_sense.goal <= {float(s.get('score', {}).get('max', 0))} 
+                and song_sense.goal >= {float(s.get('score', {}).get('min', 0))}) or """
+    #}
+    sense_str += " 1=0 "
+    
     q = f"""
     select distinct song.id, song.name, song.description, song.url, song.goal, song.image, song.user_id 
     from 
@@ -551,9 +564,9 @@ def generate(genders : list[str], senses : list[str], singers : list[str], langu
 
     where 
     {f"song_gender.gender_id in ({','.join([f"'{g}'" for g in genders])}) and" if genders else ''}
-    {f"song_sense.sense_id in ({','.join([f"'{s}'" for s in senses])}) and" if senses else ''}
     {f"song_singer.singer_id in ({','.join([f"'{sg}'" for sg in singers])}) and" if singers else ''}
     {f"song_language.language_id in ({','.join([f"'{l}'" for l in languages])}) and" if languages else ''}
+    { f"({sense_str}) and " if senses else '' }
     song.goal >= {goal if float(goal) > 0 else -1} and
     song.user_id = '{user_id}'
     """
