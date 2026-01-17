@@ -1,7 +1,6 @@
-import { useEffect, /* useRef, */ useState, type BaseSyntheticEvent } from "react";
-import { WrapMultipleSelect } from "./WrapMultipleSelect";
-
-import { AppInputRange } from "./AppInputRange";
+import { useEffect, useState, type BaseSyntheticEvent } from "react";
+import { WrapMultipleSelect } from "../../forms/SongForm/WrapMultipleSelect";
+import { AppRangeInput } from "../AppRangeInput/AppRangeInput";
 
 export type SenseOptionsType = {
     id: string,
@@ -14,7 +13,6 @@ export type ScoreType = {
     max : number,
 }
 
-//TODO change this file to inputs folder
 const SenseInput = ({ defaultValues, onChange, isMultiple = false }: { defaultValues: SenseOptionsType[], onChange: (selection: SenseOptionsType[]) => void, isMultiple?: boolean }) => {
     const [selection, setSelection] = useState<SenseOptionsType[]>(defaultValues ? defaultValues : []);
 
@@ -61,7 +59,7 @@ const SensesRanges = ({ selectedSenses, onChangeRange, isMultiple }: { selectedS
                             <div className="flex align-middle justify-center items-center mb-[3px]">
                                 <p className="mr-1 px-0 w-2/12 text-xs text-right">{name}</p>
 
-                                <AppInputRange
+                                <AppRangeInput
                                     key={id}
                                     defaultValue={score}
                                     id={id}
