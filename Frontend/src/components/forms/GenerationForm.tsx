@@ -6,7 +6,7 @@ import { usePost, type reqProps } from '../../hooks/usePost';
 import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { Method } from "../../utils/Methods"
-import { SenseInput, type SenseOptionsType } from './SongForm/SenseInput';
+import { SenseInput, type SenseOptionsType } from '../inputs/SenseInput/SenseInput';
 
 export type GenerationFormsFields = { // interface GenerationFormsFields  {
     genders?: string[],
