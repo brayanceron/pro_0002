@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router';
-import SongForm from '../../components/forms/SongForm'
+import SongForm from '../../components/forms/SongForm/SongForm'
 import type { reqProps } from '../../hooks/usePost';
 
 const POST = () => {
