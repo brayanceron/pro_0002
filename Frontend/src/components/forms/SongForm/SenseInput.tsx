@@ -16,15 +16,15 @@ export type ScoreType = {
 
 //TODO change this file to inputs folder
 const SenseInput = ({ defaultValues, onChange, isMultiple = false }: { defaultValues: SenseOptionsType[], onChange: (selection: SenseOptionsType[]) => void, isMultiple?: boolean }) => {
-    const [selectionData, setSelectionData] = useState<SenseOptionsType[]>(defaultValues ? defaultValues : []);
+    const [selection, setSelection] = useState<SenseOptionsType[]>(defaultValues ? defaultValues : []);
 
     const onChangeRange = ({ /* name, */ score, id }: SenseOptionsType) => {
-        const updatedSelection = selectionData.map((item: SenseOptionsType) => { return item.id === id ? { ...item, score } : item; }); // const updatedSelection = selectionData.map((item: SenseOptionsType) => { return item.id === id ? { id: item.id, name: item.name, score : newScore } : item; });
-        if (updatedSelection) {console.log("saving..."); setSelectionData(updatedSelection);}
+        const updatedSelection = selection.map((item: SenseOptionsType) => { return item.id === id ? { ...item, score } : item; }); // const updatedSelection = selectionData.map((item: SenseOptionsType) => { return item.id === id ? { id: item.id, name: item.name, score : newScore } : item; });
+        if (updatedSelection) {console.log("saving..."); setSelection(updatedSelection);}
     }
 
     const [ids, setIds] = useState<string[]>(); //TODO validate what happens when id of defaultVales is not valid id of options available in MultipleSelect/backend
-    useEffect(() => { onChange(selectionData); }, [selectionData]);
+    useEffect(() => { onChange(selection); }, [selection]);
     useEffect(() => { setIds(defaultValues.map((item) => item.id)); },[]);
     
     return (
@@ -37,16 +37,16 @@ const SenseInput = ({ defaultValues, onChange, isMultiple = false }: { defaultVa
                     const options = Array.from(event.target.selectedOptions);
 
                     options.forEach((option: any) => {
-                        const f: SenseOptionsType | undefined = selectionData.find((s) => s.id === option.value);
+                        const f: SenseOptionsType | undefined = selection.find((s) => s.id === option.value);
                         if (f) { newSelection.push({'id': f.id, 'name': f.name, 'score': f.score });}
                         else{newSelection.push({'id': option.value, 'name': option.text, 'score': {min: isMultiple ? 0 : -1, max: 0}});} // default score
                     });
-                    setSelectionData(newSelection);
+                    setSelection(newSelection);
                 }}
             />
             <br />
 
-            <SensesRanges selectedSenses={selectionData} onChangeRange={onChangeRange} isMultiple={isMultiple} />
+            <SensesRanges selectedSenses={selection} onChangeRange={onChangeRange} isMultiple={isMultiple} />
         </>
     );
 }
