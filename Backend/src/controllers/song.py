@@ -129,6 +129,7 @@ def post(name : str, description : str, url : str, goal : str, user_id : str, ge
 
     singers = singers or ['unknown']
     languages = languages or ['unknown']
+    genders = genders or ['unknown']
     if (not name or not url or not user_id):#{
         return {'message' : "Insuficient data"}, 400
     #}
@@ -182,6 +183,7 @@ def put(song_id : str, name : str, description : str, url : str, goal : str, use
     # TODO get song data to verify what is going to be updated and what not and verify if is convenient to update or not with optional arguments
     singers = singers if singers and len(singers) > 0  else ['unknown']
     languages = languages if languages and len(languages) > 0  else ['unknown']
+    genders = genders or ['unknown']
     # if (not name or not user_id):#{
     #     return {'message' : "Insuficient data"}, 400
     # #}
