@@ -20,7 +20,7 @@ function validarLinkYoutube(url: string) {
     return youtubeRegex.test(url);
 }
 
-const emptyFields = { url: '', image: '', name: '', languages: '', duration: '', genders: [], senses: [], singers: [], playlists: [], description: '', goal: 0 }
+const emptyFields = { url: '', image: '', name: '', duration: '', genders: [], senses: [], singers: [], languages: [], playlists: [], description: '', goal: 0 }
 
 const SongForm = ({ values = emptyFields, url, method = Method.POST, callback }: { values?: any, url: string, method?: Method, callback: (params: reqProps) => void }) => {
     const { user: userAuth } = useContext(AuthContext); // const userAuth = useContext(AuthContext!);
@@ -97,7 +97,7 @@ const SongForm = ({ values = emptyFields, url, method = Method.POST, callback }:
                     ['gender', /* 'sense', */ 'singer', 'language', 'playlist'].map((item: string) => {
                         return (
                             <WrapMultipleSelect entity={item} values={data[`${item}s`]} onChangeMultipleSelect={onChangeMultipleSelect}
-                                addAdmin={item == 'playlist' ? false : true} /* key={item} */ />
+                                addAdmin={item == 'playlist' ? false : true} key={item} />
                         );
                     })
                 }
