@@ -5,6 +5,7 @@ from uuid import uuid4
 from json import dumps, loads
 from datetime import datetime
 from src.utils.load_file import load_file
+from flask import jsonify
 
 from src.controllers.auth_controllers.song_auth_controller import auth_get, auth_get_id, auth_post, auth_post_song_, auth_put, auth_delete, auth_get_by_user
 
@@ -115,7 +116,7 @@ def get_id(id, conn, extended = False,) :#{
 
         if(AUTH_ERROR := auth_get_id(song['user_id'])): return AUTH_ERROR
 
-        if (extended and (res := extend([song], conn))[1] == 200) : return res[0][0], res[1];
+        if (extended and (res := extend([song], conn))[1] == 200) : return  jsonify(res[0][0]), res[1];
         return song, 200
     #}
 #}
@@ -144,7 +145,7 @@ def post(name : str, description : str, url : str, goal : str, user_id : str, ge
         post_song_(playlists, id, 'playlist', user_id, conn)
         post_song_(singers, id, 'singer', user_id, conn)
         post_song_(languages, id, 'language', user_id, conn)
-        post_song_senses(senses, id, user_id, goal, conn=conn)
+        post_song_senses(senses, id, user_id, conn = conn)
 
         conn.commit()
         return {'message' : "song registered", 'id' : id}, 200
@@ -162,11 +163,15 @@ def post_song_(entity : list[str], song_id : str, entity_name : str, user_id : s
     #}
 #}
 
-def post_song_senses(senses : list, song_id : str, user_id, goal : int = 0, conn = None):#{
+def post_song_senses(senses : list, song_id : str, user_id, conn = None) :#{
     with conn.cursor() as cur :#{
-        for sense in senses:#{
-            query = f"insert into song_sense(song_id, sense_id, goal, user_id) values('{song_id}','{sense}','{goal}','{user_id}')"
-            cur.execute(query)
+        for sense in senses :#{
+            score = {
+                'min' : sense.get('score', {}).get('min', 0),
+                'max' : sense.get('score', {}).get('max', 0),
+            }
+            query = f"insert into song_sense(song_id, sense_id, goal, user_id) values(%s, %s, %s, %s)"
+            cur.execute(query, (song_id, sense.get('id', ''), float(score['max']), user_id))
         #}
     #}
 #}
@@ -213,7 +218,7 @@ def put(song_id : str, name : str, description : str, url : str, goal : str, use
         post_song_(playlists, song_id, 'playlist', user_id, conn)
         post_song_(singers, song_id, 'singer', user_id, conn)
         post_song_(languages, song_id, 'language', user_id, conn)
-        post_song_senses(senses, song_id, user_id, goal, conn=conn)
+        post_song_senses(senses, song_id, user_id, conn = conn)
 
         conn.commit()
         return {"message" : "song update successfully"}, 200
@@ -311,26 +316,31 @@ def count_search(pattern : str, user_id : str, conn) :#{
 #}
 
 
-def extend(songs : list, conn) :#{
+def extend(songs : list, conn) -> list :#{ # it returns same songs list with extended data
 
     with conn.cursor() as cur :#{
         for song in songs :#{
-            keys = ['gender','language','sense','singer', 'playlist']
-            dic_list : dict = { k : [] for k in keys }
+            keys_cols : dict = { k : [f"{k}_id"] for k in ['gender','language','sense','singer', 'playlist'] }
+            keys_cols['sense'] = ['sense_id', 'goal', 'user_id']
+            
+            dic_list : dict = { k : [] for k in keys_cols.keys() }
 
-            for k in keys :#{
-                cur.execute(f"select {k}_id from song_{k} where song_id = " + "%s", [ song['id']])
-                results_ids = cur.fetchall(); results_ids = [i[0] for i in results_ids if i];
-                for result_id in results_ids :#{
+            for k in keys_cols.keys() :#{
+                cur.execute(f"select {','.join(keys_cols[k])} from song_{k} where song_id = " + "%s", [ song['id']]) # cur.execute(f"select {k}_id from song_{k} where song_id = " + "%s", [ song['id']])
+                rows = cur.fetchall()
+                if(cur.rowcount == 0) : continue
+                for row in rows :#{
+                    cols = keys_cols[k]
                     res, status = [], 500
                     ctrl = GenericController(k)
-                    res, status = ctrl.get_id_with_conn(result_id, conn)
-                    if status == 200 : dic_list[k].append(res)
+                    res, status = ctrl.get_id_with_conn(row[0], conn)
+                    zip_dict = dict(zip(cols, row))
+                    if status == 200 : dic_list[k].append({**res, **zip_dict})
                 #}
             #}
 
             # song |= dic_list 
-            song.update({f"{k2}s": dic_list[k2]  for k2 in keys})
+            song.update({f"{k2}s": dic_list[k2]  for k2 in keys_cols.keys()})
         #}
         
         return songs, 200
@@ -527,13 +537,22 @@ def get_by_language(language_id : str):#{
 #TODO this way of generate is too basic, it must be moplexer
 @validate
 def generate(genders : list[str], senses : list[str], singers : list[str], languages : list[str], goal : float, user_id : str, save = True ) :#{
+    # TODO validate auth user is equal to user_id
     if(AUTH_ERROR := auth_get_id(user_id)): return AUTH_ERROR #Validate that the user is the same as the one who logged in. 
     
     if (not user_id): return {'message' : "Insuficient data"}, 400;
     if (not genders and not senses and not singers and not languages and not goal): return {'message' : "Insuficient data"}, 400;
 
-    # TODO validate auth user is equal to user_id
-
+    #BUG - it isn't protected of sql injection
+    sense_str = ""
+    for s in senses :#{
+        sense_str += f"""
+                (song_sense.sense_id = '{s.get('id', '')}' 
+                and song_sense.goal <= {float(s.get('score', {}).get('max', 0))} 
+                and song_sense.goal >= {float(s.get('score', {}).get('min', 0))}) or """
+    #}
+    sense_str += " 1=0 "
+    
     q = f"""
     select distinct song.id, song.name, song.description, song.url, song.goal, song.image, song.user_id 
     from 
@@ -545,9 +564,9 @@ def generate(genders : list[str], senses : list[str], singers : list[str], langu
 
     where 
     {f"song_gender.gender_id in ({','.join([f"'{g}'" for g in genders])}) and" if genders else ''}
-    {f"song_sense.sense_id in ({','.join([f"'{s}'" for s in senses])}) and" if senses else ''}
     {f"song_singer.singer_id in ({','.join([f"'{sg}'" for sg in singers])}) and" if singers else ''}
     {f"song_language.language_id in ({','.join([f"'{l}'" for l in languages])}) and" if languages else ''}
+    { f"({sense_str}) and " if senses else '' }
     song.goal >= {goal if float(goal) > 0 else -1} and
     song.user_id = '{user_id}'
     """

@@ -2,6 +2,7 @@ from flask import Blueprint, request
 from src.db.database import DatabaseConnection
 import src.controllers.song
 import src.controllers.auth
+import json
 
 keys : list = ['name', 'description', 'url', 'goal', 'user_id', 'available', 'duration' ]
 ext_keys : list = ['genders', 'senses', 'singers', 'languages', 'playlists']
@@ -32,17 +33,14 @@ def post() :#{
     form = {k : form.get(k) for k in keys} # extract necesary keys
     form = {**form, **{k : values.getlist(k) for k in ext_keys}} # extract list keys
     form = {**form, **{k :  [v for v in (form.get(k) or []) if v] for k in ext_keys}} # format(delete empty values) list keys
+    form['senses'] = get_senses_from_str(form.get('senses', [''])[0])
 
     del form['duration']
     if form['available'] == None : del form['available']
 
-
     image_file = request.files.get('image')
     music_file = request.files.get('file')
 
-    print(form)
-    print(form)
-    # return {'message' : "Deliver error"}, 400
     return src.controllers.song.post(**form, image_file = image_file, music_file = music_file)
 #}
 
@@ -57,13 +55,19 @@ def put(id : str) :#{
     #BUG it is a problem becouse it don't allow to leave empty lists("[]")
     form = {**form, **{k : values.getlist(k) for k in ext_keys}} # extract list keys
     form = {**form, **{k :  [v for v in (form.get(k) or []) if v] for k in ext_keys}} # format(delete empty values) list keys
+    form['senses'] = get_senses_from_str(form.get('senses', [''])[0])
 
     del form['duration']
     if form['available'] == None : del form['available']
 
     image_file = request.files.get('image')
-
     return src.controllers.song.put(id, **form, image_file = image_file)
+#}
+
+#NOTE - this function is used only by post and put endpoints
+def get_senses_from_str(senses_str : str) -> list :#{
+    try : return [ {k : i.get(k, '') for k in ['id', 'name', 'score']} for i in json.loads(senses_str) ]
+    except : return []
 #}
 
 @song_router.route('/<id>', methods = ['DELETE'])

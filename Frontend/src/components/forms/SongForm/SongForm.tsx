@@ -1,16 +1,17 @@
 import { useContext, useEffect, useState, type BaseSyntheticEvent } from "react"
 
-import AppButton from "../buttons/AppButton"
-import AppInput from "../inputs/AppInput"
-import AppTextArea from "../inputs/AppTextArea"
-import { GoalInput } from "../inputs/GoalInput"
-import { useFormData } from "../../hooks/useFormData"
-import { usePost, type reqProps } from "../../hooks/usePost"
-import { Method } from "../../utils/Methods"
-import { AuthContext } from "../../context/AuthContext"
-import { WrapMultipleSelect } from "./SongForm/WrapMultipleSelect"
-import { AppSelectOptionInput } from "../inputs/AppSelectOptionInput/AppSelectOptionInput"
-import { YouTubePlayer } from "../player/Yt"
+import AppButton from "../../buttons/AppButton"
+import AppInput from "../../inputs/AppInput"
+import AppTextArea from "../../inputs/AppTextArea"
+import { GoalInput } from "../../inputs/GoalInput"
+import { useFormData } from "../../../hooks/useFormData"
+import { usePost, type reqProps } from "../../../hooks/usePost"
+import { Method } from "../../../utils/Methods"
+import { AuthContext } from "../../../context/AuthContext"
+import { WrapMultipleSelect } from "./WrapMultipleSelect"
+import { AppSelectOptionInput } from "../../inputs/AppSelectOptionInput/AppSelectOptionInput"
+import { YouTubePlayer } from "../../player/Yt"
+import { SenseInput, type SenseOptionsType} from "../../inputs/SenseInput/SenseInput"
 
 // TODO pass this to SongForm folder
 
@@ -41,6 +42,7 @@ const SongForm = ({ values = emptyFields, url, method = Method.POST, callback }:
     function onSub() { sendReq(); }
 
     const onChangePlayerStatus = (error : boolean) => { setValidateYTUrl(error); }
+    const onChangeSense = (snsData: SenseOptionsType[]) => { onChange({ target: { name: 'senses', value: JSON.stringify(snsData) } }); }
     return (
         <div className="shadow-md  w-full m-auto border-t-[1px] border-gray-100 border-solid">
             <div className="w-full px-4 py-2">
@@ -92,13 +94,18 @@ const SongForm = ({ values = emptyFields, url, method = Method.POST, callback }:
                 <AppSelectOptionInput />
                 
                 {
-                    ['gender', 'sense', 'singer', 'language', 'playlist'].map((item: string) => {
+                    ['gender', /* 'sense', */ 'singer', 'language', 'playlist'].map((item: string) => {
                         return (
                             <WrapMultipleSelect entity={item} values={data[`${item}s`]} onChangeMultipleSelect={onChangeMultipleSelect}
                                 addAdmin={item == 'playlist' ? false : true} /* key={item} */ />
                         );
                     })
                 }
+
+                <div className="w-full shadow-md px-2 py-4 my-3 border-[1px] border-gray-200">
+                    <SenseInput defaultValues={data['senses'].map((item : any)=> { return {...item, score : {min : -1, max : item.score}}})} onChange={onChangeSense} />
+                    {/* <SenseInput defaultValues={data['senses'].map((item : SenseOptionsType)=> { return {...item, score : {min : item.score.min, max : item.score.max}}})} onChange={onChangeSense} /> */}
+                </div>
 
                 <AppTextArea id="description" name="description" value={data.description} onChange={onChange} options={{ label: "Description", icon: "text-recognition" }} />
 

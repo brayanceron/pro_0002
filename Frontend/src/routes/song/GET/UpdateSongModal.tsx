@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import SongForm from "../../../components/forms/SongForm"
+import SongForm from "../../../components/forms/SongForm/SongForm"
 import { Method } from "../../../utils/Methods"
 import type { reqProps } from "../../../hooks/usePost"
 import { Notyf } from "notyf"
