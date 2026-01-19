@@ -7,7 +7,7 @@ def load_file(file : FileStorage, sub_folders : list = [], prefix : str = 'file'
     if not isinstance(file, FileStorage) : return None
 
     # BUG Review special characters of subfolders
-    # BUG validate file is image, your mimetype must be : png, jpeg, jpg, webp...
+    # BUG validate file is image, theirs mimetype must be : png, jpeg, jpg, webp...
     
     try :#{
         file_id = uuid4().hex
