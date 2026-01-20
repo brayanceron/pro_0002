@@ -13,6 +13,7 @@ export type OptionsInput = {
     helper?: string,
 }
 
+// TODO  implement  Appinput for files
 
 const AppInput = ({ value, name, id, options: { label = '', placeholder = '', helper = '', icon = '' } = {}, ...attributes }: AppInputProps) => {
 
