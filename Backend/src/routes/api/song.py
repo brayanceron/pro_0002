@@ -61,7 +61,8 @@ def put(id : str) :#{
     if form['available'] == None : del form['available']
 
     image_file = request.files.get('image')
-    return src.controllers.song.put(id, **form, image_file = image_file)
+    music_file = request.files.get('file')
+    return src.controllers.song.put(id, **form, image_file = image_file, music_file = music_file)
 #}
 
 #NOTE - this function is used only by post and put endpoints

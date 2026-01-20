@@ -8,6 +8,7 @@ from src.utils.load_file import load_file
 from flask import jsonify
 
 from src.controllers.auth_controllers.song_auth_controller import auth_get, auth_get_id, auth_post, auth_post_song_, auth_put, auth_delete, auth_get_by_user
+from src.utils.format_url import format_url
 
 db = DatabaseConnection()
 
@@ -125,7 +126,8 @@ def get_id(id, conn, extended = False,) :#{
 
 @validate
 def post(name : str, description : str, url : str, goal : str, user_id : str, genders, senses, singers, languages, playlists, music_file, image_file, available : bool = 1, ) :#{
-    url = url if url else load_file(music_file) if music_file else None
+    if(not (f_url := format_url(url)) and not (l_url := load_file(music_file))) : return {'message' : "url or file is invalid"}, 400
+    else : url = f_url or l_url or None
 
     singers = singers or ['unknown']
     languages = languages or ['unknown']
@@ -178,7 +180,7 @@ def post_song_senses(senses : list, song_id : str, user_id, conn = None) :#{
 #}
 
 @validate
-def put(song_id : str, name : str, description : str, url : str, goal : str, user_id : str, genders, senses, singers, languages, playlists, image_file,  available : bool = 1) :#{
+def put(song_id : str, name : str, description : str, url : str, goal : str, user_id : str, genders, senses, singers, languages, playlists, music_file, image_file,  available : bool = 1) :#{
     # TODO receive arguments way optional to not update all values if not necessary and doing update less demanding (List = [] o None)
     # TODO get song data to verify what is going to be updated and what not and verify if is convenient to update or not with optional arguments
     singers = singers if singers and len(singers) > 0  else ['unknown']
@@ -189,6 +191,8 @@ def put(song_id : str, name : str, description : str, url : str, goal : str, use
     # #}
     
     if not song_id : return {'message' : "song id not provided"}, 400
+    if((rsrc := url or music_file) and not (f_url := format_url(url)) and not (l_url := load_file(music_file))) : return {'message' : "url or file is invalid"}, 400
+    else : url = f_url or l_url if rsrc else None # else : url = f_url or l_url or None if rsrc else None
 
     if (AUTH_ERROR := auth_put(user_id)) : return AUTH_ERROR
     
