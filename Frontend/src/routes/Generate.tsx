@@ -2,29 +2,22 @@ import { useState, useContext, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import useFetch from "../hooks/useFetch";
 import { GenerationForm } from "../components/forms/GenerationForm";
-import { PlayListContext } from "../context/PlayListContext";
 import type { reqProps } from "../hooks/usePost";
-import { useNavigate } from "react-router";
 import { AppAlert } from "../components/informational/AppAlert";
+import { PlayListModal } from "./song/generate/PlayListModal";
+import { HSOverlay } from 'flyonui/flyonui';
 
 const Generate = () => {
     const { user } = useContext(AuthContext);
-    const { setPlayList } = useContext(PlayListContext);
-    const navigate = useNavigate();
 
     const { data, isLoading, error, /* res */ } = useFetch(`http://localhost:5000/api/song/get_generated_playlists/${user?.id}`);
+    const [modalData, setModalData] = useState<reqProps>({ result: null, isLoading: true, error: null, res: null });
     const [indexg, setIndexg] = useState(0);
     const url = "http://localhost:5000/api/song/generate?save=true"
 
     const cb = ({ isLoading, result, error }: reqProps) => {
-        if (error) return alert(error.message);
-        setPlayList({
-            isLoading: isLoading,
-            error: error,
-            playList: result,
-            currentIndex: 0,
-        });
-        navigate('/playing');
+        setModalData({ result: result, isLoading: isLoading, error: error, res: null });
+        HSOverlay.open('#large-modal'); // modal.open()
     }
     useEffect(() => { if (error) { setIndexg(-1); } }, [isLoading])
 
@@ -39,7 +32,7 @@ const Generate = () => {
                                     return (
                                         <GeneratedPlayList
                                             date={item['created_at']}
-                                            numberSongs={item['json_data']['playlist'].length}
+                                            numberSongs={item['json_data']['playlist_size'] || -1}
                                             index={i}
                                             setIndx={setIndexg}
                                         />
@@ -81,6 +74,7 @@ const Generate = () => {
                     </div>
                     : <></>
             }
+            <PlayListModal error={modalData.error} isLoading={modalData.isLoading} result={modalData.result} res={modalData.res} />
         </>
     );
 }
