@@ -601,17 +601,17 @@ def generate(genders : list[str], senses : list[str], singers : list[str], langu
             'goal' : str(goal) if float(goal) > 0 else -1 # 'goal' : goal,
         }
         generated_by = { k : generated_by[k] for k in generated_by.keys() if generated_by[k]}
-        if save : save_generated_playlists(songs, generated_by, user_id, conn = conn)
+        if save : save_generated_playlists(len(songs), generated_by, user_id, conn = conn)
         return songs, 200
     #}
 #}
 
-def save_generated_playlists(pl : list, generated_by : dict, user_id : str, conn) :#{
-    if (not pl or not generated_by or not user_id) : return None;
+def save_generated_playlists(playlist_size : int, generated_by : dict, user_id : str, conn) :#{
+    if (not generated_by or not user_id) : return None; # if (not pl or not generated_by or not user_id) : return None;
 
     try :#{
         json_data = dumps({
-            'playlist' : pl,
+            'playlist_size' : playlist_size or -1,
             'generated_by' : generated_by,
             'user_id' : user_id,
         })
