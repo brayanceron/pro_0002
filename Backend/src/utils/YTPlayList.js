@@ -63,5 +63,6 @@ const saveFile = (contenido, nombre) => {
     URL.revokeObjectURL(url);
 }
 
+console.log("TOTAL SONGS = ", fileObj.song.length)
 const stringFile = JSON.stringify(fileObj);
 saveFile(stringFile, "PlayListBk.json");
