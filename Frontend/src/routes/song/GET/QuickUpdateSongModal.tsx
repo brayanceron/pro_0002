@@ -2,6 +2,7 @@
 import { GenerationForm, /* type GenerationFormsFields */ } from "../../../components/forms/GenerationForm"
 import { Method } from "../../../utils/Methods"
 
+// TODO delete this file later and use UpdateSongModal instead
 // export const UpdateSongModal = ({ modalId, defaultValues, isChanging }: { modalId: string, defaultValues: GenerationFormsFields, isChanging: boolean }) => {
 export const QuickUpdateSongModal = ({ modalId, defaultValues, isChanging }: { modalId: string, defaultValues: {}, isChanging: boolean }) => {
     
@@ -20,11 +21,13 @@ export const QuickUpdateSongModal = ({ modalId, defaultValues, isChanging }: { m
 
                             {
                                 isChanging ? <p>Loading song data...</p>
-                                : <GenerationForm 
-                                    values={defaultValues}
+                                : 
+                                    <GenerationForm
+                                    // values={defaultValues}
                                     url={`http://localhost:5000/api/song/${(defaultValues as any).id}`}
                                     method={Method.PUT}
-                                    callback={() => { }} />
+                                    callback={() => { }}
+                                    />
                             }
                             <p>{JSON.stringify(defaultValues)}</p>
                             {/* <WrapMultipleSelect
