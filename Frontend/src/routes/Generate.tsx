@@ -43,7 +43,7 @@ const Generate = () => {
 
                         {
                             indexg === -1 ? <></> :
-                                <div className="w-1/4 mx-auto shadow-md m-8 p-5">
+                                <div className="w-2/3 mx-auto shadow-md m-8 p-5">
                                     <h1 className="text-center text-2xl font-bold mt-6 mb-4">{indexg === -1 ? 'Generate' : `Re-Generate`}</h1>
                                     {
                                         data.map((_: any, j: number) => {
@@ -54,7 +54,6 @@ const Generate = () => {
                                                         values={data[j]['json_data']['generated_by']}
                                                         url={url}
                                                         callback={cb}
-                                                    // saveArg={j === 0 ? false : true} // this for not save the first and don't show repeated generated playlists
                                                     />
                                                 </>
                                             );
