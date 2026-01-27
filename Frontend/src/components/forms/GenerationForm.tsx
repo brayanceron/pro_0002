@@ -1,12 +1,12 @@
-import { WrapMultipleSelect } from './SongForm/WrapMultipleSelect';
-import { GoalInput } from '../inputs/GoalInput';
 import AppButton from '../buttons/AppButton';
 import { useForm } from '../../hooks/useForm';
 import { usePost, type reqProps } from '../../hooks/usePost';
 import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { Method } from "../../utils/Methods"
-import { SenseInput, type SenseOptionsType } from '../inputs/SenseInput/SenseInput';
+import { type SenseOptionsType } from '../inputs/SenseInput/SenseInput';
+import { GenerationFormBase } from './GenerationForm/GenerationFormBase';
+import { GoalInput } from '../inputs/GoalInput';
 
 export type GenerationFormsFields = { // interface GenerationFormsFields  {
     genders?: string[],
@@ -14,38 +14,46 @@ export type GenerationFormsFields = { // interface GenerationFormsFields  {
     singers?: string[],
     languages?: string[],
     goal?: number,
-    user_id?: string,
+    // user_id?: string,
 }
 type ComponentProps = {
-    values?: GenerationFormsFields,
+    values?: GenerationFormsFieldsComplete,
     url : string,
     method? : Method,
     callback: (params: reqProps) => void,
     saveArg?: boolean,
 }
 
-const emptyFields = { genders: [], senses: [], singers: [], languages: [], goal: 0, user_id: '' };
+const emptyValues : GenerationFormsFields = { genders: [], senses: [], singers: [], languages: [], goal: 0, /* user_id: '' */ };
+const emptyFields : GenerationFormsFieldsComplete = { 
+    include : emptyValues,
+    exclude : emptyValues,
+    user_id : '',
+    goal : -1,
+};
 const keyThatAreArrays = ['gender', /* 'sense', */ 'singer', 'language'];
-
+// TODO change this file to GenerationForm folder
 
 export const GenerationForm = ({ values = emptyFields, url, callback, method = Method.POST, /* saveArg = true */ }: ComponentProps) => {
     const { user } = useContext(AuthContext)
     values.user_id = user?.id || ''
 
-    const {data, onChange} = useForm(values); // let { data, onChangeMultipleSelect, onChange } = useFormData<GenerationFormsFields>(values, keyThatAreArrays.map(i => i + 's'));
+    const { data, onChange } = useForm<GenerationFormsFieldsComplete>(values); // let { data, onChangeMultipleSelect, onChange } = useFormData<GenerationFormsFields>(values, keyThatAreArrays.map(i => i + 's') );
     const { sendReq, isLoading } = usePost(data, url, callback, method);
 
     const onSubmit = () => { 
         sendReq(); 
     }
-    const onChangeSense = (data: any) => { onChange({ target: { name: 'senses', value: data } }); }
-    const onChangeMultipleSelect = (event: any) => {
-        const values = Array.from(event.target.selectedOptions, (option: any) => option.value);
-        const key = event.target.name;
-        onChange({ target: { name: key, value: values } });
-    }
 
-    /* //TODO (this for later) : this save playlist data only if the form data changes, it for avoid save repeated generated playlists
+    const onChangeGeneral = (key : string, value: any, typeAction: 'include' | 'exclude') => {
+        const updateValue = { ...data[typeAction], [key]: value };
+        onChange({target : { name: typeAction, value: updateValue }});
+    }
+    const onChangeInclude = (event: any) => { onChangeGeneral(event.target.name, event.target.value, 'include'); }
+    const onChangeExclude = (event: any) => { onChangeGeneral(event.target.name, event.target.value, 'exclude'); }
+    
+    //TODO (this for later) : this save playlist data only if the form data changes, it for avoid save repeated generated playlists
+    /* 
     const [save, setSave] = useState(false); // it starts in false because in beginning both values and data are equal
     const { sendReq, isLoading } = usePost(data, `http://localhost:5000/api/song/generate?${save ? 'save=true' : ''}`, callback); // const { sendReq } = usePost(formData, "http://localhost:5000/api/song/generate", callback);
 
@@ -59,23 +67,28 @@ export const GenerationForm = ({ values = emptyFields, url, callback, method = M
         <>
             {
                 <>
-                    {keyThatAreArrays.map((item: string) => {
-                        return (
-                            <WrapMultipleSelect
-                                entity={item}
-                                values={data[`${item}s` as keyof GenerationFormsFields] as string[] || []}
-                                onChangeMultipleSelect={onChangeMultipleSelect}
-                                key={item}
+                    <div className='w-full flex items-center justify-center'>
+
+                        <div className='w-1/2 h-full shadow-lg p-4 my-4 mx-2 border-[1px] border-gray-200'>
+                            <h1 className="text-center text-2xl font-bold mt-6 mb-4">Include</h1>
+                            <GenerationFormBase 
+                                data={data.include}
+                                keyThatAreArrays={keyThatAreArrays} 
+                                onChange={onChangeInclude} // onChange={onChange}
                             />
-                        );
-                    })}
+                            <GoalInput key="1" value={data.goal} name="goal" id="goal" label="Score" onChange={onChange} />
+                        </div>
+                        
+                        <div className='w-1/2 h-full shadow-lg p-4 my-4 mx-2 border-[1px] border-gray-200'>
+                            <h1 className="text-center text-2xl font-bold mt-6 mb-4">Exclude</h1>
+                            <GenerationFormBase 
+                                data={data.exclude}
+                                keyThatAreArrays={keyThatAreArrays}
+                                onChange={onChangeExclude} // onChange={onChangeEx}
+                            />
+                        </div>
 
-                    <div className="w-full shadow-md px-2 py-4 my-3 border-[1px] border-gray-200">
-                        <SenseInput defaultValues={ values.senses || []} onChange={onChangeSense} isMultiple={true} />
                     </div>
-
-                    <GoalInput key="1" value={data.goal} name="goal" id="goal" label="Score" onChange={onChange} />
-
                     <AppButton text="Generate" onClick={onSubmit} isLoading={isLoading} />
                 </>
 
@@ -83,6 +96,13 @@ export const GenerationForm = ({ values = emptyFields, url, callback, method = M
         </>
 
     );
+}
+
+type GenerationFormsFieldsComplete = {
+    include: GenerationFormsFields,
+    exclude: GenerationFormsFields,
+    user_id : string,
+    goal: number,
 }
 
 //INFO - This function compares two GenerationFormsFields objects to see if they are equal

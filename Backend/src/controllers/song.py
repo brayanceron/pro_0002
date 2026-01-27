@@ -9,6 +9,7 @@ from flask import jsonify
 
 from src.controllers.auth_controllers.song_auth_controller import auth_get, auth_get_id, auth_post, auth_post_song_, auth_put, auth_delete, auth_get_by_user
 from src.utils.format_url import format_url
+from src.helpers.HelperGenerateParams import GenerateParams
 
 db = DatabaseConnection()
 
@@ -540,24 +541,20 @@ def get_by_language(language_id : str):#{
     #}
 #}
 
-#TODO this way of generate is too basic, it must be moplexer
-@validate
-def generate(genders : list[str], senses : list[str], singers : list[str], languages : list[str], goal : float, user_id : str, save = True ) :#{
-    # TODO validate auth user is equal to user_id
-    if(AUTH_ERROR := auth_get_id(user_id)): return AUTH_ERROR #Validate that the user is the same as the one who logged in. 
-    
-    if (not user_id): return {'message' : "Insuficient data"}, 400;
-    if (not genders and not senses and not singers and not languages and not goal): return {'message' : "Insuficient data"}, 400;
-
-    #BUG - it isn't protected of sql injection
+def generate_query(genders : list[str], senses : list[str], singers : list[str], languages : list[str], user_id : str, goal : float = -0.01) :#{
+    # if (not genders and not senses and not singers and not languages and ( 5 < float(goal) < 0)): return ''
+    if (not genders and not senses and not singers and not languages and ( float(goal) > 5 or float(goal) < 0)): return ''
     sense_str = ""
     for s in senses :#{
-        sense_str += f"""
-                (song_sense.sense_id = '{s.get('id', '')}' 
+        sense_str += f"""(
+                song_sense.sense_id = '{s.get('id', '')}' 
                 and song_sense.goal <= {float(s.get('score', {}).get('max', 0))} 
-                and song_sense.goal >= {float(s.get('score', {}).get('min', 0))}) or """
+                and song_sense.goal >= {float(s.get('score', {}).get('min', 0))}
+                ) or """
     #}
     sense_str += " 1=0 "
+    
+    #BUG - it isn't protected of sql injection
     
     q = f"""
     select distinct song.id, song.name, song.description, song.url, song.goal, song.image, song.user_id 
@@ -568,14 +565,31 @@ def generate(genders : list[str], senses : list[str], singers : list[str], langu
     {'join song_singer on song.id = song_singer.song_id' if singers else ''}
     {'join song_language on song.id = song_language.song_id' if languages else ''}
 
-    where 
+    where (
     {f"song_gender.gender_id in ({','.join([f"'{g}'" for g in genders])}) and" if genders else ''}
     {f"song_singer.singer_id in ({','.join([f"'{sg}'" for sg in singers])}) and" if singers else ''}
     {f"song_language.language_id in ({','.join([f"'{l}'" for l in languages])}) and" if languages else ''}
-    { f"({sense_str}) and " if senses else '' }
-    song.goal >= {goal if float(goal) > 0 else -1} and
+    { f"({sense_str}) and " if senses else '' } 
+    1=1 ) and
+    {f"song.goal >= {goal if float(goal) > 0 else -1} and" if goal else ''}
     song.user_id = '{user_id}'
-    """
+    """    
+    return q
+#}
+
+#TODO this way of generate is too basic, it must be moplexer
+@validate
+def generate(include : GenerateParams, exclude : GenerateParams, goal : float, user_id : str, save = True ) :#{ #TODO - improve as receive params, it couldbe sompler
+    # TODO validate auth user is equal to user_id
+    if(AUTH_ERROR := auth_get_id(user_id)): return AUTH_ERROR #Validate that the user is the same as the one who logged in. 
+    
+    if (not user_id): return {'message' : "Insuficient data"}, 400;
+    inc = {**include.get_dict(), "user_id" : user_id, "goal" : goal }
+    exc = {**exclude.get_dict(), "user_id" : user_id, }
+
+    q = ''
+    if (any([q1 := generate_query(**inc), q2 := generate_query(**exc)])) : q = (q1 or ' select * from songs ') + (f" except {q2}" if q2 else '')
+    else : return {'message' : "filters not provided"}, 400;
 
     with db.get_connection() as conn, conn.cursor() as cur :#{
         songs = []
@@ -594,19 +608,22 @@ def generate(genders : list[str], senses : list[str], singers : list[str], langu
             })
         #}
         generated_by : dict = { # generated_by = { f"{k=}".split('=')[0] : k for k in [genders, senses, singers, languages, goal] if k }
-            'genders' : genders,
-            'senses' : senses,
-            'singers' : singers,
-            'languages' : languages,
-            'goal' : str(goal) if float(goal) > 0 else -1 # 'goal' : goal,
+            'include' : include.get_dict(),
+            'exclude' : exclude.get_dict(),
+            'goal' : str(goal) if float(goal) > 0 else -1, # 'goal' : goal,
+            'user_id' : user_id,
+            'playlist_size' : len(songs),
         }
         generated_by = { k : generated_by[k] for k in generated_by.keys() if generated_by[k]}
-        if save : save_generated_playlists(len(songs), generated_by, user_id, conn = conn)
+        if save : save_generated_playlists(generated_by, conn = conn)
         return songs, 200
     #}
 #}
 
-def save_generated_playlists(playlist_size : int, generated_by : dict, user_id : str, conn) :#{
+def save_generated_playlists(generated_by : dict, conn) :#{
+    user_id = generated_by.get('user_id', '')
+    playlist_size = generated_by.get('playlist_size', -1)
+    
     if (not generated_by or not user_id) : return None; # if (not pl or not generated_by or not user_id) : return None;
 
     try :#{
