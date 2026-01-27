@@ -3,6 +3,7 @@ from src.db.database import DatabaseConnection
 import src.controllers.song
 import src.controllers.auth
 import json
+from src.helpers.HelperGenerateParams import GenerateParams
 
 keys : list = ['name', 'description', 'url', 'goal', 'user_id', 'available', 'duration' ]
 ext_keys : list = ['genders', 'senses', 'singers', 'languages', 'playlists']
@@ -119,9 +120,13 @@ def get_bay_language(language_id) :#{
 
 @song_router.route('/generate', methods = ['POST'])
 def generate() :#{
-    ks = ['genders', 'senses', 'singers', 'languages']
-    form = dict(request.get_json())
-    form = {k : form.get(k, [] if k in ks else 0 ) for k in ['goal', 'user_id', *ks]} # extract necesary keys
+    ksa = ['genders', 'senses', 'singers', 'languages'] # keys that are arrays inside include/exclude
+    ks = ('goal', 'user_id', 'include', 'exclude') # keys at request body
+    form = dict(request.get_json()) #FIXME - error if it isn't json
+    form = {k : form.get(k, {} if k in ks[2:] else 0) for k in ks}
+    
+    form['include'] = GenerateParams(**{k : form['include'].get(k, []) for k in ksa})
+    form['exclude'] = GenerateParams(**{k : form['exclude'].get(k, []) for k in ksa})
     
     save = request.args.get('save', False) # save = save if (save := request.args.get('save', None)) else None  
     return src.controllers.song.generate(**form, save = save)
