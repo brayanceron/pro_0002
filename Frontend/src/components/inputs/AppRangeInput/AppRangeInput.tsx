@@ -10,9 +10,10 @@ type AppRangeInputsProps = {
     isMultiple?: boolean
     defaultValue?: ScoreType,
     onChangeRange: (values: SenseOptionsType) => void,
+    addStyles?: any,
 }
 
-export const AppRangeInput = ({ defaultValue = { min: 2, max: 3 }, id, isMultiple = false, onChangeRange }: AppRangeInputsProps) => {
+export const AppRangeInput = ({ defaultValue = { min: 2, max: 3 }, id, isMultiple = false, onChangeRange, addStyles }: AppRangeInputsProps) => {
     const sliderRef: any = useRef(null);
     const [currentValues, setCurrentValues] = useState<ScoreType>(defaultValue);
 
@@ -26,6 +27,7 @@ export const AppRangeInput = ({ defaultValue = { min: 2, max: 3 }, id, isMultipl
                     'min': 0,
                     'max': 5, // 'max': 100 //TODO - max and min should be props
                 },
+                ...addStyles,
                 step: 0.01,
                 cssPrefix: 'noUi-',
             });
