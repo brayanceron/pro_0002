@@ -53,3 +53,14 @@
 .slider-round .noUi-handle-lower .noUi-handle-touch_area {
     display: none;
 }
+
+.slider-round .noUi-tooltip {
+    border-radius: 100%;
+    font-size: 0.7rem;
+    padding: 4px;
+}
+.slider-round .noUi-pips {
+    font-size: 0.8rem;
+    align-items: center;
+    justify-items: center;
+}
