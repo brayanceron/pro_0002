@@ -13,7 +13,7 @@ type AppRangeInputsProps = {
     addStyles?: any,
 }
 
-export const AppRangeInput = ({ defaultValue = { min: 2, max: 3 }, id, isMultiple = false, onChangeRange, addStyles }: AppRangeInputsProps) => {
+export const AppRangeInput = ({ defaultValue = { min: 2.5, max: 4.5 }, id, isMultiple = false, onChangeRange, addStyles }: AppRangeInputsProps) => {
     const sliderRef: any = useRef(null);
     const [currentValues, setCurrentValues] = useState<ScoreType>(defaultValue);
 
