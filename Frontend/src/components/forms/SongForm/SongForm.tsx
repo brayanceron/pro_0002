@@ -3,7 +3,7 @@ import { useContext, useEffect, useState, type BaseSyntheticEvent } from "react"
 import AppButton from "../../buttons/AppButton"
 import AppInput from "../../inputs/AppInput"
 import AppTextArea from "../../inputs/AppTextArea"
-import { GoalInput } from "../../inputs/GoalInput"
+import { AppRangeInput } from "../../inputs/AppRangeInput/AppRangeInput" // import { GoalInput } from "../../inputs/GoalInput"
 import { useFormData } from "../../../hooks/useFormData"
 import { usePost, type reqProps } from "../../../hooks/usePost"
 import { Method } from "../../../utils/Methods"
@@ -12,8 +12,9 @@ import { WrapMultipleSelect } from "./WrapMultipleSelect"
 import { AppSelectOptionInput } from "../../inputs/AppSelectOptionInput/AppSelectOptionInput"
 import { YouTubePlayer } from "../../player/Yt"
 import { SenseInput, type SenseOptionsType} from "../../inputs/SenseInput/SenseInput"
+import { PipsMode } from "nouislider"
 
-// TODO pass this to SongForm folder
+// TODO - create type for this component
 
 function validarLinkYoutube(url: string) {
     const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|v\/|.+\?v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})$/;
@@ -43,6 +44,8 @@ const SongForm = ({ values = emptyFields, url, method = Method.POST, callback }:
 
     const onChangePlayerStatus = (error : boolean) => { setValidateYTUrl(error); }
     const onChangeSense = (snsData: SenseOptionsType[]) => { onChange({ target: { name: 'senses', value: JSON.stringify(snsData) } }); }
+    const onChangeGoalRange = (valuess : SenseOptionsType) => { onChange({target : {name : valuess.id/* 'goal' */, value : valuess.score.max}}) }
+
     return (
         <div className="shadow-md  w-full m-auto border-t-[1px] border-gray-100 border-solid">
             <div className="w-full px-4 py-2">
@@ -109,7 +112,11 @@ const SongForm = ({ values = emptyFields, url, method = Method.POST, callback }:
 
                 <AppTextArea id="description" name="description" value={data.description} onChange={onChange} options={{ label: "Description", icon: "text-recognition" }} />
 
-                <GoalInput id="goal" name="goal" label="Goal : " size="3xl" onChange={onChange} value={data.goal} />
+                {/* <GoalInput id="goal" name="goal" label="Goal : " size="3xl" onChange={onChange} value={data.goal} /> */}
+                <div className='w-full h-[100px] pr-2 mt-5'>
+                    <p className='mb-[10px]'>General Score:</p>
+                    <AppRangeInput defaultValue={{min : 0, max : data.goal}} onChangeRange={onChangeGoalRange} id='goal' isMultiple = {false} addStyles={rangeStyles} /> 
+                </div>
 
                 <div className="w-full my-3">
                     <label className="label label-text" htmlFor="image"> Select Image/Photo </label>
@@ -128,3 +135,15 @@ const SongForm = ({ values = emptyFields, url, method = Method.POST, callback }:
 export default SongForm
 
 
+const rangeStyles: any = {
+    range: {
+        'min': 0,
+        'max': 5, // 'max': 100 //TODO - max and min should be props
+    },
+    pips : {
+        mode: PipsMode.Values,
+        values: [0,1,2,3,4,5],
+        density: 4
+    },
+    tooltips : [ true ],
+}
