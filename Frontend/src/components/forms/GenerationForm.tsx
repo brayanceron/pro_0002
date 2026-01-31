@@ -4,43 +4,35 @@ import { usePost, type reqProps } from '../../hooks/usePost';
 import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
 import { Method } from "../../utils/Methods"
-import { type SenseOptionsType } from '../inputs/SenseInput/SenseInput';
-import { GenerationFormBase } from './GenerationForm/GenerationFormBase';
-import { GoalInput } from '../inputs/GoalInput';
+import { type SenseOptionsType, type ScoreType } from '../inputs/SenseInput/SenseInput';
+import { GenerationFormBase, type GenerationFormsBaseFields, emptyFields as emptyBaseValues} from './GenerationForm/GenerationFormBase';
+import { AppRangeInput } from '../inputs/AppRangeInput/AppRangeInput';
+import { PipsMode } from 'nouislider';
 
-export type GenerationFormsFields = { // interface GenerationFormsFields  {
-    genders?: string[],
-    senses?: SenseOptionsType[], // senses?: string[],
-    singers?: string[],
-    languages?: string[],
-    goal?: number,
-    // user_id?: string,
-}
 type ComponentProps = {
-    values?: GenerationFormsFieldsComplete,
+    values?: GenerationFormsFields,
     url : string,
     method? : Method,
     callback: (params: reqProps) => void,
     saveArg?: boolean,
 }
 
-const emptyValues : GenerationFormsFields = { genders: [], senses: [], singers: [], languages: [], goal: 0, /* user_id: '' */ };
-const emptyFields : GenerationFormsFieldsComplete = { 
-    include : emptyValues,
-    exclude : emptyValues,
+const emptyGoal : ScoreType= { min : 0, max : 4.8 };
+const emptyFields : GenerationFormsFields = { 
+    include : emptyBaseValues,
+    exclude : emptyBaseValues,
     user_id : '',
-    goal : -1,
+    goal : emptyGoal, // goal : -1,
 };
-const keyThatAreArrays = ['gender', /* 'sense', */ 'singer', 'language'];
 // TODO change this file to GenerationForm folder
 
 export const GenerationForm = ({ values = emptyFields, url, callback, method = Method.POST, /* saveArg = true */ }: ComponentProps) => {
     const { user } = useContext(AuthContext)
     values.user_id = user?.id || ''
+    values.goal = {...emptyGoal, ...values.goal}; // values.goal = values.goal || emptyGoal;
 
-    const { data, onChange } = useForm<GenerationFormsFieldsComplete>(values); // let { data, onChangeMultipleSelect, onChange } = useFormData<GenerationFormsFields>(values, keyThatAreArrays.map(i => i + 's') );
+    const { data, onChange } = useForm<GenerationFormsFields>(values);
     const { sendReq, isLoading } = usePost(data, url, callback, method);
-
     const onSubmit = () => { 
         sendReq(); 
     }
@@ -62,7 +54,7 @@ export const GenerationForm = ({ values = emptyFields, url, callback, method = M
         if (compareData(values, data)) { setSave(false); }
         else { setSave(true); }
     }, [data]); */
-
+    const onChangeGoalRange = (valuess : SenseOptionsType) => { onChange({target : {name : valuess.id, value : valuess.score}}) }
     return (
         <>
             {
@@ -72,18 +64,19 @@ export const GenerationForm = ({ values = emptyFields, url, callback, method = M
                         <div className='w-1/2 h-full shadow-lg p-4 my-4 mx-2 border-[1px] border-gray-200'>
                             <h1 className="text-center text-2xl font-bold mt-6 mb-4">Include</h1>
                             <GenerationFormBase 
-                                data={data.include}
-                                keyThatAreArrays={keyThatAreArrays} 
+                                defaultValues={data.include}
                                 onChange={onChangeInclude} // onChange={onChange}
                             />
-                            <GoalInput key="1" value={data.goal} name="goal" id="goal" label="Score" onChange={onChange} />
+                            <div className='w-full h-[100px] pr-2 mt-5'>
+                                <p className='mb-[10px]'>General Score:</p>
+                                <AppRangeInput defaultValue={data.goal} onChangeRange={onChangeGoalRange} id='goal' isMultiple = {true} addStyles={rangeStyles} /> 
+                            </div>
                         </div>
                         
                         <div className='w-1/2 h-full shadow-lg p-4 my-4 mx-2 border-[1px] border-gray-200'>
                             <h1 className="text-center text-2xl font-bold mt-6 mb-4">Exclude</h1>
                             <GenerationFormBase 
-                                data={data.exclude}
-                                keyThatAreArrays={keyThatAreArrays}
+                                defaultValues={data.exclude}
                                 onChange={onChangeExclude} // onChange={onChangeEx}
                             />
                         </div>
@@ -98,13 +91,29 @@ export const GenerationForm = ({ values = emptyFields, url, callback, method = M
     );
 }
 
-type GenerationFormsFieldsComplete = {
-    include: GenerationFormsFields,
-    exclude: GenerationFormsFields,
+type GenerationFormsFields = {
+    include: GenerationFormsBaseFields,
+    exclude: GenerationFormsBaseFields,
     user_id : string,
-    goal: number,
+    goal: ScoreType, // goal: number,// goal: SenseOptionsType, // goal: number,
 }
 
+const rangeStyles: any = {
+    range: {
+        'min': 0,
+        'max': 5, // 'max': 100 //TODO - max and min should be props
+        '10%' : 1.0,
+        '20%' : 2.0,
+        '30%' : 3.0,
+        '45%': 4.0
+    },
+    pips : {
+        mode: PipsMode.Values,
+        values: [0,1,2,3,4,5],
+        density: 4
+    },
+    tooltips : [ true, true],
+}
 //INFO - This function compares two GenerationFormsFields objects to see if they are equal
 
 /* function compareData(obj1: GenerationFormsFields, obj2: GenerationFormsFields): boolean {
