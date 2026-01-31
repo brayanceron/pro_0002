@@ -25,7 +25,7 @@ class DatabaseConnection :#{
         try :#{
             self._conection_pool = pooling.MySQLConnectionPool(**{
                 'pool_name' : 'pool_connection',
-                'pool_size' : 30,
+                'pool_size' : 32,
                 'host' : 'localhost',
                 'port' : 3306,
                 'database' : 'pro_0002',

@@ -36,8 +36,8 @@ const SenseInput = ({ defaultValues, onChange, isMultiple = false }: { defaultVa
 
                     options.forEach((option: any) => {
                         const f: SenseOptionsType | undefined = selection.find((s) => s.id === option.value);
-                        if (f) { newSelection.push({'id': f.id, 'name': f.name, 'score': f.score });}
-                        else{newSelection.push({'id': option.value, 'name': option.text, 'score': {min: isMultiple ? 0 : -1, max: 0}});} // default score
+                        if(f) { newSelection.push({'id': f.id, 'name': f.name, 'score': f.score });}
+                        else{ newSelection.push({'id': option.value, 'name': option.text, 'score': {min: isMultiple ? 0.2 : -1, max: 4.8}}); }
                     });
                     setSelection(newSelection);
                 }}

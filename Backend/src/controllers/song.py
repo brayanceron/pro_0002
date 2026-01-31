@@ -541,9 +541,12 @@ def get_by_language(language_id : str):#{
     #}
 #}
 
-def generate_query(genders : list[str], senses : list[str], singers : list[str], languages : list[str], user_id : str, goal : float = -0.01) :#{
-    # if (not genders and not senses and not singers and not languages and ( 5 < float(goal) < 0)): return ''
-    if (not genders and not senses and not singers and not languages and ( float(goal) > 5 or float(goal) < 0)): return ''
+def generate_query(genders : list[str], senses : list[str], singers : list[str], languages : list[str], user_id : str, goal : dict[str, float] = {'min' : 0, 'max' : 5}) :#{
+    #TODO - validate if max and min are numbers, otherwise it reach uncontrolled response -> res should show "wrong format" and not 500 error
+    max = float(goal['max']) # min = n if(0 <= (n := float(goal['min'])) <  5) else 0
+    min = float(goal['min']) # max = n if(0 <  (n := float(goal['max'])) <= 5) else 5
+    
+    if (not genders and not senses and not singers and not languages and ( max > 5 or min < 0)): return ''
     sense_str = ""
     for s in senses :#{
         sense_str += f"""(
@@ -571,7 +574,7 @@ def generate_query(genders : list[str], senses : list[str], singers : list[str],
     {f"song_language.language_id in ({','.join([f"'{l}'" for l in languages])}) and" if languages else ''}
     { f"({sense_str}) and " if senses else '' } 
     1=1 ) and
-    {f"song.goal >= {goal if float(goal) > 0 else -1} and" if goal else ''}
+    {f"(song.goal >= {min} and song.goal <= {max}) and" if goal else ''}
     song.user_id = '{user_id}'
     """    
     return q
@@ -579,16 +582,16 @@ def generate_query(genders : list[str], senses : list[str], singers : list[str],
 
 #TODO this way of generate is too basic, it must be moplexer
 @validate
-def generate(include : GenerateParams, exclude : GenerateParams, goal : float, user_id : str, save = True ) :#{ #TODO - improve as receive params, it couldbe sompler
+def generate(include : GenerateParams, exclude : GenerateParams, goal : dict, user_id : str, save = True ) :#{ #TODO - improve as receive params, it couldbe sompler
     # TODO validate auth user is equal to user_id
     if(AUTH_ERROR := auth_get_id(user_id)): return AUTH_ERROR #Validate that the user is the same as the one who logged in. 
     
     if (not user_id): return {'message' : "Insuficient data"}, 400;
     inc = {**include.get_dict(), "user_id" : user_id, "goal" : goal }
-    exc = {**exclude.get_dict(), "user_id" : user_id, }
+    exc = {**exclude.get_dict(), "user_id" : user_id, "goal" : {'min' : -1,'max' : 6}}
 
     q = ''
-    if (any([q1 := generate_query(**inc), q2 := generate_query(**exc)])) : q = (q1 or ' select * from songs ') + (f" except {q2}" if q2 else '')
+    if (any([q1 := generate_query(**inc), q2 := generate_query(**exc)])) : q = (q1 or ' select * from song ') + (f" except {q2}" if q2 else '')
     else : return {'message' : "filters not provided"}, 400;
 
     with db.get_connection() as conn, conn.cursor() as cur :#{
@@ -610,7 +613,7 @@ def generate(include : GenerateParams, exclude : GenerateParams, goal : float, u
         generated_by : dict = { # generated_by = { f"{k=}".split('=')[0] : k for k in [genders, senses, singers, languages, goal] if k }
             'include' : include.get_dict(),
             'exclude' : exclude.get_dict(),
-            'goal' : str(goal) if float(goal) > 0 else -1, # 'goal' : goal,
+            'goal' : goal, # 'goal' : str(goal) if float(goal) > 0 else -1, # 'goal' : goal,
             'user_id' : user_id,
             'playlist_size' : len(songs),
         }

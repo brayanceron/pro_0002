@@ -127,6 +127,7 @@ def generate() :#{
     
     form['include'] = GenerateParams(**{k : form['include'].get(k, []) for k in ksa})
     form['exclude'] = GenerateParams(**{k : form['exclude'].get(k, []) for k in ksa})
+    form['goal'] = { k : g.get(k, 0) if type(g := form['goal']) == dict else 0 for k in ['min', 'max']}
     
     save = request.args.get('save', False) # save = save if (save := request.args.get('save', None)) else None  
     return src.controllers.song.generate(**form, save = save)
