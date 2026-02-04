@@ -18,7 +18,7 @@ const GETBY = () => {
     const { data: songs, isLoading, error } = useFetch(`http://localhost:5000/api/song/by/${criterion}/${value}`);
     const {data : criterionData, isLoading:criterionIsLoading, error:criterionError} = useFetch(`http://localhost:5000/api/${criterion}/${value}`)
     const playPlayList = () =>{
-        setPlayList({playList : songs, isLoading, error, currentIndex : 0});
+        // setPlayList({playList : songs, isLoading, error, currentIndex : 0}); // INFO this route is not complete
         navigate("/playing");
     }
     return (
