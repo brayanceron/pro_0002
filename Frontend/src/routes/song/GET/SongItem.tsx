@@ -53,6 +53,7 @@ const SongItem = ({ id, name,  genders, singers, languages, goal, image, url,  i
             error: null,
             playList: [data],
             currentIndex: 0,
+            generatedBy: {},
         });
         setCurrentIndex(0);
         navigate('/playing');
