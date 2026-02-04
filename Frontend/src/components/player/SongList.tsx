@@ -25,7 +25,7 @@ const SongList = ({ playList, isLoading, error, currentIndex }: { playList: any,
                             </div>
                             {
                                 playList.map((item: any, index: number) => {
-                                    return <SongItem id={item.id} name={item.name} url={item.image || item.url} singer={"Test Singer"} index={index} currentIndex={currentIndex} />
+                                    return <SongListItem id={item.id} name={item.name} url={item.image || item.url} singer={"Test Singer"} index={index} currentIndex={currentIndex} />
                                 })
                             }
                         </div>
@@ -35,7 +35,7 @@ const SongList = ({ playList, isLoading, error, currentIndex }: { playList: any,
     );
 }
 
-const SongItem = ({ id, name, singer, url, index, /* currentIndex */ }: { id: string, name: string, singer: string, url: string, index: number, currentIndex: number }) => {
+const SongListItem = ({ id, name, singer, url, index, /* currentIndex */ }: { id: string, name: string, singer: string, url: string, index: number, currentIndex: number }) => {
     const navigate = useNavigate();
     const onClickGetEntity = () => { navigate(`/song/get/${id}`); }
     const { /* playList, isLoading, error, */ currentIndex, setCurrentIndex } = useContext(PlayListContext);
