@@ -11,3 +11,10 @@ export type SongModel = {
     url: string,
     user_id: string,
 }
+
+export interface SongModalExtended extends SongModel {
+    genders : [],
+    singers : [],
+    languages: [],
+    senses: [], 
+}
