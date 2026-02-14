@@ -619,7 +619,7 @@ def generate(include : GenerateParams, exclude : GenerateParams, goal : dict, us
         }
         generated_by = { k : generated_by[k] for k in generated_by.keys() if generated_by[k]}
         if save : save_generated_playlists(generated_by, conn = conn)
-        return songs, 200
+        return extend(songs, conn) #return songs, 200
     #}
 #}
 
