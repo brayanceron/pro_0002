@@ -12,9 +12,21 @@ export type SongModel = {
     user_id: string,
 }
 
+export interface ExtendedGeneric {
+    id : string,
+    name : string,
+    description : string,
+    available : number,
+    image : string,
+    user_id : string,
+    score : number,
+}
+interface ExtendedSenses extends ExtendedGeneric {
+    goal : number,
+}
 export interface SongModalExtended extends SongModel {
-    genders : [],
-    singers : [],
-    languages: [],
-    senses: [], 
+    genders : ExtendedGeneric[],
+    singers : ExtendedGeneric[],
+    languages: ExtendedGeneric[],
+    senses: ExtendedSenses [], 
 }
