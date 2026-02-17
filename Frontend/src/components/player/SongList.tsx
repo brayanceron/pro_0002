@@ -5,11 +5,6 @@ import { PlayListContext } from "../../context/PlayListContext";
 import gifPlaying from '../../assets/playing.gif';
 
 const SongList = ({ playList, isLoading, error, currentIndex }: { playList: any, isLoading: boolean, error: Error | null, currentIndex: number }) => { // const SongList = ({ urlGet }: { urlGet?: string }) => {
-    const { setPlayList } = useContext(PlayListContext);
-    const random = () => {
-        const shuffled : any = shuffleArray(playList);
-        setPlayList({ playList: shuffled });
-    }
 
     return (
         <div className="bg-white">
@@ -17,12 +12,6 @@ const SongList = ({ playList, isLoading, error, currentIndex }: { playList: any,
                 isLoading ? <p>Loading...</p> :
                     error ? <p>Error : {error.message}</p> :
                         <div>
-                            <div className="p-0 flex content-center items-center">
-                                <span onClick={random} className="badge badge-neutral size-6 rounded-full p-0 mt-1 hover:cursor-pointer transition-transform hover:scale-105 hover:bg-neutral-600">
-                                    <span className="icon-[tabler--arrows-shuffle]"></span>
-                                </span>
-                                <p className="text-[10px] text-gray-400 mx-2">Total songs: {playList.length}</p>
-                            </div>
                             {
                                 playList.map((item: any, index: number) => {
                                     return <SongListItem id={item.id} name={item.name} url={item.image || item.url} singer={"Test Singer"} index={index} currentIndex={currentIndex} />
@@ -72,15 +61,6 @@ const SongListItem = ({ id, name, singer, url, index, /* currentIndex */ }: { id
             </div>
         </div>
     );
-}
-
-function shuffleArray<T>(array: T[]): T[] {
-    const shuffledArray = [...array];
-    for (let i = shuffledArray.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]]; // Intercambiamos el elemento actual (en i) con el elemento aleatorio (en j)
-    }
-    return shuffledArray;
 }
 
 export default SongList
