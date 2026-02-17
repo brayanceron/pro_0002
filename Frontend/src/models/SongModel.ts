@@ -24,7 +24,7 @@ export interface ExtendedGeneric {
 interface ExtendedSenses extends ExtendedGeneric {
     goal : number,
 }
-export interface SongModalExtended extends SongModel {
+export interface SongModelExtended extends SongModel {
     genders : ExtendedGeneric[],
     singers : ExtendedGeneric[],
     languages: ExtendedGeneric[],
