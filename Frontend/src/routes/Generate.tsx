@@ -2,21 +2,20 @@ import { useState, useContext, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import useFetch from "../hooks/useFetch";
 import { GenerationForm } from "../components/forms/GenerationForm";
-import type { reqProps } from "../hooks/usePost";
 import { AppAlert } from "../components/informational/AppAlert";
-import { PlayListModal } from "./song/generate/PlayListModal";
+import { PlayListModal, type PlayListModalProps } from "./song/generate/PlayListModal";
 import { HSOverlay } from 'flyonui/flyonui';
 
 const Generate = () => {
     const { user } = useContext(AuthContext);
 
     const { data, isLoading, error, /* res */ } = useFetch(`http://localhost:5000/api/song/get_generated_playlists/${user?.id}`);
-    const [modalData, setModalData] = useState<reqProps>({ result: null, isLoading: true, error: null, res: null });
+    const [modalData, setModalData] = useState<PlayListModalProps>({ result: null, isLoading: true, error: null, res: null, generatedBy : [], orderBy : null });
     const [indexg, setIndexg] = useState(0);
     const url = "http://localhost:5000/api/song/generate?save=true"
 
-    const cb = ({ isLoading, result, error }: reqProps) => {
-        setModalData({ result: result, isLoading: isLoading, error: error, res: null });
+    const cb = ({ isLoading, result, error, generatedBy }: PlayListModalProps) => {
+        setModalData({ result: result, isLoading: isLoading, error: error, res: null, generatedBy : generatedBy, orderBy : null });
         HSOverlay.open('#large-modal'); // modal.open()
     }
     useEffect(() => { if (error) { setIndexg(-1); } }, [isLoading])
@@ -73,7 +72,8 @@ const Generate = () => {
                     </div>
                     : <></>
             }
-            <PlayListModal error={modalData.error} isLoading={modalData.isLoading} result={modalData.result} res={modalData.res} />
+            <PlayListModal error={modalData.error} isLoading={modalData.isLoading} result={modalData.result} res={modalData.res} generatedBy={modalData.generatedBy} orderBy={modalData.orderBy}/>
+            {/* <PlayListModal {...modalData} /> */}
         </>
     );
 }

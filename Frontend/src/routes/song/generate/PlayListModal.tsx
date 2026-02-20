@@ -1,13 +1,18 @@
 import { useContext } from "react";
 import SongList from "../../../components/player/SongList"
 import type { reqProps } from "../../../hooks/usePost";
-import { PlayListContext } from "../../../context/PlayListContext";
+import { PlayListContext, type OrderByType } from "../../../context/PlayListContext";
 import { useNavigate } from "react-router";
 import { HSOverlay } from "flyonui/flyonui";
 import AppButton from "../../../components/buttons/AppButton";
 
 
-export const PlayListModal = ({isLoading, result : playList, error, /* res */} : reqProps) => {
+export interface PlayListModalProps extends reqProps {
+    generatedBy : any,
+    orderBy : OrderByType | null,
+}
+
+export const PlayListModal = ({isLoading, result : playList, error, generatedBy = [], orderBy = null/* res */ } : PlayListModalProps) => {
     const { setPlayList } = useContext(PlayListContext);
     const navigate = useNavigate();
     
@@ -20,6 +25,8 @@ export const PlayListModal = ({isLoading, result : playList, error, /* res */} :
             error: error,
             playList: playList, // playList: result,
             currentIndex: 0,
+            generatedBy: generatedBy,
+            orderBy : orderBy,
         });
         setTimeout(() => { navigate('/playing'); }, 500); // TODO fix navigate before modal close | simulate a loading while closing
     }
@@ -43,7 +50,7 @@ export const PlayListModal = ({isLoading, result : playList, error, /* res */} :
 
                         <div className="modal-footer mt-4">
                             {/* <button type="button" className="btn btn-soft btn-secondary w-[" data-overlay="#large-modal">Close</button> */}
-                            <AppButton text="Generate" onClick={onClickBtnSave} isLoading={isLoading} addStyles="w-[40%] mx-auto" />
+                            <AppButton text="Apply" onClick={onClickBtnSave} isLoading={isLoading} addStyles="w-[40%] mx-auto" />
                         </div>
                     </div>
                 </div>

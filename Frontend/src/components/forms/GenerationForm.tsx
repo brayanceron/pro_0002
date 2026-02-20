@@ -8,12 +8,13 @@ import { type SenseOptionsType, type ScoreType } from '../inputs/SenseInput/Sens
 import { GenerationFormBase, type GenerationFormsBaseFields, emptyFields as emptyBaseValues} from './GenerationForm/GenerationFormBase';
 import { AppRangeInput } from '../inputs/AppRangeInput/AppRangeInput';
 import { PipsMode } from 'nouislider';
+import type { PlayListModalProps } from '../../routes/song/generate/PlayListModal';
 
 type ComponentProps = {
     values?: GenerationFormsFields,
     url : string,
     method? : Method,
-    callback: (params: reqProps) => void,
+    callback: (params: PlayListModalProps) => void,
     saveArg?: boolean,
 }
 
@@ -31,11 +32,10 @@ export const GenerationForm = ({ values = emptyFields, url, callback, method = M
     values.user_id = user?.id || ''
     values.goal = {...emptyGoal, ...values.goal}; // values.goal = values.goal || emptyGoal;
 
+    const preCallback = (params: reqProps) => { callback({...params, generatedBy : data}); }
     const { data, onChange } = useForm<GenerationFormsFields>(values);
-    const { sendReq, isLoading } = usePost(data, url, callback, method);
-    const onSubmit = () => { 
-        sendReq(); 
-    }
+    const { sendReq, isLoading } = usePost(data, url, preCallback, method);
+    const onSubmit = () => { sendReq(); }
 
     const onChangeGeneral = (key : string, value: any, typeAction: 'include' | 'exclude') => {
         const updateValue = { ...data[typeAction], [key]: value };

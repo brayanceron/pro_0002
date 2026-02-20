@@ -7,9 +7,10 @@ import { PlayListContext } from "../../context/PlayListContext";
 
 type Criterion = 'gender' | 'playlist' | 'singer' | 'language' | 'sense';
 
+//INFO - this route is not useful/used for now. this route allow to get songs by a specific criterion
 const GETBY = () => {
     const navigate = useNavigate()
-    const {setPlayList} = useContext(PlayListContext)
+    const {/* setPlayList */} = useContext(PlayListContext)
     const params = useParams();
     const criterion: Criterion = params.criterion as Criterion; //  const criterion = params.criterion;
     const value = params.value;
@@ -18,7 +19,7 @@ const GETBY = () => {
     const { data: songs, isLoading, error } = useFetch(`http://localhost:5000/api/song/by/${criterion}/${value}`);
     const {data : criterionData, isLoading:criterionIsLoading, error:criterionError} = useFetch(`http://localhost:5000/api/${criterion}/${value}`)
     const playPlayList = () =>{
-        setPlayList({playList : songs, isLoading, error, currentIndex : 0});
+        // setPlayList({playList : songs, isLoading, error, currentIndex : 0}); // INFO this route is not complete
         navigate("/playing");
     }
     return (

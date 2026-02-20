@@ -16,8 +16,10 @@ const PlayListProvider = ({ children }: { children: any }) => {
         setPlayListState(beforeData => { return { ...beforeData, currentIndex: newIndex } });  // setPlayListState({ ...playList, currentIndex: newIndex });
     }
 
-    const initState = {
+    const initState : PlayListContextType = {
         playList: [],
+        generatedBy : [],
+        orderBy : null,
         isLoading: false,
         error: null,
         currentIndex: 0,
@@ -32,6 +34,30 @@ const PlayListProvider = ({ children }: { children: any }) => {
     const {setData, data, isLoading, error} = useLocalData({key : user ? user.id : 'guest', options});
     useEffect(() => {
         setPlayListState(beforeData => { return { ...beforeData, isLoading, error, ...data } });
+        //TODO destructure only data needed for playlist context
+        /* const { 
+            playList : playListData = [],
+            currentIndex : currentIndexData = 0,
+            generatedBy : generatedByData = [],
+            orderBy : orderByData = {},
+            // isLoading : isLoadingData = false,
+            // error : errorData = null,
+        } = data || {};
+
+        setPlayListState(beforeData => { 
+            return { 
+                ...beforeData,
+                playList: playListData,
+                currentIndex: currentIndexData,
+                generatedBy: generatedByData,
+                orderBy: orderByData,
+
+                // isLoading: isLoadingData || false,
+                // error: errorData || null,
+                isLoading: isLoading,
+                error: error,
+            } 
+        }); */
     }, [data]);
 
     
@@ -44,9 +70,9 @@ const PlayListProvider = ({ children }: { children: any }) => {
     }  */
 
     useEffect(()=>{ 
-        const { isLoading, error, playList : pl, currentIndex } = playList; // const {setPlayList, setCurrentIndex, ...newValalues} = playList;
+        const { isLoading, error, playList : pl, currentIndex, generatedBy, orderBy } = playList; // const {setPlayList, setCurrentIndex, ...newValalues} = playList;
         if(isLoading || error || !pl || pl.length === 0) return; // avoid saving empty playlists
-        setData({newValue: { playList: pl, isLoading, error, currentIndex}}); // setData({ newValue: newValalues });
+        setData({newValue: { playList: pl, isLoading, error, currentIndex, generatedBy, orderBy}}); // setData({ newValue: newValalues });
     },[playList]);
 
     return (
