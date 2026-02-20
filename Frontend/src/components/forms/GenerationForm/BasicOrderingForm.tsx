@@ -1,29 +1,30 @@
 
-import { useState, useContext, type BaseSyntheticEvent, } from "react";
-import { PlayListContext } from "../../../context/PlayListContext";
+import { useState, useContext, type BaseSyntheticEvent, useEffect, } from "react";
+import { PlayListContext, type OrderByType, type CriterionValues } from "../../../context/PlayListContext";
 import { type SongModelExtended, type ExtendedGeneric } from "../../../models/SongModel";
 import { PlayListModal, type PlayListModalProps } from "../../../routes/song/generate/PlayListModal";
 import { HSOverlay } from "flyonui/flyonui";
 
-type selectedCriterianValues = 'genders' | 'singers' | 'languages' | 'senses' | 'name' | 'goal'
-const criterian: selectedCriterianValues[] = ['genders', 'singers', 'languages', 'senses', 'name', 'goal']
+const criterian: CriterionValues[] = ['genders', 'singers', 'languages', 'senses', 'name', 'goal']
+const emptyOrder : OrderByType = { selectedCriterian: null, desc: false };
 
 export const BasicOrderingForm = () => {
-    const { playList, generatedBy } = useContext(PlayListContext);
-    const [selectedCriterian, setSelectedCriterian] = useState<selectedCriterianValues | null>(null);
-    const [modalData, setModalData] = useState<PlayListModalProps>({ result: playList, isLoading: false, error: null, res: null, generatedBy: null });
-    const [desc, setDesc] = useState<boolean>(true);
+    const { playList, generatedBy, orderBy : orderByData} = useContext(PlayListContext);
+    const [modalData, setModalData] = useState<PlayListModalProps>({ result: playList, isLoading: false, error: null, res: null, generatedBy: null, orderBy : orderByData });
+    const [order, setOrder] = useState<OrderByType>(orderByData || emptyOrder)
 
-    const onChangeRadio = (value: selectedCriterianValues) => setSelectedCriterian(value);
+    const onClickBtnDesc = (newDesc : boolean) => setOrder(befVal => { return {...befVal, desc: newDesc} })
+    const onChangeRadio = (newCrit: CriterionValues) => setOrder(befVal => {return {...befVal, selectedCriterian : newCrit}});
     const OnClickBtnRandom = () => setNewPlayList(shuffleArray(playList));
     const OnClickBtnApply = () => {
-        if (!selectedCriterian) return alert("Not criterian selected");
-        setNewPlayList(OrderPlayList(playList, desc, selectedCriterian));
+        if (!order || !order.selectedCriterian) return alert("Not criterian selected");
+        setNewPlayList(OrderPlayList(playList, order.desc, order.selectedCriterian), order);
     }
 
-    const setNewPlayList = (newList : SongModelExtended[]) => {
+    useEffect(() => { setOrder(orderByData || emptyOrder); }, [orderByData]);
+    const setNewPlayList = (newList : SongModelExtended[], newOrder: OrderByType | null = null) => {
         if(!newList) return alert("Error with new list")
-        setModalData({ result: newList, isLoading: false, error: null, res: null, generatedBy });
+        setModalData({ result: newList, isLoading: false, error: null, res: null, generatedBy, orderBy : newOrder });
         HSOverlay.open('#large-modal'); // modal.open()
     }
 
@@ -32,17 +33,18 @@ export const BasicOrderingForm = () => {
             <button onClick={OnClickBtnRandom} className="badge badge-neutral size-6 mr-1 mt-1 p-0 btn btn-xs btn-secondary">
                 <span className="icon-[tabler--arrows-shuffle]"></span>
             </button>
-            <OrderIndicatorButton initState={desc} setState={setDesc} onClick={OnClickBtnApply} />
+            <OrderIndicatorSortButton initState={order.desc} setState={onClickBtnDesc} onClick={OnClickBtnApply} selectedCriterian={order.selectedCriterian} />
 
             <div className="join drop-shadow checked:bg-red-700">
                 {
-                    criterian.map((i: selectedCriterianValues) => {
+                    criterian.map((i: CriterionValues) => {
                         return (
                             <input key={i}
                                 className="join-item btn btn-xs text-xs bg-gray-200  hover:bg-gray-300"
                                 type="radio"
                                 name="radio-15"
                                 aria-label={i}
+                                checked = {i === order.selectedCriterian}
                                 onChange={() => onChangeRadio(i)} // checked={selectedCriterian === i} 
                             />
                         );
@@ -54,16 +56,16 @@ export const BasicOrderingForm = () => {
     );
 }
 
-const OrderIndicatorButton = ({ initState, setState, onClick }: { initState: boolean, setState: (newState: boolean) => void, onClick: () => void }) => {
-    const onChange = (event: BaseSyntheticEvent) => { setState(event.target.checked); } // const onToggle = () => setState(!initState);
+const OrderIndicatorSortButton = ({ initState, setState, onClick, selectedCriterian }: { initState: boolean, setState: (newState: boolean) => void, onClick: () => void, selectedCriterian : CriterionValues | null }) => {
+    const onChange = (event: BaseSyntheticEvent) => setState(event.target.checked); // const onToggle = () => setState(!initState);
 
     return (
         <div className="indicator inline-block mr-2">
             <div className="indicator-item indicator-middle indicator-end">
                 <label className="swap swap-rotate ml-2 mb-3">
                     <input type="checkbox" onChange={onChange} checked={initState} />
-                    <span className="swap-on  icon-[tabler--square-rounded-arrow-up-filled] size-5 bg-green-500"></span>
-                    <span className="swap-off icon-[tabler--square-rounded-arrow-down-filled] size-5 bg-yellow-500"></span>
+                    <span className={`swap-on  icon-[tabler--square-rounded-arrow-up-filled] size-5 ${selectedCriterian === null ? 'bg-gray-500' : 'bg-green-500'}`}></span>
+                    <span className={`swap-off icon-[tabler--square-rounded-arrow-down-filled] size-5 ${selectedCriterian === null ? 'bg-gray-500' : 'bg-yellow-500'}`}></span>
                 </label>
             </div>
 
@@ -85,8 +87,9 @@ function shuffleArray<T>(array: T[]): T[] {
     return shuffledArray;
 }
 
-const OrderPlayList = ( pl : SongModelExtended[], desc: boolean, selectedCriterian: selectedCriterianValues) => {
+const OrderPlayList = ( pl : SongModelExtended[], desc: boolean, selectedCriterian: CriterionValues) => {
     const newLista: SongModelExtended[] = [...pl];
+    if(!selectedCriterian) return newLista;
 
     newLista.sort((first: SongModelExtended, second: SongModelExtended) => {
         const v1 = !desc ? first[selectedCriterian as keyof SongModelExtended] : second[selectedCriterian as keyof SongModelExtended]
