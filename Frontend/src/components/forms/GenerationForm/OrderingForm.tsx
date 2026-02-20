@@ -11,8 +11,11 @@ import type { SongModel } from "../../../models/SongModel";
 //FIXME
 /* 
 This feature/component is not complete. There are many ways songs can be ordered, and This has many cases.
-This component use sortablejs library for drag and drop elements. So this library must be installed to use this component ("npm install sortablejs").
+This component use sortablejs library for drag and drop elements. So this library must be installed to use this component.
 sortablejs library was deleted from project dependencies(package.json) 
+install :
+npm install sortablejs
+npm install @types/sortablejs --save-dev
 */
 
 type keyss = 'genders' | 'languages' | 'senses' | 'singers' | 'name' | 'score'; // type keyss = 'genders' | 'languages' | 'senses' | 'singers';
