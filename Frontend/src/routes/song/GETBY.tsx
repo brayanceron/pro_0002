@@ -7,9 +7,10 @@ import { PlayListContext } from "../../context/PlayListContext";
 
 type Criterion = 'gender' | 'playlist' | 'singer' | 'language' | 'sense';
 
+//INFO - this route is not useful/used for now. this route allow to get songs by a specific criterion
 const GETBY = () => {
     const navigate = useNavigate()
-    const {setPlayList} = useContext(PlayListContext)
+    const {/* setPlayList */} = useContext(PlayListContext)
     const params = useParams();
     const criterion: Criterion = params.criterion as Criterion; //  const criterion = params.criterion;
     const value = params.value;
