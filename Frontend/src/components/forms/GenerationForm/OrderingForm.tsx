@@ -4,6 +4,17 @@ import { PlayListContext } from "../../../context/PlayListContext";
 import type { SongModel } from "../../../models/SongModel";
 
 
+//TODO
+//INFO
+//NOTE
+//BUG - 
+//FIXME
+/* 
+This feature/component is not complete. There are many ways songs can be ordered, and This has many cases.
+This component use sortablejs library for drag and drop elements. So this library must be installed to use this component ("npm install sortablejs").
+sortablejs library was deleted from project dependencies(package.json) 
+*/
+
 type keyss = 'genders' | 'languages' | 'senses' | 'singers' | 'name' | 'score'; // type keyss = 'genders' | 'languages' | 'senses' | 'singers';
 // type ord = 'asc' | 'desc';
 
@@ -33,12 +44,19 @@ const emptyFields: StructOrder = {
     // languages: ['Spanish', 'English', 'Esperanto'],
     // senses: ['Sadly', 'Happy', 'Joy'],
     // singers: ['Maluma', 'Michael Jackson', 'Shakira'],
-    genders: ['cumbia', 'merengue'],
-    languages: ['spanish', 'unknown'],
-    senses: ['joy', 'Happy', 'enthusiasm'],
-    singers: ['unknown'],
+
+    // genders: ['cumbia', 'merengue'],
+    // languages: ['spanish', 'unknown'],
+    // senses: ['joy', 'Happy', 'enthusiasm'],
+    // singers: ['unknown'],
     // name : [],
     // score : [],
+
+    genders: [],
+    languages: [],
+    senses: [],
+    singers: [],
+
 }
 
 // export const OrderingForm = ({ /* defaultValues = []  */ }: { defaultValues?: string[] }) => {
@@ -128,15 +146,56 @@ export const OrderingForm = ({ defaultValues = emptyFields }: { defaultValues?: 
     const OnClickBtnApply = (_ :any) => {
         console.log(playList)
         const newLista = [...playList];
+        const comparePrimitive = (f : any, s : any) =>{
+            if(f instanceof String && s instanceof String) return f.toString().localeCompare(s.toString());
+            // else if(f instanceof Number && s instanceof Number) return parseFloat(f.toString()) - parseFloat(s);
+            else if(!isNaN(f) && !isNaN(s)) return parseFloat(f.toString()) - parseFloat(s); // && f.trim() !== ""
+            // else if(f instanceof Number && s instanceof Number) return f - s;
+            return 0;
+        }
 
+        const isPrimitive = (value : any) =>{
+            if(Array.isArray(value)) return false;
+            if(value instanceof String) return true;
+            else if(value instanceof Number) return true;
+            return false
+        }
+        
         newLista.sort((a : SongModel,b :SongModel)=>{
 
-            const nameCompare = a.name.localeCompare(b.name);
+            for (let h = 0; h < allOrd.globalOrder!.length; h++) {
+                const criterion = allOrd.globalOrder![h];
+                const criterionVals = allOrd[criterion as keyof StructOrder]
+
+                // if(isPrimitive(criterionVals)) return comparePrimitive(a[criterion as keyof SongModel].toString() , b[criterion as keyof SongModel].toString())
+                if(isPrimitive(criterionVals)) return comparePrimitive(a[criterion as keyof SongModel].toString() , criterion)
+
+                for (let j = 0; j < criterionVals!.length; j++) {
+                    const criteriaItem : any = criterionVals![j];
+                    if(isPrimitive(criteriaItem)) return comparePrimitive(a[criterion as keyof SongModel].toString() , b[criterion as keyof SongModel].toString())
+                    /* if(criteriaItem instanceof String) {
+                        // const strCompare = a[criterion].localeCompare(b[criterion]);
+                        const strCompare = (a[criterion as keyof SongModel].toString()).localeCompare(b[criterion as keyof SongModel].toString());
+                        if(!strCompare) continue;
+                        if (strCompare !== 0) return strCompare;
+                    }
+                    else if (criteriaItem instanceof Number){
+                        const numCompare = parseFloat(a.goal) - parseFloat(b.goal)
+                        if(!numCompare) continue;
+                        return numCompare
+                    } */
+                }
+                
+
+            }
+            return 0;
+            // ==================
+            /* const nameCompare = a.name.localeCompare(b.name);
             if (nameCompare !== 0) return nameCompare;
 
             const goalCompare = parseFloat(a.goal) - parseFloat(b.goal);  // ASC (smallest to largest)
             // const goalCompare = parseFloat(b.goal) - parseFloat(a.goal);  // DESC (largest to smallest)
-            return goalCompare;
+            return goalCompare; */
         })
         console.log(newLista)
     }
