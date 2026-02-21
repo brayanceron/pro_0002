@@ -108,12 +108,18 @@ function App() {
         <Route path='/login' element={<ProtectedLogin><Login /></ProtectedLogin>} />
         <Route path='/signup' element={<ProtectedLogin><SignUp /></ProtectedLogin>} />
 
+        <Route path='*' element={<NotFound />} />
       </Routes >
 
-)
+  )
 {/* </AuthProvider> */}
 }
 
+const NotFound = () => {
+  return (
+    <h1>404 Not Found</h1>
+  )
+}
 
 const optDef = {
   gender: {
