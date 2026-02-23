@@ -21,6 +21,7 @@ const PlayListProvider = ({ children }: { children: any }) => {
         generatedBy : [],
         orderBy : null,
         isLoading: false,
+        // isLoading: true,
         error: null,
         currentIndex: 0,
         setPlayList,
@@ -32,8 +33,15 @@ const PlayListProvider = ({ children }: { children: any }) => {
     // INFO isLoading should start in True
     // TODO validate playlist json has correct format
     const {setData, data, isLoading, error} = useLocalData({key : user ? user.id : 'guest', options});
+    // const [playList, setPlayListState] = useState<PlayListContextType>({ ...initState, isLoading : isLoading, error: error });
     useEffect(() => {
-        setPlayListState(beforeData => { return { ...beforeData, isLoading, error, ...data } });
+        if(data && !isLoading && !error) setPlayListState(beforeData => { return { ...beforeData, isLoading, error, ...data } });
+        /* 
+        if(!isLoading) {
+            setPlayListState(beforeData => { return data? { ...data, isLoading, error } : { ...beforeData, isLoading, error } });
+            if (firtsTime) setFirstTime(false);
+        }
+        */
         //TODO destructure only data needed for playlist context
         /* const { 
             playList : playListData = [],
@@ -58,7 +66,8 @@ const PlayListProvider = ({ children }: { children: any }) => {
                 error: error,
             } 
         }); */
-    }, [data]);
+    // }, [data]);
+    }, [data, isLoading, error]); // }, [data, isLoading, error]);
 
     
     /* const {setData, getData } = useLocalData({key : user ? user.id : 'guest'});
@@ -70,9 +79,10 @@ const PlayListProvider = ({ children }: { children: any }) => {
     }  */
 
     useEffect(()=>{ 
-        const { isLoading, error, playList : pl, currentIndex, generatedBy, orderBy } = playList; // const {setPlayList, setCurrentIndex, ...newValalues} = playList;
-        if(isLoading || error || !pl || pl.length === 0) return; // avoid saving empty playlists
-        setData({newValue: { playList: pl, isLoading, error, currentIndex, generatedBy, orderBy}}); // setData({ newValue: newValalues });
+        const { isLoading : isL, error : err, playList : pl, currentIndex, generatedBy, orderBy } = playList; // const {setPlayList, setCurrentIndex, ...newValalues} = playList;
+        if(isL || err || !pl || pl.length === 0) return; // avoid saving empty playlists
+        setData({newValue: { playList: pl, isLoading: isL, error: err, currentIndex, generatedBy, orderBy}}); // setData({ newValue: newValalues });
+
     },[playList]);
 
     return (
