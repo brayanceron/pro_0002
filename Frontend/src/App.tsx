@@ -29,6 +29,8 @@ import { SignUp } from './routes/SignUp';
 // import AuthProvider from './context/AuthProvider';
 import { ProtectedRoute } from './auth/ProtectedRoute';
 import { ProtectedLogin } from './auth/ProtectedLogin';
+import { NotFound404 } from './utils/NotFound404';
+import { Root } from './utils/Root';
 
 declare global {
   interface Window {
@@ -47,12 +49,9 @@ function App() {
   }, [location.pathname]);
 
   return (
-    // <AuthProvider>
       <Routes>
-        <Route path='/' element={<h1>Hello world, root path</h1>}></Route>
+        <Route path='/' element={<Root />}></Route>
 
-        {/* <ProtectedRoute> */}
-        {/* <Route element={<DashboardLayout />}> */}
         <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
           <Route path='/getview' element={<GetView />}></Route>
 
@@ -103,21 +102,13 @@ function App() {
           </Route>
 
         </Route>
-        {/* </ProtectedRoute> */}
 
         <Route path='/login' element={<ProtectedLogin><Login /></ProtectedLogin>} />
         <Route path='/signup' element={<ProtectedLogin><SignUp /></ProtectedLogin>} />
 
-        <Route path='*' element={<NotFound />} />
+        <Route path='*' element={<NotFound404 />} />
       </Routes >
 
-  )
-{/* </AuthProvider> */}
-}
-
-const NotFound = () => {
-  return (
-    <h1>404 Not Found</h1>
   )
 }
 
