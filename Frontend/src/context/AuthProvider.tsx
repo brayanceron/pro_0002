@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
-// import useFetch from "../hooks/useFetch";
 import { AuthContext, type AuthContextUserType } from "./AuthContext";
 import { useNavigate, useLocation } from "react-router";
+// import useFetch from "../hooks/useFetch";
 // import { AuthContext } from "./AuthContext"
 
 
@@ -37,12 +37,16 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     async function pull() {
         console.log(location.pathname);
-        const res = await fetch('http://localhost:5000/api/auth/whoami', { credentials: 'include' });
-        const user_res = await res.json();
-        if (res.status == 401) {
-            return setValues({ user: null, isLoading: false, error: null });
+        try {
+            const res = await fetch('http://localhost:5000/api/auth/whoami', { credentials: 'include' });
+            const user_res = await res.json();
+
+            if (res.status == 401) return setValues({ user: null, isLoading: false, error: null }); //INFO 401 is a error status code, but this isnt an error, it just means that the user is not logged in.
+            setValues({ user: res.ok ? user_res : null, isLoading: false, error: res.ok ? null : new Error(`${user_res.message}`) })
+        } 
+        catch (error : Error | unknown) {
+            setValues({ user: null, isLoading: false, error: error instanceof Error ? error : new Error('Unknown error occurred while fetching user data') })
         }
-        setValues({ user: res.ok ? user_res : null, isLoading: false, error: res.ok ? null : new Error(`user unknown_ error : ${user_res.message}`) })//###################
     }
 
     useEffect(() => { pull(); }, [])
@@ -86,7 +90,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
         // <AuthContext.Provider value={{ user: userAuth, login, logout }} >
         <AuthContext.Provider value={{ user: userAuth, login, logout, reload }} >
             {
-                isLoading ? <p>Loading Session</p> :
+                isLoading ? <p>Loading Session...</p> :
                     error ? <p>Error ocurred: "{error.message}". Try later</p> :
                         children
             }
