@@ -1,6 +1,7 @@
 import {  forwardRef, useContext, useEffect, useImperativeHandle, useReducer, useRef, /* useState */} from "react";
 import { isValidSrcUrl, isValidYouTubeUrl } from '../../utils/urls';
 import { PlayListContext } from "../../context/PlayListContext";
+import songDefault from "../../assets/songDefault.jpeg"
 
 interface Props {
     url: string,
@@ -81,7 +82,17 @@ export const SrcPlayer = forwardRef ( ({ url, playing, onFinishSong, onChangeSta
     return (
         <>
             <div>
-                { plState.error && <p>Error loading src video</p> }
+                {/* { plState.error && <p>Error loading src video</p> } */}
+                {
+                    plState.error || isValidYouTubeUrl(url) || !isValidSrcUrl(url) ? <p>Error loading src video</p> : 
+                    <div className="w-full flex justify-center mt-10">
+                        <div className="avatar">
+                            <div className="size-40 rounded-full mask mask-decagon">
+                                <img src={songDefault} alt="Mu" /> {/* <img src={imgUrl} alt="avatar" /> */}
+                            </div>
+                        </div>
+                    </div>
+                }
 
                 <audio
                     ref={rep}
@@ -99,6 +110,4 @@ export const SrcPlayer = forwardRef ( ({ url, playing, onFinishSong, onChangeSta
         </>
     )
 })
-
-// }
 
