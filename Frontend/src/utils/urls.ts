@@ -31,6 +31,13 @@ function isValidYouTubeUrl(url: string): boolean {
 
     return youtubePatterns.some(pattern => pattern.test(url));
 }
+function isValidBlobUrl(url: string): boolean {
+    if (!url || typeof url !== 'string') return false;
+
+    const origin = window.location.origin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // scape special characters (., /, etc.)
+    const frontEndPattern = new RegExp(`^blob:${origin}\/[a-z0-9-]+$`, 'i'); // format: ^blob:ORIGEN\/[a-z0-9-]+$
+    return frontEndPattern.test(url);
+}
 function isValidSrcUrl(url : string, ) : boolean {
     if (!url || typeof url !== 'string') { return false; }
 
@@ -52,6 +59,7 @@ function isExternalImg(url: string): boolean {
 }
 function getUrlBySong(file_string: string, folderPath: string = '') {
     if (isValidYouTubeUrl(file_string)) return file_string;
+    else if(isValidBlobUrl(file_string)) return file_string;
     else return getUrlBySrc(file_string, folderPath)
 }
 function getUrlBySrc(file_id: string, folderPath: string = '') { //folder path must contain "/folder/subfolder..."
@@ -80,5 +88,6 @@ export {
     getUrlBySrc,
     getImageUrlByYTVideo,
     getImageUrl,
-    getUrlBySong
+    getUrlBySong,
+    isValidBlobUrl as isValidTemporalUrl
 }
