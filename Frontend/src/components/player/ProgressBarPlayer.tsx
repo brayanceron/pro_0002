@@ -21,12 +21,12 @@ const ProgressBarPlayer = ({ duration, url, playing, currentIndex, onChangeTime,
         if (inputRef.current) { inputRef.current.value = "0"; }
         setDisplayTime(0);
     };
-    url;
+    useEffect(()=>{ resetValues(); }, [url])
 
     // start / stop animation
     useEffect(() => {
         console.log("playing = ", playing, " duration = ", duration, " progressRef = ", progressRef)
-        if (!duration || duration <= 0) { resetValues(); return; } // it reset when duration is 0, it means song changed, it fix whe change song and duration not updated yet
+        // if (!duration || duration <= 0) { resetValues(); return; } // it reset when duration is 0, it means song changed, it fix when change song and duration not updated yet
         if (!playing) { cancelAnimationFrame(animRef.current); return; }
         
         const tick = (now: any) => {
