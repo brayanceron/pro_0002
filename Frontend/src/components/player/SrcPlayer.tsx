@@ -1,5 +1,5 @@
 import {  forwardRef, useContext, useEffect, useImperativeHandle, useReducer, useRef, /* useState */} from "react";
-import { isValidSrcUrl, isValidYouTubeUrl } from '../../utils/urls';
+import { isValidSrcUrl, isValidYouTubeUrl, isValidTemporalUrl } from '../../utils/urls';
 import { PlayListContext } from "../../context/PlayListContext";
 import songDefault from "../../assets/songDefault.jpeg"
 
@@ -34,7 +34,7 @@ const reducer = (prevState : PlayerStates, action : ReduxAction ) : PlayerStates
 export const SrcPlayer = forwardRef ( ({ url, playing, onFinishSong, onChangeStates } : Props, ref) => {
     const { currentIndex } = useContext(PlayListContext);
     const rep = useRef<HTMLAudioElement>(null);
-    const initialState : PlayerStates = {error : !isValidSrcUrl(url), duration : 0,};
+    const initialState : PlayerStates = {error : !isValidSrcUrl(url) && !isValidTemporalUrl(url), duration : 0,};
     const [plState, dispatch] = useReducer(reducer, initialState);
     
 
@@ -47,7 +47,7 @@ export const SrcPlayer = forwardRef ( ({ url, playing, onFinishSong, onChangeSta
     }, [ plState.error, plState.duration]);
     
     useEffect(() => {
-        dispatch({type : 'ONCHANGEURL', payload : {error : !isValidSrcUrl(url), duration : getDuration(), /* playerState : null, */ /* url */}}) // dispatch payload without side-effect functions; run side-effects after dispatch
+        dispatch({type : 'ONCHANGEURL', payload : {error : !isValidSrcUrl(url) && !isValidTemporalUrl(url), duration : getDuration(), /* playerState : null, */ /* url */}}) // dispatch payload without side-effect functions; run side-effects after dispatch
         changeUrl();
     }, [currentIndex, url]);
 
@@ -57,7 +57,7 @@ export const SrcPlayer = forwardRef ( ({ url, playing, onFinishSong, onChangeSta
         exec()
     }
     const getDuration = () => {
-        if(isValidSrcUrl(url) == false) return -1;
+        if(!isValidSrcUrl(url) && !isValidTemporalUrl(url)) return -1;
         if(rep.current && rep.current.duration) { return rep.current.duration; }
         return -1;
     }
@@ -84,7 +84,7 @@ export const SrcPlayer = forwardRef ( ({ url, playing, onFinishSong, onChangeSta
             <div>
                 {/* { plState.error && <p>Error loading src video</p> } */}
                 {
-                    plState.error || isValidYouTubeUrl(url) || !isValidSrcUrl(url) ? <p>Error loading src video</p> : 
+                    plState.error || isValidYouTubeUrl(url) || (!isValidSrcUrl(url) && !isValidTemporalUrl(url)) ? <p>Error loading src video</p> : 
                     <div className="w-full flex justify-center mt-10">
                         <div className="avatar">
                             <div className="size-40 rounded-full mask mask-decagon">
