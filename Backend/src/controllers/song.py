@@ -126,9 +126,9 @@ def get_id(id, conn, extended = False,) :#{
 # ====================================================================================================
 
 @validate
-def post(name : str, description : str, url : str, goal : str, user_id : str, genders, senses, singers, languages, playlists, music_file, image_file, available : bool = 1, ) :#{
+def post(name : str, description : str, url : str, goal : str, user_id : str, genders, senses, singers, languages, playlists, music_file, image_file, available : bool = 1, by_file : bool = False, ) :#{
     if(not (f_url := format_url(url)) and not (l_url := load_file(music_file))) : return {'message' : "url or file is invalid"}, 400
-    else : url = f_url or l_url or None
+    else : url = l_url if by_file else f_url or f_url or l_url # else : url = f_url or l_url or None
 
     singers = singers or ['unknown']
     languages = languages or ['unknown']
@@ -181,7 +181,7 @@ def post_song_senses(senses : list, song_id : str, user_id, conn = None) :#{
 #}
 
 @validate
-def put(song_id : str, name : str, description : str, url : str, goal : str, user_id : str, genders, senses, singers, languages, playlists, music_file, image_file,  available : bool = 1) :#{
+def put(song_id : str, name : str, description : str, url : str, goal : str, user_id : str, genders, senses, singers, languages, playlists, music_file, image_file, available : bool = 1, by_file : bool = False) :#{
     # TODO receive arguments way optional to not update all values if not necessary and doing update less demanding (List = [] o None)
     # TODO get song data to verify what is going to be updated and what not and verify if is convenient to update or not with optional arguments
     singers = singers if singers and len(singers) > 0  else ['unknown']
@@ -192,9 +192,12 @@ def put(song_id : str, name : str, description : str, url : str, goal : str, use
     # #}
     
     if not song_id : return {'message' : "song id not provided"}, 400
-    if((rsrc := url or music_file) and not (f_url := format_url(url)) and not (l_url := load_file(music_file))) : return {'message' : "url or file is invalid"}, 400
-    else : url = f_url or l_url if rsrc else None # else : url = f_url or l_url or None if rsrc else None
-
+    
+    if(not url and not music_file) : url = None
+    elif (by_file) : url = l_url if (l_url := load_file(music_file)) else Exception("Invalid File") if music_file else None
+    else : url = f_url if (f_url := format_url(url)) else Exception("Invalid URL")
+    
+    if (isinstance(url, Exception)) : return {'message' : str(url)}, 400
     if (AUTH_ERROR := auth_put(user_id)) : return AUTH_ERROR
     
     # BUG: -> image must save in user folder
