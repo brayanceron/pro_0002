@@ -58,26 +58,17 @@ const PlayerComponent = ({ playList, currentIndex, setCurrentIndex, onChangeStat
     useEffect(() => { setSongs(playList.map(s => getUrlBySong(s.url))); }, [playList])
     useEffect(() => { if(playerSelected && playerSelected?.error) { nextIfError();} }, [playerSelected]);
     
-    // const nextIfError = () => { if(currentIndex + 1 < playList.length) setCurrentIndex(currentIndex + 1); } /* if(currentIndex + 1 < playList.length) move(1); */
-    // const nextIfError = () => { if(currentIndex + 1 < playList.length) setCurrentIndex(currentIndex + 1); } /* if(currentIndex + 1 < playList.length) move(1); */
-    const nextIfError = () => {
-        console.log("NEXT IF ERROR WAS CALLED")
-        if(currentIndex + 1 < playList.length) setCurrentIndex(currentIndex + 1); /* if(currentIndex + 1 < playList.length) move(1); */
-    }
+    const nextIfError = () => { if(currentIndex + 1 < playList.length) setCurrentIndex(currentIndex + 1); }/* if(currentIndex + 1 < playList.length) move(1); */
     
     const onChangeStatesInternal = (error : boolean, duration: number, currentTime: number) => {
         setPlayerSelected({error, duration, currentTime});
         if(onChangeState) onChangeState({error, duration, currentTime});
     }
     const onChangeProgress = (newVal: number) => {
-        // if(srcPlayerRef && srcPlayerRef.current && !srcPlayerRef.current.getError()) return srcPlayerRef.current.onChangeProgress(newVal);
-        // else if(ytPlatyerRef && ytPlatyerRef.current && !playerSelected?.error) return ytPlatyerRef.current.onChangeProgress(newVal); // else if(ytPlatyerRef && ytPlatyerRef.current && !ytPlatyerRef.current.getError()) return ytPlatyerRef.current.onChangeProgress(newVal);
         if(!isValidYouTubeUrl(songs[currentIndex]) && srcPlayerRef && srcPlayerRef.current && !playerSelected?.error){
             return srcPlayerRef.current.onChangeProgress(newVal);
         }
-        else {
-            if(ytPlatyerRef && ytPlatyerRef.current && !playerSelected?.error) return ytPlatyerRef.current.onChangeProgress(newVal)
-        }
+        else { if(ytPlatyerRef && ytPlatyerRef.current && !playerSelected?.error) { return ytPlatyerRef.current.onChangeProgress(newVal); }}
     }
     
     return (
@@ -104,17 +95,18 @@ const PlayerComponent = ({ playList, currentIndex, setCurrentIndex, onChangeStat
                     songs.length > 0 ?
                         <>
                             <div className={`w-full ${showPlayer ? '' : 'hidden'}`}>
-                            <SrcPlayer url={songs[currentIndex]} onFinishSong={() => move(1)} playing={playing} setPlaying={setPlaying} ref={srcPlayerRef} onChangeStates={onChangeStatesInternal} />
-                            <YouTubePlayer url={songs[currentIndex]} onFinishSong={() => move(1)} playing={playing} setPlaying={setPlaying} ref={ytPlatyerRef} onChangeStates={onChangeStatesInternal} />
+                                <SrcPlayer url={songs[currentIndex]} onFinishSong={() => move(1)} playing={playing} setPlaying={setPlaying} ref={srcPlayerRef} onChangeStates={onChangeStatesInternal} />
+                                <YouTubePlayer url={songs[currentIndex]} onFinishSong={() => move(1)} playing={playing} setPlaying={setPlaying} ref={ytPlatyerRef} onChangeStates={onChangeStatesInternal} />
                             </div>
                             
                             {/* PROGRESS SECTION */}
                             <div className={`w-full mt-7 ${showProgressBar ? '' : 'hidden'} ${playerSelected?.error ? 'hidden' : ''}`}>
-                            <ProgressBarPlayer url={songs[currentIndex]} 
-                                currentIndex={currentIndex}
-                                currentTime = {playerSelected?.currentTime ? playerSelected.currentTime : 0}
-                                duration={playerSelected ? playerSelected.duration : 0}
-                                playing={playing} onChangeTime={onChangeProgress}/>
+                                <ProgressBarPlayer url={songs[currentIndex]} 
+                                    currentIndex={currentIndex}
+                                    currentTime = {playerSelected?.currentTime ? playerSelected.currentTime : 0}
+                                    duration={playerSelected ? playerSelected.duration : 0}
+                                    playing={playing} onChangeTime={onChangeProgress}
+                                />
                             </div>
                         </>
                         : <p className="text-center invert py-5">Empty playlist (0 Songs) {/* <span className="icon-[tabler--alert-triangle] size-6"></span> */}</p>
@@ -124,7 +116,7 @@ const PlayerComponent = ({ playList, currentIndex, setCurrentIndex, onChangeStat
 
             {/* CONTROLS SECTION */}
             <div className={`w-full mt-0 mb-2 ${showControls ? '' : 'hidden'} ${(playerSelected && playerSelected.error) ? 'hidden' : ''} ${songs.length === 0 ? 'hidden' : ''}`}>
-            <PlayerControls play={play} pause={pause} move={move} />
+                <PlayerControls play={play} pause={pause} move={move} />
             </div>
         </div>
     )
@@ -139,7 +131,7 @@ const PlayerControls = ({play, pause, move}:{play : () => void, pause : () => vo
                     <span className="icon-[tabler--repeat]"></span>
                 </button>
 
-                <button onClick={_ => move(-1)} className="btn btn-circle btn-soft btn-default glass text-white" aria-label="Circle Soft Icon Button">
+                <button onClick={ _ => move(-1)} className="btn btn-circle btn-soft btn-default glass text-white" aria-label="Circle Soft Icon Button">
                     <span className="icon-[tabler--track-prev]"></span>
                 </button>
 
@@ -151,7 +143,7 @@ const PlayerControls = ({play, pause, move}:{play : () => void, pause : () => vo
                     <span className="icon-[tabler--play]"></span>
                 </button>
 
-                <button onClick={_ => move(1)} className="btn btn-circle btn-soft btn-default glass text-white" aria-label="Circle Soft Icon Button">
+                <button onClick={ _ => move(1)} className="btn btn-circle btn-soft btn-default glass text-white" aria-label="Circle Soft Icon Button">
                     <span className="icon-[tabler--track-next]"></span>
                 </button>
 
