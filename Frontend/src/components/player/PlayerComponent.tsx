@@ -104,18 +104,17 @@ const PlayerComponent = ({ playList, currentIndex, setCurrentIndex, onChangeStat
                     songs.length > 0 ?
                         <>
                             <div className={`w-full ${showPlayer ? '' : 'hidden'}`}>
-                                <SrcPlayer url={songs[currentIndex]} onFinishSong={() => move(1)} playing={playing} setPlaying={setPlaying} ref={srcPlayerRef} onChangeStates={onChangeStatesInternal} />
-                                <YouTubePlayer url={songs[currentIndex]} onFinishSong={() => move(1)} playing={playing} setPlaying={setPlaying} ref={ytPlatyerRef} onChangeStates={onChangeStatesInternal} />
+                            <SrcPlayer url={songs[currentIndex]} onFinishSong={() => move(1)} playing={playing} setPlaying={setPlaying} ref={srcPlayerRef} onChangeStates={onChangeStatesInternal} />
+                            <YouTubePlayer url={songs[currentIndex]} onFinishSong={() => move(1)} playing={playing} setPlaying={setPlaying} ref={ytPlatyerRef} onChangeStates={onChangeStatesInternal} />
                             </div>
                             
                             {/* PROGRESS SECTION */}
                             <div className={`w-full mt-7 ${showProgressBar ? '' : 'hidden'} ${playerSelected?.error ? 'hidden' : ''}`}>
-                                <ProgressBarPlayer url={songs[currentIndex]} 
-                                    currentIndex={currentIndex}
-                                    currentTime = {playerSelected?.currentTime ? playerSelected.currentTime : 0}
-                                    duration={playerSelected ? playerSelected.duration : 0}
-                                    playing={playing} onChangeTime={onChangeProgress}
-                                />
+                            <ProgressBarPlayer url={songs[currentIndex]} 
+                                currentIndex={currentIndex}
+                                currentTime = {playerSelected?.currentTime ? playerSelected.currentTime : 0}
+                                duration={playerSelected ? playerSelected.duration : 0}
+                                playing={playing} onChangeTime={onChangeProgress}/>
                             </div>
                         </>
                         : <p className="text-center invert py-5">Empty playlist (0 Songs) {/* <span className="icon-[tabler--alert-triangle] size-6"></span> */}</p>
