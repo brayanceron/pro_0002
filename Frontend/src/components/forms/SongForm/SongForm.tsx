@@ -40,7 +40,7 @@ const SongForm = ({ values = emptyFields, url, method = Method.POST, callback }:
     const { sendReq, isLoading } = usePost(formData, uploadUrl, callback, method) // const { sendReq } = usePost(formData, "http://localhost:5000/api/song", callback, method )
     
     function onSub() { 
-        if(validateYTUrl || !isAllowedYouTubeUrl(videoUrl || '')) return alert("The YouTube video is not compatible, please change the URL or upload a file.");
+        if(isYouTubeUrl(videoUrl || '') && validateYTUrl) return alert("The YouTube video is not compatible, please change the URL or upload a file.");
         sendReq(); 
     }
     const onChangeSelectedFile = (event: BaseSyntheticEvent) => {
@@ -58,13 +58,8 @@ const SongForm = ({ values = emptyFields, url, method = Method.POST, callback }:
         setVideoUrl(url);
         onChange(event);
     }
-    const onChangePlayerState = (state: states) => { 
-        // if(validateYTUrl !== state.error) setValidateYTUrl(state.error != null ? state.error : false);
-        setValidateYTUrl(state.error != null ? state.error : false);
-    }
     // useEffect(()=>{setTempPlayList([{...tempPlayList[0], url: videoUrl || ''}])}, [videoUrl])
-
-    // const onChangePlayerStatus = (error : boolean) => { setValidateYTUrl(error); }
+    const onChangePlayerState = (state: states) => { setValidateYTUrl(state.error != null ? state.error : false); }
     const onChangeSense = (snsData: SenseOptionsType[]) => { onChange({ target: { name: 'senses', value: JSON.stringify(snsData) } }); }
     const onChangeGoalRange = (valuess : SenseOptionsType) => { onChange({target : {name : valuess.id/* 'goal' */, value : valuess.score.max}}) }
 
