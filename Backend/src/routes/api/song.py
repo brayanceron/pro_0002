@@ -29,6 +29,7 @@ def get_id(id) :#{
 @song_router.route('/', methods = ['POST'])
 def post() :#{
     values = request.values # stream= request.stream
+    by_file =  True if request.args.get('byfile') else False
 
     form = dict(request.form)
     form = {k : form.get(k) for k in keys} # extract necesary keys
@@ -42,12 +43,13 @@ def post() :#{
     image_file = request.files.get('image')
     music_file = request.files.get('file')
 
-    return src.controllers.song.post(**form, image_file = image_file, music_file = music_file)
+    return src.controllers.song.post(**form, image_file = image_file, music_file = music_file, by_file = by_file)
 #}
 
 @song_router.route('/<id>', methods = ['PUT'])
 def put(id : str) :#{
     values = request.values # stream= request.stream
+    by_file =  True if request.args.get('byfile') else False
 
     form = dict(request.form)
     form = {k : form.get(k) for k in keys} # extract necesary keys
@@ -63,7 +65,7 @@ def put(id : str) :#{
 
     image_file = request.files.get('image')
     music_file = request.files.get('file')
-    return src.controllers.song.put(id, **form, image_file = image_file, music_file = music_file)
+    return src.controllers.song.put(id, **form, image_file = image_file, music_file = music_file, by_file = by_file)
 #}
 
 #NOTE - this function is used only by post and put endpoints
