@@ -6,8 +6,32 @@ const getYouYubeVideoId = (url: string): string | null => {
 };
 
 // TODO simplify functions: 'get...()' and 'is...()' sould reduce to one function
+function isYouTubeUrl(url : string): boolean { //INFO any url that belongs to youtube
+    try {
+        const urlObj = new URL(url);
+        const host = urlObj.hostname.replace('www.', ''); // extract host without www
+        
+        // whitelist
+        const dominiosOficiales = [
+            'youtube.com', 
+            'youtu.be', 
+            'm.youtube.com', 
+            'music.youtube.com', 
+            'gaming.youtube.com'
+        ];
 
-function isValidYouTubeUrl(url: string): boolean {
+        return dominiosOficiales.includes(host);
+    } catch (e) { // if url is invalid, new URL() will throw an error
+        return false;
+    } 
+}
+function isAllowedYouTubeUrl(url: string): boolean { //INFO only allows urls with video id
+    if (!isYouTubeUrl(url)) return false;
+    const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|embed\/|v\/|.+\?v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})$/;
+    return youtubeRegex.test(url);
+}
+//INFO - this function is ambiguous and must be deprecated, it must be replaced by isYouTubeUrl() and isAllowedYouTubeUrl()
+function isValidYouTubeUrl(url: string): boolean { //INFO only allows urls
     if (!url || typeof url !== 'string') { return false; }
 
     // TODO add support to youtubemusic urls
@@ -89,5 +113,7 @@ export {
     getImageUrlByYTVideo,
     getImageUrl,
     getUrlBySong,
-    isValidBlobUrl as isValidTemporalUrl
+    isValidBlobUrl as isValidTemporalUrl,
+    isYouTubeUrl,
+    isAllowedYouTubeUrl,
 }
