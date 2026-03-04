@@ -21,11 +21,11 @@ const emptyFields = { url: '', image: '', name: '', duration: '', genders: [], s
 
 const SongForm = ({ values = emptyFields, url, method = Method.POST, callback }: { values?: any, url: string, method?: Method, callback: (params: reqProps) => void }) => {
     const { user: userAuth } = useContext(AuthContext); // const userAuth = useContext(AuthContext!);
-    const [videoUrl, setVideoUrl] = useState<string | null>(values.url || null); // const [videoUrl, setVideoUrl] = useState<string | null>(null);
-    values.url = method === Method.PUT?  (isValidYouTubeUrl(values.url) ? values.url : null) : values.url; //values.url = isValidYouTubeUrl(values.url) ? values.url : '';
-    const [validateYTUrl, setValidateYTUrl] = useState<boolean>(false);
+    // const [videoUrl, setVideoUrl] = useState<string | null>(values.url || null); // const [videoUrl, setVideoUrl] = useState<string | null>(null);
+    // values.url = method === Method.PUT?  (isValidYouTubeUrl(values.url) ? values.url : null) : values.url; //values.url = isValidYouTubeUrl(values.url) ? values.url : '';
+    // const [validateYTUrl, setValidateYTUrl] = useState<boolean>(false);
     values.user_id = userAuth?.id;
-    const [tempPlayList, setTempPlayList] = useState<SongModelExtended[]>([{...temporalPlayList[0], url: videoUrl || ''}]);
+    // const [tempPlayList, setTempPlayList] = useState<SongModelExtended[]>([{...temporalPlayList[0], url: videoUrl || ''}]);
     const [uploadUrl, setUploadUrl] = useState(url);
 
     useEffect(() => {
@@ -40,10 +40,11 @@ const SongForm = ({ values = emptyFields, url, method = Method.POST, callback }:
     const { sendReq, isLoading } = usePost(formData, uploadUrl, callback, method) // const { sendReq } = usePost(formData, "http://localhost:5000/api/song", callback, method )
     
     function onSub() { 
-        if(validateYTUrl || !isAllowedYouTubeUrl(videoUrl || '')) return alert("The YouTube video is not compatible, please change the URL or upload a file.");
+        // if(validateYTUrl || !isAllowedYouTubeUrl(videoUrl || '')) return alert("The YouTube video is not compatible, please change the URL or upload a file.");
         sendReq(); 
     }
-    const onChangeSelectedFile = (event: BaseSyntheticEvent) => {
+    {/* ========================================0 */}
+    /* const onChangeSelectedFile = (event: BaseSyntheticEvent) => {
         const file = event.target.files[0];
         if (!file) return; //TODO - add error message
         let tempUrl = URL.createObjectURL(file);
@@ -61,7 +62,8 @@ const SongForm = ({ values = emptyFields, url, method = Method.POST, callback }:
     const onChangePlayerState = (state: states) => { 
         // if(validateYTUrl !== state.error) setValidateYTUrl(state.error != null ? state.error : false);
         setValidateYTUrl(state.error != null ? state.error : false);
-    }
+    } */
+    {/* ========================================0 */}
     // useEffect(()=>{setTempPlayList([{...tempPlayList[0], url: videoUrl || ''}])}, [videoUrl])
 
     // const onChangePlayerStatus = (error : boolean) => { setValidateYTUrl(error); }
@@ -74,41 +76,11 @@ const SongForm = ({ values = emptyFields, url, method = Method.POST, callback }:
 
                 <h1 className="text-center text-2xl font-bold mt-6 mb-4">{`${method == Method.POST ? 'Register' : 'Update'} Song`}</h1>
 
-                <div className="border-[1px] border-gray-200  px-2 pb-2 shadow-md">
-                    <nav className="tabs tabs-bordered" aria-label="Tabs" role="tablist" aria-orientation="horizontal">
-                        <button type="button" onClick={ _ => setUploadUrl(url) } className={`tab active-tab:tab-active w-full active`} id="tabs-basic-filled-item-1" data-tab="#tabs-basic-filled-1" aria-controls="tabs-basic-filled-1" role="tab" aria-selected="true">
-                            Link
-                        </button>
-                        <button type="button" onClick={ _ => setUploadUrl(`${url}?byfile=1`) } className={`tab active-tab:tab-active w-full`} id="tabs-basic-filled-item-2" data-tab="#tabs-basic-filled-2" aria-controls="tabs-basic-filled-2" role="tab" aria-selected="false">
-                            File
-                        </button>
-                    </nav>
-
-                    <div className="mt-3 ">
-
-                        <div id="tabs-basic-filled-1" role="tabpanel" aria-labelledby="tabs-basic-filled-item-1">
-                            <AppInput id="url" name="url" value={data.url || ''} options={{ label: "By Link", icon: "link" }}
-                                onChange={onChangeUrlInput}
-                            />
-                            {/* <AppButton text="Extract info" addStyles="btn-xs w-[130px] my-1" icon="stack-push" /> */}
-                            {
-                                videoUrl === null ? <p className="text-sm text-gray-300">...</p> :
-                                    !isYouTubeUrl(videoUrl) ?<p className="text-sm text-red-500 ">This link is not a YouTube video!</p>
-                                    :!isAllowedYouTubeUrl(videoUrl) ?<p className="text-sm text-red-500 ">This YouTube link is not allowed!</p>
-                                        : validateYTUrl ? <p className="text-sm text-red-500 ">Video not supported!</p>
-                                            : <p className="text-sm text-green-500 ">Video compatible!</p>
-                            }
-                        </div>
-
-                        <div id="tabs-basic-filled-2" className="hidden" role="tabpanel" aria-labelledby="tabs-basic-filled-item-2">
-                            <AppInput id="file" name="file" value="" type='file' options={{ label: "By File" }} onChange={onChangeSelectedFile} accept="audio/*" />
-                            <p className="text-xs text-gray-400">File : {data.file?.name || 'No file selected'}</p>
-                        </div>
-                        <QuickPlaying url={videoUrl} tempPlayList={tempPlayList} onChangePlayerState={onChangePlayerState} />
-
-                    </div>
-                </div>
-                <p className="text-xs text-center text-gray-300 mt-2">Upload : {uploadUrl.includes('byfile=1') ? 'File' : 'Link'}</p>
+                {/* ========================================0 */}
+                {/* <SelectSongSrc defaultUrl={values.url} baseUploadUrl={url} setUploadUrl={setUploadUrl} onChange={onChange} onChangeFile={onChangeFile} /> */}
+                <SelectSongSrc defaultUrl={values.url} baseUploadUrl={uploadUrl} setUploadUrl={setUploadUrl} onChange={onChange} onChangeFile={onChangeFile} method={method} />
+                {/* <SelectSongSrc defaultUrl={data.url} baseUploadUrl={uploadUrl} setUploadUrl={setUploadUrl} onChange={onChange} onChangeFile={onChangeFile} method={method} /> */}
+                {/* ========================================0 */}
 
                 <AppInput id="name" name="name" value={data.name} onChange={onChange} options={{ label: "Name", icon: "text-recognition" }} />
                 <AppInput id="duration" name="duration" value={data.duration} onChange={onChange} options={{ label: "duration", icon: "clock" }} />
@@ -188,6 +160,78 @@ const QuickPlaying = ({url, tempPlayList, onChangePlayerState} : {url : string |
             </div>
         </>
     );
+}
+
+// const SelectSrc = ({ videoUrl, url, setUploadUrl} : { videoUrl : string, url : string, setUploadUrl: (url: string) => void}) =>{
+// const SelectSrc = ({  url, setUploadUrl} : { url : string, setUploadUrl: (url: string) => void}) =>{
+const SelectSongSrc = ({ defaultUrl, baseUploadUrl, setUploadUrl, onChange, onChangeFile, method = Method.POST} : { defaultUrl : string | null, baseUploadUrl : string, setUploadUrl: (url: string) => void, onChange : (event : any) => void , onChangeFile : (event : any) => void, method?: Method},  ) =>{
+    const [validateYTUrl, setValidateYTUrl] = useState<boolean>(false);
+    // const [videoUrl, setVideoUrl] = useState<string | null>(values.url || null); // const [videoUrl, setVideoUrl] = useState<string | null>(null);
+    const [videoUrl, setVideoUrl] = useState<string | null>(defaultUrl || null); // const [videoUrl, setVideoUrl] = useState<string | null>(null);
+    // defaultUrl = method === Method.PUT?  (isValidYouTubeUrl(defaultUrl!) ? defaultUrl : null) : defaultUrl; //values.url = isValidYouTubeUrl(values.url) ? values.url : '';
+    const [tempPlayList, setTempPlayList] = useState<SongModelExtended[]>([{...temporalPlayList[0], url: videoUrl || ''}]);
+
+    const onChangeSelectedFile = (event: BaseSyntheticEvent) => {
+        const file = event.target.files[0];
+        if (!file) return; //TODO - add error message
+        let tempUrl = URL.createObjectURL(file);
+
+        setTempPlayList([{...tempPlayList[0], url: tempUrl}]);
+        setVideoUrl(tempUrl);
+        onChangeFile(event);
+    }
+    const onChangeUrlInput = (event: BaseSyntheticEvent) => {
+        const url_ = event.target.value;
+        setTempPlayList([{...tempPlayList[0], url : url_}]);
+        setVideoUrl(url_);
+        onChange(event);
+    }
+    const onChangePlayerState = (state: states) => { 
+        // if(validateYTUrl !== state.error) setValidateYTUrl(state.error != null ? state.error : false);
+        setValidateYTUrl(state.error != null ? state.error : false);
+    }
+    return (
+        <>
+        <div className="border-[1px] border-gray-200  px-2 pb-2 shadow-md">
+                    <nav className="tabs tabs-bordered" aria-label="Tabs" role="tablist" aria-orientation="horizontal">
+                        <button type="button" onClick={ _ => setUploadUrl(baseUploadUrl) } className={`tab active-tab:tab-active w-full active`} id="tabs-basic-filled-item-1" data-tab="#tabs-basic-filled-1" aria-controls="tabs-basic-filled-1" role="tab" aria-selected="true">
+                            Link
+                        </button>
+                        <button type="button" onClick={ _ => setUploadUrl(`${baseUploadUrl}?byfile=1`) } className={`tab active-tab:tab-active w-full`} id="tabs-basic-filled-item-2" data-tab="#tabs-basic-filled-2" aria-controls="tabs-basic-filled-2" role="tab" aria-selected="false">
+                            File
+                        </button>
+                    </nav>
+
+                    <div className="mt-3 ">
+
+                        <div id="tabs-basic-filled-1" role="tabpanel" aria-labelledby="tabs-basic-filled-item-1">
+                            {/* <AppInput id="url" name="url" value={data.url || ''} options={{ label: "By Link", icon: "link" }} */}
+                            {/* <AppInput id="url" name="url" value={videoUrl || ''} options={{ label: "By Link", icon: "link" }} */}
+                            {/* // <AppInput id="url" name="url" value={defaultUrl || ''} options={{ label: "By Link", icon: "link" }} */}
+                            {/* <AppInput id="url" name="url" value={ (method === Method.PUT && isValidYouTubeUrl(videoUrl!)) ? videoUrl : videoUrl || ''} options={{ label: "By Link", icon: "link" }} */}
+                            <AppInput id="url" name="url" value={ (method === Method.PUT) ? (isValidYouTubeUrl(videoUrl!) ? videoUrl! : '') : videoUrl!} options={{ label: "By Link", icon: "link" }}
+                                onChange={onChangeUrlInput}
+                            />
+                            {/* <AppButton text="Extract info" addStyles="btn-xs w-[130px] my-1" icon="stack-push" /> */}
+                            {
+                                videoUrl === null ? <p className="text-sm text-gray-300">...</p> :
+                                    !isYouTubeUrl(videoUrl) ?<p className="text-sm text-red-500 ">This link is not a YouTube video!</p>
+                                    :!isAllowedYouTubeUrl(videoUrl) ?<p className="text-sm text-red-500 ">This YouTube link is not allowed!</p>
+                                        : validateYTUrl ? <p className="text-sm text-red-500 ">Video not supported!</p>
+                                            : <p className="text-sm text-green-500 ">Video compatible!</p>
+                            }
+                        </div>
+
+                        <div id="tabs-basic-filled-2" className="hidden" role="tabpanel" aria-labelledby="tabs-basic-filled-item-2">
+                            <AppInput id="file" name="file" value="" type='file' options={{ label: "By File" }} onChange={onChangeSelectedFile} accept="audio/*" />
+                            {/* <p className="text-xs text-gray-400">File : {data.file?.name || 'No file selected'}</p> */}
+                        </div>
+                        <QuickPlaying url={videoUrl} tempPlayList={tempPlayList} onChangePlayerState={onChangePlayerState} />
+
+                    </div>
+                </div>
+        </>
+    )
 }
 const temporalPlayList: SongModelExtended[] = [{
     id: 'temp_id',
