@@ -6,6 +6,7 @@ import songDefault from "../../assets/songDefault.jpeg"
 interface Props {
     url: string,
     playing: boolean,
+    volume: number,
     setPlaying: (val: boolean) => void,
     onFinishSong : () => void,
     onChangeStates: (error: boolean, duration: number, currentTime: number) => void,
@@ -31,7 +32,7 @@ const reducer = (prevState : PlayerStates, action : ReduxAction ) : PlayerStates
 }
 
 //TODO verify if url is a url supported by audio element or is url of backend
-export const SrcPlayer = forwardRef ( ({ url, playing, onFinishSong, onChangeStates } : Props, ref) => {
+export const SrcPlayer = forwardRef ( ({ url, playing, onFinishSong, onChangeStates, volume } : Props, ref) => {
     const { currentIndex } = useContext(PlayListContext);
     const rep = useRef<HTMLAudioElement>(null);
     const initialState : PlayerStates = {error : !isValidSrcUrl(url) && !isValidTemporalUrl(url), duration : 0,};
@@ -70,11 +71,19 @@ export const SrcPlayer = forwardRef ( ({ url, playing, onFinishSong, onChangeSta
     }
 
     const onError = () => { dispatch({type : 'ERROR', payload : {error : true, duration : -1}}) }
-    const onCanPlay =  () => { if (rep.current) { dispatch({type : 'PLAYERSTATE', payload : {error : false, duration : getDuration(),}}) } }
+    const onCanPlay =  () => { 
+        if (rep.current) { 
+            dispatch({type : 'PLAYERSTATE', payload : {error : false, duration : getDuration(),}});
+            rep.current.volume = volume / 100; 
+        }
+    }
 
     useImperativeHandle(ref, () => ({
         onChangeProgress(newVal: number) {
             if(rep.current) rep.current.currentTime = newVal;
+        },
+        onChangeVolume(value: number) {
+            if(rep.current) rep.current.volume = value / 100;
         },
         getCurrentTime : () => { return rep.current ? rep.current.currentTime : 0; },
     }));
