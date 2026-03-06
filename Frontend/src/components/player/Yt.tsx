@@ -5,6 +5,7 @@ import { PlayListContext } from '../../context/PlayListContext';
 interface Props {
     url: string,
     playing: boolean,
+    volume: number,
     onFinishSong: () => void,
     onChangeStates: (error: boolean, duration: number, currentTime: number) => void,
     setPlaying: (val: boolean) => void,
@@ -40,7 +41,7 @@ const reducer = (prevState: PlayerStates, action: ReduxAction): PlayerStates => 
     }
 }
 
-export const YouTubePlayer = forwardRef(({ url, playing, setPlaying, onFinishSong, onChangeStates }: Props, ref) => {
+export const YouTubePlayer = forwardRef(({ url, playing, setPlaying, onFinishSong, onChangeStates, volume }: Props, ref) => {
     const playerRef = useRef<HTMLDivElement>(null);
     const playerInstance = useRef<any>(null);
     const { currentIndex } = useContext(PlayListContext);
@@ -111,6 +112,7 @@ export const YouTubePlayer = forwardRef(({ url, playing, setPlaying, onFinishSon
                 events: {
                     onReady: () => {
                         dispatch({ type: 'PLAYERSTATE', payload: { error: false, duration: getDuration(), playerState: null } })
+                        if(playerInstance.current && playerInstance.current.setVolume) playerInstance.current.setVolume(volume);
                         exec();
                     },
                     // onStateChange: (event: any) => { dispatch({type : 'PLAYERSTATE', payload : {playerState : event.data, error : null, duration : getDuration()}}) },
@@ -138,6 +140,9 @@ export const YouTubePlayer = forwardRef(({ url, playing, setPlaying, onFinishSon
         onChangeProgress(newVal: number) {
             if (playerInstance.current && playerInstance.current.seekTo) playerInstance.current.seekTo(newVal, true);
         },
+        onChangeVolume(value: number) {
+            if(playerInstance.current && playerInstance.current.setVolume) playerInstance.current.setVolume(value);
+        }
         /* getCurrentTime : () => { 
             if(!playerInstance.current || !playerInstance || !playerInstance.current.getCurrentTime) return 0;
             return playerInstance.current.getCurrentTime();
