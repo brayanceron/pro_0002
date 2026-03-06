@@ -84,7 +84,7 @@ const ProgressBarPlayer = ({ duration, url, playing, currentIndex, onChangeTime,
         <div className="py-1">
 
             <input
-                className="range bg-transparent border-solid border-2"
+                className="range range-sm bg-transparent border-solid border-[1px] hover:cursor-move"
                 ref={inputRef}
                 type="range"
                 min={0}
