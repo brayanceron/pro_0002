@@ -24,6 +24,7 @@ export type states = {
     duration : number,
     currentTime : number | null,
 }
+const initVol = 60; // read from localStorage
 
 const PlayerComponent = ({ playList, currentIndex, setCurrentIndex, onChangeState, showPlayer = true, showProgressBar = true, showControls = true } : Props) => {
     const { playList :plGlobal, currentIndex :currentIndexGlobal, setCurrentIndex : setCurrentIndexGlobal } = useContext(PlayListContext);
@@ -70,6 +71,12 @@ const PlayerComponent = ({ playList, currentIndex, setCurrentIndex, onChangeStat
         }
         else { if(ytPlatyerRef && ytPlatyerRef.current && !playerSelected?.error) { return ytPlatyerRef.current.onChangeProgress(newVal); }}
     }
+    const onChangeVolume = (value: number) => {
+        if(!isValidYouTubeUrl(songs[currentIndex]) && srcPlayerRef && srcPlayerRef.current && !playerSelected?.error){
+            return srcPlayerRef.current.onChangeVolume(value);
+        }
+        else { if(ytPlatyerRef && ytPlatyerRef.current && !playerSelected?.error) { return ytPlatyerRef.current.onChangeVolume(value); }}
+    }
     
     return (
         <div className="w-full overflow-hidden px-3 box-border">
@@ -95,8 +102,8 @@ const PlayerComponent = ({ playList, currentIndex, setCurrentIndex, onChangeStat
                     songs.length > 0 ?
                         <>
                             <div className={`w-full ${showPlayer ? '' : 'hidden'}`}>
-                                <SrcPlayer url={songs[currentIndex]} onFinishSong={() => move(1)} playing={playing} setPlaying={setPlaying} ref={srcPlayerRef} onChangeStates={onChangeStatesInternal} />
-                                <YouTubePlayer url={songs[currentIndex]} onFinishSong={() => move(1)} playing={playing} setPlaying={setPlaying} ref={ytPlatyerRef} onChangeStates={onChangeStatesInternal} />
+                                <SrcPlayer url={songs[currentIndex]} onFinishSong={() => move(1)} playing={playing} setPlaying={setPlaying} ref={srcPlayerRef} onChangeStates={onChangeStatesInternal} volume={initVol} />
+                                <YouTubePlayer url={songs[currentIndex]} onFinishSong={() => move(1)} playing={playing} setPlaying={setPlaying} ref={ytPlatyerRef} onChangeStates={onChangeStatesInternal} volume={initVol} />
                             </div>
                             
                             {/* PROGRESS SECTION */}
@@ -116,17 +123,30 @@ const PlayerComponent = ({ playList, currentIndex, setCurrentIndex, onChangeStat
 
             {/* CONTROLS SECTION */}
             <div className={`w-full mt-0 mb-2 ${showControls ? '' : 'hidden'} ${(playerSelected && playerSelected.error) ? 'hidden' : ''} ${songs.length === 0 ? 'hidden' : ''}`}>
-                <PlayerControls play={play} pause={pause} move={move} />
+                <PlayerControls play={play} pause={pause} move={move} onChangeVolume={onChangeVolume} initVol={initVol} srcLink={songs[currentIndex]} />
             </div>
         </div>
     )
 }
 
 
-const PlayerControls = ({play, pause, move}:{play : () => void, pause : () => void, move : (step: number) => void}) => {
-    return (
-        <div className="flex justify-center">
+const PlayerControls = ({play, pause, move,  onChangeVolume, initVol, srcLink = '/'}:{play : () => void, pause : () => void, move : (step: number) => void, initVol: number, onChangeVolume : (value: number) => void , srcLink? : string}) => {
+    const onChangeInputVolume = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = parseInt(e.target.value);
+        if(isNaN(value)) return alert("Please enter a valid number for volume.");
+        onChangeVolume(value);
+    }
 
+    return (
+        <div className="flex items-center justify-between">
+
+                <div className="flex-1 flex justify-start">
+                    <a href={srcLink} target="_blank">
+                        <span className="icon-[tabler--external-link] size-4 invert m-0 p-0"></span>
+                    </a>
+                </div>
+
+                <div style={{flex : '0 0 auto'}}>
                 <button className="btn btn-circle btn-soft btn-default glass text-white" aria-label="Circle Soft Icon Button">
                     <span className="icon-[tabler--repeat]"></span>
                 </button>
@@ -146,7 +166,18 @@ const PlayerControls = ({play, pause, move}:{play : () => void, pause : () => vo
                 <button onClick={ _ => move(1)} className="btn btn-circle btn-soft btn-default glass text-white" aria-label="Circle Soft Icon Button">
                     <span className="icon-[tabler--track-next]"></span>
                 </button>
+                </div>
 
+                <div className="flex-1">
+                    <div className="w-auto flex items-center gap-1 justify-end mx-1">
+                        <span className="icon-[tabler--volume] size-4 invert"></span>
+                        <input type="range" className="range range-xs w-[60px] bg-transparent border-solid border-white border-[1px]" aria-label="range" defaultValue={initVol} onChange={onChangeInputVolume} />
+                    </div>
+                </div>
+
+                {/* <div>
+                    <span className="icon-[tabler--brand-youtube-filled] size-4 invert"></span>
+                </div> */}
             </div>
     )
 }

@@ -291,7 +291,15 @@ INSERT INTO `sense` (`id`, `name`, `description`, `user_id`, `score`, `image`, `
 ('fc746675261a49dbbe4a9026d90f6d5b', 'Humor', '', 'admin', -1.00, '', 1),
 ('4dbc4be9b2e6463696992aef39ba18a2', 'Irony', '', 'admin', -1.00, '', 1),
 ('2a7b6c43c4b84a1e9ca777d5b65126ac', 'Whimsy', '', 'admin', -1.00, '', 1),
-('c532129f8703426daf86da7cedbd872a', 'Absurdity', '', 'admin', -1.00, '', 1);
+('c532129f8703426daf86da7cedbd872a', 'Absurdity', '', 'admin', -1.00, '', 1),
+
+('44275102ce794d5a98ccbfd7acd43028', 'Patriotism', '', 'admin', -1.00, '', 1),
+('6fde7279503941389cba4f297de77fd2', 'Melancholy', '', 'admin', -1.00, '', 1),
+('525e26352dbc41bcb87eadaa8f2eb530', 'Agitation', '', 'admin', -1.00, '', 1),
+('85c89119f55c4475abdb1536080b98f7', 'Arrogant', '', 'admin', -1.00, '', 1),
+('d93d9910b29141b897f3a057caddc190', 'Fortress', '', 'admin', -1.00, '', 1),
+('876934ce53ba43beb69daac5dfe7de57', 'Friendship', '', 'admin', -1.00, '', 1),
+('d09b4fdec555451f94cfe79b7c5d00da', 'Sensual', '', 'admin', -1.00, '', 1);
 
 
 -- --------------------------------------------------------

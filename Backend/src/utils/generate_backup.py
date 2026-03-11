@@ -3,6 +3,7 @@ from src.db.database import DatabaseConnection
 import json
 from uuid import uuid4
 from  src.controllers.GenericController import GenericController
+from src.utils.format_url import format_url, is_valid_yt_url
 
 
 generic_table = ['id', 'name', 'description', 'user_id', 'score', 'image', 'available']
@@ -140,6 +141,12 @@ def load_json_backup(json_dic : dict, user_id : str) :#{
                     # qs += f"insert into {name_table}({','.join(name_cols)}) values({','.join([ f'%({k})s' for k in name_cols])});"
                     # qs += f"insert into {name_table}({','.join(name_cols)}) values({','.join( [ f"'{uuid4().hex if c == 'id' else user_id if c == 'user_id' else row[c]}'" for c in name_cols] )});"
 
+                    if(name_table == 'song') :#{
+                        f_url = format_url(row['url'])
+                        bef_url = row['url']
+                        row['url'] = f_url if f_url else "https://www.youtube.com/watch?v=BRm4QWDl0yo" # default error url if the url is invalid
+                        row['description'] = row['description'] if f_url else f"[ERROR] : invalid url [[ {bef_url} ]]\n\n{row['description']}"
+                    #}
                     # =================
                     # qs = f"insert into {name_table}({','.join(name_cols)}) values({','.join( [ f"'{row[c] if c != 'user_id' else user_id}'" for c in name_cols] )});"
                     qs = f"insert into {name_table}({','.join(name_cols)}) values({','.join( [ f"%({c})s" for c in name_cols] )});"
