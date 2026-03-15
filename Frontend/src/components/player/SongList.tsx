@@ -2,7 +2,7 @@ import { useNavigate } from "react-router";
 import { getImageUrl } from "../../utils/urls";
 import { useContext } from "react";
 import { PlayListContext } from "../../context/PlayListContext";
-import gifPlaying from '../../assets/playing.gif';
+// import gifPlaying from '../../assets/playing.gif';
 
 const SongList = ({ playList, isLoading, error, currentIndex }: { playList: any, isLoading: boolean, error: Error | null, currentIndex: number }) => { // const SongList = ({ urlGet }: { urlGet?: string }) => {
 
@@ -50,10 +50,10 @@ const SongListItem = ({ id, name, singer, url, index, /* currentIndex */ }: { id
 
             <div className="flex w-auto justify-end">
                 {
-                    index === currentIndex &&
+                    /* index === currentIndex &&
                     <div className="w-[25px]">
                         <img src={gifPlaying} alt="" />
-                    </div>
+                    </div> */
                 }
                 <span onClick={onClickGetEntity} className="badge badge-neutral size-6 rounded-full p-0 mr-1">
                     <span className="icon-[tabler--external-link]"></span>
