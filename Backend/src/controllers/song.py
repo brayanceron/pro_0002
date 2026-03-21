@@ -64,7 +64,6 @@ def get(page : str = '1', limit : str = '10', extended = False) :#{
     
     with db.get_connection() as conn, conn.cursor() as cur :#{
     
-        # cur.execute("select id, name, description, url, goal, image, user_id  from song")
         cur.execute(f"select id, name, description, url, goal, image, user_id  from song {"limit %s offset %s" if limit != -1 else ''}",
                     [limit, offset][0:None if limit != -1 else 0])
         rows = cur.fetchall()
@@ -97,9 +96,7 @@ def get_id(id, conn, extended = False,) :#{
     if not id : return {'message' : "song id not provided"}, 400
 
     with conn.cursor() as cur :#{
-        cur.execute("""
-            select id, name, description, url, goal, image, user_id from song where id = %s
-        """, [id])
+        cur.execute('select id, name, description, url, goal, image, user_id from song where id = %s ', [id])
 
         row = cur.fetchone()
         # TODO verify in all controllers if <row> is None, 
@@ -288,7 +285,7 @@ def search(pattern : str, page : str = '1', limit : str = '10', extended = 0) :#
     with db.get_connection() as conn, conn.cursor() as cur :#{
         cur.execute(f"""
                     select id, name, description, url, goal, image, user_id from song 
-                    where user_id = %s and name like(%s) {"limit %s offset %s" if limit != -1 else ''}
+                    where user_id = %s and name like(%s) order by song.name {"limit %s offset %s" if limit != -1 else ''}
                     """, [user_id, f"%{pattern}%", limit, offset][0:None if limit != -1 else 2])
         rows = cur.fetchall()
         if not rows or cur.rowcount == 0 : return {'message' : "data not found"}, 404
@@ -368,7 +365,7 @@ def get_by_user(user_id : str, page : str = '1', limit : str = '10', extended = 
 
     with db.get_connection() as conn, conn.cursor() as cur :#{
         cur.execute(f"""select id, name, description, url, goal, image, user_id 
-                    from song where user_id = %s {"limit %s offset %s" if limit != -1 else ''}""", 
+                    from song where user_id = %s order by song.name {"limit %s offset %s" if limit != -1 else ''}""", 
                     [user_id, limit, offset][0:None if limit != -1 else 1])
 
         rows = cur.fetchall()
@@ -594,7 +591,7 @@ def generate(include : GenerateParams, exclude : GenerateParams, goal : dict, us
     exc = {**exclude.get_dict(), "user_id" : user_id, "goal" : {'min' : -1,'max' : 6}}
 
     q = ''
-    if (any([q1 := generate_query(**inc), q2 := generate_query(**exc)])) : q = (q1 or ' select * from song ') + (f" except {q2}" if q2 else '')
+    if (any([q1 := generate_query(**inc), q2 := generate_query(**exc)])) : q = (q1 or f' select * from song where user_id  = {user_id}') + (f" except {q2}" if q2 else '')
     else : return {'message' : "filters not provided"}, 400;
 
     with db.get_connection() as conn, conn.cursor() as cur :#{
@@ -670,7 +667,6 @@ def get_generated_playlists(user_id : str) :#{
     if not user_id : return {'message' : "user id not provided"}, 400
     
     with db.get_connection() as conn, conn.cursor() as cur :#{
-        # cur.execute("select json_data, created_at from temp_playlist where user_id = %s order by created_at desc limit 1;", [user_id])
         cur.execute("select json_data, created_at from temp_playlist where user_id = %s order by created_at desc", [user_id])
         pls = cur.fetchall()
         

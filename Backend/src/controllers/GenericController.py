@@ -48,7 +48,7 @@ class GenericController :#{
     def get(self) :#{
         if (AUTH_ERROR := auth_get()) : return AUTH_ERROR
         
-        query = f"select {self.cols} from {self.entity}"
+        query = f"select {self.cols} from {self.entity} order by name"
         result : list[GenericModel] = []
 
         with self.db.get_connection() as conn, conn.cursor() as cursor :#{
@@ -154,8 +154,7 @@ class GenericController :#{
     def get_by_user(self, user_id : str) :#{
         if (AUTH_ERROR := auth_get_by_user(user_id)) : return AUTH_ERROR
         
-
-        query = f"select {self.cols} from {self.entity} where user_id = %s"
+        query = f"select {self.cols} from {self.entity} where user_id = %s order by name"
         result : list[GenericModel] = []
         with self.db.get_connection() as conn, conn.cursor() as cursor :#{
             cursor.execute(query, [user_id])
