@@ -99,6 +99,7 @@ INSERT INTO `gender` (`id`, `name`, `description`, `user_id`, `score`, `image`, 
 ('ef3e46e8c0144900a1c393a8e4ef52e9', 'Electronic', 'Electronic Music', 'admin', 4.85, '', 1),
 ('efc9982cde8847b88e71af25bd90c1be', 'Soul', 'Soul Music', 'admin', 3.55, '', 1),
 ('bb7bf52da4f54c91982b03446752d8f5', 'Bachata', 'Bachata Music', 'admin', 4.55, '', 1),
+('ae9e91257c0c442f85e7868ad960e64a', 'Soundtrack', 'Soundtrack Music', 'admin', 4.55, '', 1),
 ('unknown', 'unknown', 'unknown', 'admin', -1.00, '', 1);
 
 -- --------------------------------------------------------
@@ -288,7 +289,7 @@ INSERT INTO `sense` (`id`, `name`, `description`, `user_id`, `score`, `image`, `
 ('2a1088f9de53470f88a9dca9c42509d9', 'Resentment', '', 'admin', -1.00, '', 1),
 
 -- ('be63e02648ec4cd29bdf5b473e6d72c6', 'Wonder', '', 'admin', -1.00, '', 1),
-('416cab05c5e640d7b08bb46cb3e7d559', 'Inspiration', '', 'admin', -1.00, '', 1),
+-- ('416cab05c5e640d7b08bb46cb3e7d559', 'Inspiration', '', 'admin', -1.00, '', 1),
 -- ('e24170bbf99c439c82819f00a5672b5b', 'Reverence', '', 'admin', -1.00, '', 1),
 -- ('72254ddd35f74ff7a1187298f25a79b9', 'Spirituality', '', 'admin', -1.00, '', 1),
 -- ('5a1f925bb8894ec186f088b21a535bd0', 'Amazement', '', 'admin', -1.00, '', 1),
