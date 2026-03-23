@@ -7,11 +7,12 @@ import { PaginationComponent } from "../../../components/navigation/PaginationCo
 import { UpdateSongModal } from "./UpdateSongModal";
 import { SongItem } from "./SongItem";
 import { DeleteSongModal } from "./DeleteSongModal";
-import type { GenerationFormsFields } from "../../../components/forms/GenerationForm";
+// import type { GenerationFormsBaseFields } from "../../../components/forms/GenerationForm/GenerationFormBase"; // import type {  } from "../../../components/forms/GenerationForm";
 import { useSearchParams } from "react-router";
 import { SearchSong } from "./SearchSong";
 
-const emptyFields: GenerationFormsFields = { genders: [], senses: [], singers: [], languages: [], goal: 0, user_id: '' };
+// FIXME create a type in songForm. becouse it is not compatible with GenerationFormsBaseFields. there are problems with GenerationFormsBaseFields GenerationFormsFields, it doesn't compatible
+const emptyFields = { genders: [], senses: [], singers: [], languages: [], goal: 0 }; // const emptyFields: GenerationFormsBaseFields = { genders: [], senses: [], singers: [], languages: [], /* goal: 0 */ };
 const baseRoute = "http://localhost:5000/api/song";
 const editModalId = "editModal";
 const deleteModalId = "deleteModal";
@@ -53,7 +54,8 @@ const GET = () => {
         newSong = { 
             ...newSong,  
             genders:  newSong.genders.map((g : any) => g.id),
-            senses:  newSong.senses.map((s : any) => s.id),
+            // senses:  newSong.senses.map((s : any) => s.id), //TODO review this
+            senses:  newSong.senses.map((s : any) => ({id : s.id, name : s.name, score : s.goal})),
             singers:  newSong.singers.map((s : any) => s.id),
             languages:  newSong.languages.map((l : any) => l.id),
             playlists:  newSong.playlists.map((p : any) => p.id),

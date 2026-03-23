@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router';
 import useFetch from '../../hooks/useFetch';
-import SongForm from '../../components/forms/SongForm';
+import SongForm from '../../components/forms/SongForm/SongForm';
 import type { reqProps } from '../../hooks/usePost';
 import { Method } from '../../utils/Methods';
 import { useEffect, useRef, useState } from 'react';
@@ -17,7 +17,7 @@ const GETID = () => {
     const params = useParams();
     const song_id = params.id;
     // const [reload, setReload] = useState(false);
-    const [url, setUrl] = useState(`http://localhost:5000/api/song/${song_id}?extended=1`)
+    const [url, /* setUrl */] = useState(`http://localhost:5000/api/song/${song_id}?extended=1`)
 
     // const { data, isLoading, error } = useFetch(`http://localhost:5000/api/song/${song_id}?extended=1`);
     const { data, isLoading, error } = useFetch(url);
@@ -27,7 +27,7 @@ const GETID = () => {
     function cb({ result, res, error : errorCb }: reqProps) { 
         if (errorCb) { return notyf.error("Error updating the song!  "+ errorCb.message); }
         if (res && res.ok){ 
-            setUrl(url+' '); 
+            // setUrl(url+' ');// BUG | TODO : form not reload well, it load before data and not updated data
             return notyf.success(result.message); 
         }
     }
@@ -40,7 +40,8 @@ const GETID = () => {
         setFData({
             ...data, // ...data[0],
             genders: (data) ? data.genders.map((item: any) => item.id) : [], // genders : data[0].genders.map((item: any) => item.id),
-            senses: (data) ? data.senses.map((item: any) => item.id) : [],  // senses : data[0].senses.map((item: any) => item.id),
+            // senses: (data) ? data.senses.map((item: any) => item.id) : [],  // senses : data[0].senses.map((item: any) => item.id), //TODO review this
+            senses: (data) ? data.senses.map((item: any) => { return {id : item.id, name : item.name, score : item.goal}}) : [],  // senses : data[0].senses.map((item: any) => item.id),
             singers: (data) ? data.singers.map((item: any) => item.id) : [], // singers : data[0].singers.map((item: any) => item.id),
             languages: (data) ? data.languages.map((item: any) => item.id) : [], // languages : data[0].languages.map((item: any) => item.id),
             playlists: (data) ? data.playlists.map((item: any) => item.id) : [], // languages : data[0].languages.map((item: any) => item.id),
@@ -57,16 +58,16 @@ const GETID = () => {
         navigate(0);// navigate(-1) //FIXME fix it later
     }
     return (
-        <div className='mt-15'>
+        <div className='mt-10'>
             {
                 isLoading ? <p>Loading...</p> :
                     error ? <AppAlert message={error.message} color="error" icon="x" soft addStyles='w-1/3 m-auto' /> :
                         (fData && fData.id) ?
                             <>
-                                <div className='w-auto'>
+                                <div className='w-[35%] my-auto mx-auto'>
                                     {/* <img className="mask mask-decagon m-auto size-44" ref={imgRef} src={getImageUrl(fData.image || fData.url)} alt="Error" onError={onErrorLoad} /> */}
                                     <img className="mask mask-decagon m-auto size-44" ref={imgRef} src={getImageUrl(fData.image || fData.url || defaultImgs)} alt="Error" />
-                                    <h1 className="text-4xl text-center mt-2">{fData.name}</h1>
+                                    <h1 className="text-2xl text-center mt-2">{fData.name}</h1>
                                     <p className="text-xs text-center">{fData.id}</p>
                                     <p className="text-xs text-center text-gray-400">(Song)</p>
                                     <div className='w-fit mx-auto mt-3'>
