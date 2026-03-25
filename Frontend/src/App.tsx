@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Route, Routes } from "react-router"
-import GetView from './routes/GetView'
+// import GetView from './routes/GetView'
 
 import type { IStaticMethods } from 'flyonui/flyonui'
 // import GetSong from './routes/song/GET';
@@ -53,7 +53,7 @@ function App() {
         <Route path='/' element={<Root />}></Route>
 
         <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
-          <Route path='/getview' element={<GetView />}></Route>
+          {/* <Route path='/getview' element={<GetView />}></Route> */}
 
           <Route path='/playing' element={<Playing />}></Route>
           <Route path='/generate' element={<Generate />}></Route>
