@@ -36,7 +36,7 @@ export const DeleteSongModal = ({ modalId, songId, songName, callback }: Compone
         const data = await res.json();
         if (res.ok){ 
             notyf.success(data.message); 
-            callback()
+            setTimeout(callback, 150); // callback()
         }
         else { notyf.error(data.message);}
         CloseModal(modalId, /* songId */)
