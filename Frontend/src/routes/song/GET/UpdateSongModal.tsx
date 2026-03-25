@@ -4,7 +4,12 @@ import { Method } from "../../../utils/Methods"
 import type { reqProps } from "../../../hooks/usePost"
 import { Notyf } from "notyf"
 import "../../../../node_modules/notyf/notyf.min.css"
+import { HSOverlay } from "flyonui/flyonui";
 
+export const CloseModal = (modalId : string) =>{
+    const modal = new HSOverlay(document.querySelector(`#${modalId}`)!)
+    modal.close()
+}
 export const UpdateSongModal = ({ modalId, defaultValues, isChanging, reload }: { modalId: string, defaultValues: {}, isChanging: boolean, reload : () => void }) => {
     const [fData, setFData] = useState(defaultValues);
 
@@ -22,7 +27,8 @@ export const UpdateSongModal = ({ modalId, defaultValues, isChanging, reload }: 
     function cb({ result, error, res }: reqProps) { 
         if (error) { return notyf.error("Error updating the song!  "+ error.message); }
         if (res && res.ok){ 
-            reload()
+            setTimeout(reload, 150) // reload()
+            CloseModal(modalId)
             return notyf.success(result.message);
         }
     }
