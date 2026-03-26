@@ -15,6 +15,7 @@ const useFetch = (url: string) => {
     const [req, setReq] = useState<Params>({ ...initValues, isLoading: true })
 
     async function getData(url: string) {
+        setReq({ ...initValues, isLoading: true })
         try {
             const res = await fetch(url, { method: 'GET', credentials: "include" });
             const data = await res.json()
@@ -33,6 +34,7 @@ const useFetch = (url: string) => {
 
     useEffect(() => {
         if (!url) { return setReq({ data: null, isLoading: false, error: Error("invalid url"), res: null }); }
+        // setReq({ ...initValues, isLoading: true })
         getData(url)
     }, [url])
 

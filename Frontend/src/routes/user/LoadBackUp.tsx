@@ -14,13 +14,14 @@ const LoadBackUp = () => {
     const btnLogout = () => { sendReq(); }
 
     return (
-        <div className="w-full">
+        <div className="w-full my-2 p-2 shadow-md border-t-[1px]">
+            <h1 className="text-xs text-gray-400 text-center">Load BackUp</h1>
             <div className="flex justify-center pt-3">
                 <input type="file" className="input max-w-sm" aria-label="file-input" name="backup_file" onChange={onChangeFile} />
             </div>
             <div className="my-1">
                 <div className="w-fit mx-auto">
-                    <AppButton text="Load File" addStyles="btn-xs" icon="file-upload" onClick={btnLogout} isLoading={isLoading} />
+                    <AppButton text="Load file" addStyles="btn-xs" /* icon="file-upload" */ onClick={btnLogout} isLoading={isLoading} />
                 </div>
             </div>
 

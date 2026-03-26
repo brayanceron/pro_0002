@@ -60,8 +60,8 @@ const GETID = () => {
                                 <p className="text-xs text-center"> {data.id} </p>
                                 <p className="text-xs text-center text-gray-400">(User)</p>
 
-                                <div className="w-full flex justify-center pt-3 gap-1">
-                                    <AppButton text="LogOut" icon="logout" addStyles="btn-xs w-[98px]" onClick={btnLogout} isLoading = {isLoadingLogout} />
+                                <div className="w-full flex justify-center p-3 gap-1">
+                                    <div className="w-[100px]"><AppButton text="LogOut" icon="exit" addStyles="btn-xs" onClick={btnLogout} isLoading = {isLoadingLogout} /></div>
                                     <a href={`http://localhost:5000/api/user/generate_backup/${id}`}   /* onClick={generateBackUp} */ className="btn btn-xs btn-squares border-[#2b3137] bg-[#2b3137] text-white shadow-[#2b3137]/30 hover:border-[#2b3137] hover:bg-[#2b3137]/90" aria-label="Github Icon Button" >
                                         <span className="icon-[tabler--cloud-download]"></span>
                                         Backup
